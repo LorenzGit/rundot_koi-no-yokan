@@ -1,0 +1,900 @@
+{
+  "generatedBy": "scripts/normalize-expression-sheets.mjs",
+  "canvas": {
+    "width": 1800,
+    "height": 900,
+    "frames": 6,
+    "cellWidth": 300,
+    "baselineY": 840,
+    "background": "#00FF00"
+  },
+  "scale": {
+    "maxHeightCm": 186,
+    "maxBodyPx": 760,
+    "pixelsPerCm": 4.086022,
+    "policy": "uniform crown-to-sole scaling from scripts/cast.mjs heightCm"
+  },
+  "cast": {
+    "char_f_artist": {
+      "name": "Mizuki",
+      "heightCm": 169,
+      "targetBodyPx": 691,
+      "sourceChroma": {
+        "key": [9, 243, 12],
+        "high": 228
+      },
+      "sourceFrameBoundaries": [0, 311, 629, 893, 1192, 1495, 1827],
+      "input": "art/raw/char_f_artist_expressions_left.png",
+      "output": "art/normalized/char_f_artist_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 786,
+          "targetBodyPx": 691,
+          "renderedBodyPx": 691,
+          "scale": 0.878941,
+          "sprite": {
+            "w": 184,
+            "h": 697
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 0,
+            "x1": 311
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 784,
+          "targetBodyPx": 691,
+          "renderedBodyPx": 691,
+          "scale": 0.881761,
+          "sprite": {
+            "w": 225,
+            "h": 701
+          },
+          "crownOffsetPx": 10,
+          "sourceX": {
+            "x0": 311,
+            "x1": 629
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 782,
+          "targetBodyPx": 691,
+          "renderedBodyPx": 691,
+          "scale": 0.883692,
+          "sprite": {
+            "w": 173,
+            "h": 699
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 629,
+            "x1": 893
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 784,
+          "targetBodyPx": 691,
+          "renderedBodyPx": 691,
+          "scale": 0.88191,
+          "sprite": {
+            "w": 206,
+            "h": 702
+          },
+          "crownOffsetPx": 11,
+          "sourceX": {
+            "x0": 893,
+            "x1": 1192
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 783,
+          "targetBodyPx": 691,
+          "renderedBodyPx": 691,
+          "scale": 0.882872,
+          "sprite": {
+            "w": 197,
+            "h": 701
+          },
+          "crownOffsetPx": 10,
+          "sourceX": {
+            "x0": 1192,
+            "x1": 1495
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 783,
+          "targetBodyPx": 691,
+          "renderedBodyPx": 691,
+          "scale": 0.882724,
+          "sprite": {
+            "w": 177,
+            "h": 700
+          },
+          "crownOffsetPx": 9,
+          "sourceX": {
+            "x0": 1495,
+            "x1": 1827
+          }
+        }
+      ]
+    },
+    "char_f_tsundere": {
+      "name": "Rin",
+      "heightCm": 171,
+      "targetBodyPx": 699,
+      "sourceChroma": {
+        "key": [12, 231, 26],
+        "high": 202
+      },
+      "sourceFrameBoundaries": [0, 315, 612, 886, 1175, 1455, 1774],
+      "input": "art/raw/char_f_tsundere_expressions_left.png",
+      "output": "art/normalized/char_f_tsundere_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 828,
+          "targetBodyPx": 699,
+          "renderedBodyPx": 699,
+          "scale": 0.844125,
+          "sprite": {
+            "w": 199,
+            "h": 704
+          },
+          "crownOffsetPx": 5,
+          "sourceX": {
+            "x0": 0,
+            "x1": 315
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 826,
+          "targetBodyPx": 699,
+          "renderedBodyPx": 699,
+          "scale": 0.846339,
+          "sprite": {
+            "w": 220,
+            "h": 705
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 315,
+            "x1": 612
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 827,
+          "targetBodyPx": 699,
+          "renderedBodyPx": 699,
+          "scale": 0.845138,
+          "sprite": {
+            "w": 193,
+            "h": 704
+          },
+          "crownOffsetPx": 5,
+          "sourceX": {
+            "x0": 612,
+            "x1": 886
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 826,
+          "targetBodyPx": 699,
+          "renderedBodyPx": 699,
+          "scale": 0.846339,
+          "sprite": {
+            "w": 208,
+            "h": 705
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 886,
+            "x1": 1175
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 828,
+          "targetBodyPx": 699,
+          "renderedBodyPx": 699,
+          "scale": 0.844311,
+          "sprite": {
+            "w": 196,
+            "h": 705
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 1175,
+            "x1": 1455
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 828,
+          "targetBodyPx": 699,
+          "renderedBodyPx": 699,
+          "scale": 0.843938,
+          "sprite": {
+            "w": 189,
+            "h": 703
+          },
+          "crownOffsetPx": 4,
+          "sourceX": {
+            "x0": 1455,
+            "x1": 1774
+          }
+        }
+      ]
+    },
+    "char_m_senpai": {
+      "name": "Haruto",
+      "heightCm": 184,
+      "targetBodyPx": 752,
+      "sourceChroma": {
+        "key": [18, 235, 11],
+        "high": 212
+      },
+      "sourceFrameBoundaries": [0, 293, 594, 834, 1144, 1437, 1774],
+      "input": "art/raw/char_m_senpai_expressions_left.png",
+      "output": "art/normalized/char_m_senpai_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 777,
+          "targetBodyPx": 752,
+          "renderedBodyPx": 752,
+          "scale": 0.968193,
+          "sprite": {
+            "w": 218,
+            "h": 761
+          },
+          "crownOffsetPx": 9,
+          "sourceX": {
+            "x0": 0,
+            "x1": 293
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 780,
+          "targetBodyPx": 752,
+          "renderedBodyPx": 752,
+          "scale": 0.964467,
+          "sprite": {
+            "w": 238,
+            "h": 760
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 293,
+            "x1": 594
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 778,
+          "targetBodyPx": 752,
+          "renderedBodyPx": 752,
+          "scale": 0.966879,
+          "sprite": {
+            "w": 177,
+            "h": 759
+          },
+          "crownOffsetPx": 7,
+          "sourceX": {
+            "x0": 594,
+            "x1": 834
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 779,
+          "targetBodyPx": 752,
+          "renderedBodyPx": 752,
+          "scale": 0.965736,
+          "sprite": {
+            "w": 263,
+            "h": 761
+          },
+          "crownOffsetPx": 9,
+          "sourceX": {
+            "x0": 834,
+            "x1": 1144
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 779,
+          "targetBodyPx": 752,
+          "renderedBodyPx": 752,
+          "scale": 0.965693,
+          "sprite": {
+            "w": 243,
+            "h": 760
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 1144,
+            "x1": 1437
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 778,
+          "targetBodyPx": 752,
+          "renderedBodyPx": 752,
+          "scale": 0.966921,
+          "sprite": {
+            "w": 194,
+            "h": 760
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 1437,
+            "x1": 1774
+          }
+        }
+      ]
+    },
+    "char_m_athlete": {
+      "name": "Sora",
+      "heightCm": 179,
+      "targetBodyPx": 731,
+      "sourceChroma": {
+        "key": [4, 244, 6],
+        "high": 234
+      },
+      "sourceFrameBoundaries": [0, 315, 631, 894, 1188, 1482, 1808],
+      "input": "art/raw/char_m_athlete_expressions_left.png",
+      "output": "art/normalized/char_m_athlete_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 706,
+          "targetBodyPx": 731,
+          "renderedBodyPx": 731,
+          "scale": 1.034916,
+          "sprite": {
+            "w": 211,
+            "h": 741
+          },
+          "crownOffsetPx": 10,
+          "sourceX": {
+            "x0": 0,
+            "x1": 315
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 703,
+          "targetBodyPx": 731,
+          "renderedBodyPx": 731,
+          "scale": 1.039161,
+          "sprite": {
+            "w": 270,
+            "h": 743
+          },
+          "crownOffsetPx": 12,
+          "sourceX": {
+            "x0": 315,
+            "x1": 631
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 703,
+          "targetBodyPx": 731,
+          "renderedBodyPx": 731,
+          "scale": 1.039216,
+          "sprite": {
+            "w": 216,
+            "h": 742
+          },
+          "crownOffsetPx": 11,
+          "sourceX": {
+            "x0": 631,
+            "x1": 894
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 705,
+          "targetBodyPx": 731,
+          "renderedBodyPx": 731,
+          "scale": 1.036313,
+          "sprite": {
+            "w": 249,
+            "h": 742
+          },
+          "crownOffsetPx": 11,
+          "sourceX": {
+            "x0": 894,
+            "x1": 1188
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 701,
+          "targetBodyPx": 731,
+          "renderedBodyPx": 731,
+          "scale": 1.043357,
+          "sprite": {
+            "w": 238,
+            "h": 746
+          },
+          "crownOffsetPx": 15,
+          "sourceX": {
+            "x0": 1188,
+            "x1": 1482
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 701,
+          "targetBodyPx": 731,
+          "renderedBodyPx": 731,
+          "scale": 1.043417,
+          "sprite": {
+            "w": 214,
+            "h": 745
+          },
+          "crownOffsetPx": 14,
+          "sourceX": {
+            "x0": 1482,
+            "x1": 1808
+          }
+        }
+      ]
+    },
+    "char_f_siren": {
+      "name": "Reina",
+      "heightCm": 174,
+      "targetBodyPx": 711,
+      "sourceChroma": {
+        "key": [3, 238, 3],
+        "high": 231
+      },
+      "sourceFrameBoundaries": [0, 312, 661, 946, 1267, 1581, 1900],
+      "input": "art/raw/char_f_siren_expressions_left.png",
+      "output": "art/normalized/char_f_siren_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 760,
+          "targetBodyPx": 711,
+          "renderedBodyPx": 711,
+          "scale": 0.935948,
+          "sprite": {
+            "w": 171,
+            "h": 716
+          },
+          "crownOffsetPx": 5,
+          "sourceX": {
+            "x0": 0,
+            "x1": 312
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 763,
+          "targetBodyPx": 711,
+          "renderedBodyPx": 711,
+          "scale": 0.932203,
+          "sprite": {
+            "w": 218,
+            "h": 715
+          },
+          "crownOffsetPx": 4,
+          "sourceX": {
+            "x0": 312,
+            "x1": 661
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 759,
+          "targetBodyPx": 711,
+          "renderedBodyPx": 711,
+          "scale": 0.937008,
+          "sprite": {
+            "w": 160,
+            "h": 714
+          },
+          "crownOffsetPx": 3,
+          "sourceX": {
+            "x0": 661,
+            "x1": 946
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 764,
+          "targetBodyPx": 711,
+          "renderedBodyPx": 711,
+          "scale": 0.93099,
+          "sprite": {
+            "w": 216,
+            "h": 715
+          },
+          "crownOffsetPx": 4,
+          "sourceX": {
+            "x0": 946,
+            "x1": 1267
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 762,
+          "targetBodyPx": 711,
+          "renderedBodyPx": 711,
+          "scale": 0.933507,
+          "sprite": {
+            "w": 198,
+            "h": 716
+          },
+          "crownOffsetPx": 5,
+          "sourceX": {
+            "x0": 1267,
+            "x1": 1581
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 760,
+          "targetBodyPx": 711,
+          "renderedBodyPx": 711,
+          "scale": 0.935864,
+          "sprite": {
+            "w": 168,
+            "h": 715
+          },
+          "crownOffsetPx": 4,
+          "sourceX": {
+            "x0": 1581,
+            "x1": 1900
+          }
+        }
+      ]
+    },
+    "char_m_charmer": {
+      "name": "Kaito",
+      "heightCm": 186,
+      "targetBodyPx": 760,
+      "sourceChroma": {
+        "key": [3, 235, 2],
+        "high": 229
+      },
+      "sourceFrameBoundaries": [0, 309, 616, 873, 1173, 1474, 1774],
+      "input": "art/raw/char_m_charmer_expressions_left.png",
+      "output": "art/normalized/char_m_charmer_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 781,
+          "targetBodyPx": 760,
+          "renderedBodyPx": 760,
+          "scale": 0.973282,
+          "sprite": {
+            "w": 229,
+            "h": 765
+          },
+          "crownOffsetPx": 5,
+          "sourceX": {
+            "x0": 0,
+            "x1": 309
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 779,
+          "targetBodyPx": 760,
+          "renderedBodyPx": 760,
+          "scale": 0.975796,
+          "sprite": {
+            "w": 242,
+            "h": 766
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 309,
+            "x1": 616
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 780,
+          "targetBodyPx": 760,
+          "renderedBodyPx": 760,
+          "scale": 0.974457,
+          "sprite": {
+            "w": 199,
+            "h": 763
+          },
+          "crownOffsetPx": 3,
+          "sourceX": {
+            "x0": 616,
+            "x1": 873
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 783,
+          "targetBodyPx": 760,
+          "renderedBodyPx": 760,
+          "scale": 0.970738,
+          "sprite": {
+            "w": 252,
+            "h": 763
+          },
+          "crownOffsetPx": 3,
+          "sourceX": {
+            "x0": 873,
+            "x1": 1173
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 777,
+          "targetBodyPx": 760,
+          "renderedBodyPx": 760,
+          "scale": 0.978289,
+          "sprite": {
+            "w": 247,
+            "h": 766
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 1173,
+            "x1": 1474
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 783,
+          "targetBodyPx": 760,
+          "renderedBodyPx": 760,
+          "scale": 0.970775,
+          "sprite": {
+            "w": 207,
+            "h": 764
+          },
+          "crownOffsetPx": 4,
+          "sourceX": {
+            "x0": 1474,
+            "x1": 1774
+          }
+        }
+      ]
+    },
+    "char_f_runner": {
+      "name": "Kaede",
+      "heightCm": 172,
+      "targetBodyPx": 703,
+      "sourceChroma": {
+        "key": [4, 241, 2],
+        "high": 234
+      },
+      "sourceFrameBoundaries": [0, 324, 642, 903, 1212, 1489, 1807],
+      "input": "art/raw/char_f_runner_expressions_left.png",
+      "output": "art/normalized/char_f_runner_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 798,
+          "targetBodyPx": 703,
+          "renderedBodyPx": 703,
+          "scale": 0.881481,
+          "sprite": {
+            "w": 206,
+            "h": 714
+          },
+          "crownOffsetPx": 11,
+          "sourceX": {
+            "x0": 0,
+            "x1": 324
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 801,
+          "targetBodyPx": 703,
+          "renderedBodyPx": 703,
+          "scale": 0.877778,
+          "sprite": {
+            "w": 233,
+            "h": 711
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 324,
+            "x1": 642
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 800,
+          "targetBodyPx": 703,
+          "renderedBodyPx": 703,
+          "scale": 0.878563,
+          "sprite": {
+            "w": 181,
+            "h": 709
+          },
+          "crownOffsetPx": 6,
+          "sourceX": {
+            "x0": 642,
+            "x1": 903
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 799,
+          "targetBodyPx": 703,
+          "renderedBodyPx": 703,
+          "scale": 0.879802,
+          "sprite": {
+            "w": 234,
+            "h": 710
+          },
+          "crownOffsetPx": 7,
+          "sourceX": {
+            "x0": 903,
+            "x1": 1212
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 795,
+          "targetBodyPx": 703,
+          "renderedBodyPx": 703,
+          "scale": 0.884615,
+          "sprite": {
+            "w": 199,
+            "h": 713
+          },
+          "crownOffsetPx": 10,
+          "sourceX": {
+            "x0": 1212,
+            "x1": 1489
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 803,
+          "targetBodyPx": 703,
+          "renderedBodyPx": 703,
+          "scale": 0.875462,
+          "sprite": {
+            "w": 188,
+            "h": 710
+          },
+          "crownOffsetPx": 7,
+          "sourceX": {
+            "x0": 1489,
+            "x1": 1807
+          }
+        }
+      ]
+    },
+    "char_m_climber": {
+      "name": "Ren",
+      "heightCm": 181,
+      "targetBodyPx": 740,
+      "sourceChroma": {
+        "key": [11, 234, 9],
+        "high": 219
+      },
+      "sourceFrameBoundaries": [0, 312, 613, 866, 1165, 1482, 1774],
+      "input": "art/raw/char_m_climber_expressions_left.png",
+      "output": "art/normalized/char_m_climber_expressions_left.png",
+      "frames": [
+        {
+          "frame": 1,
+          "sourceBodyPx": 737,
+          "targetBodyPx": 740,
+          "renderedBodyPx": 740,
+          "scale": 1.004021,
+          "sprite": {
+            "w": 220,
+            "h": 749
+          },
+          "crownOffsetPx": 9,
+          "sourceX": {
+            "x0": 0,
+            "x1": 312
+          }
+        },
+        {
+          "frame": 2,
+          "sourceBodyPx": 738,
+          "targetBodyPx": 740,
+          "renderedBodyPx": 740,
+          "scale": 1.002681,
+          "sprite": {
+            "w": 244,
+            "h": 748
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 312,
+            "x1": 613
+          }
+        },
+        {
+          "frame": 3,
+          "sourceBodyPx": 731,
+          "targetBodyPx": 740,
+          "renderedBodyPx": 740,
+          "scale": 1.012129,
+          "sprite": {
+            "w": 198,
+            "h": 751
+          },
+          "crownOffsetPx": 11,
+          "sourceX": {
+            "x0": 613,
+            "x1": 866
+          }
+        },
+        {
+          "frame": 4,
+          "sourceBodyPx": 740,
+          "targetBodyPx": 740,
+          "renderedBodyPx": 740,
+          "scale": 1,
+          "sprite": {
+            "w": 254,
+            "h": 748
+          },
+          "crownOffsetPx": 8,
+          "sourceX": {
+            "x0": 866,
+            "x1": 1165
+          }
+        },
+        {
+          "frame": 5,
+          "sourceBodyPx": 732,
+          "targetBodyPx": 740,
+          "renderedBodyPx": 740,
+          "scale": 1.010782,
+          "sprite": {
+            "w": 271,
+            "h": 750
+          },
+          "crownOffsetPx": 10,
+          "sourceX": {
+            "x0": 1165,
+            "x1": 1482
+          }
+        },
+        {
+          "frame": 6,
+          "sourceBodyPx": 733,
+          "targetBodyPx": 740,
+          "renderedBodyPx": 740,
+          "scale": 1.009396,
+          "sprite": {
+            "w": 198,
+            "h": 752
+          },
+          "crownOffsetPx": 12,
+          "sourceX": {
+            "x0": 1482,
+            "x1": 1774
+          }
+        }
+      ]
+    }
+  },
+  "review": "art/expression_height_check.png"
+}

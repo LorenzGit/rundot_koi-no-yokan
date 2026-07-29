@@ -1,0 +1,4801 @@
+@import "tailwindcss";
+
+@theme {
+    /* ADAPT: game palette — these become Tailwind utilities (bg-primary,
+       text-primary, bg-surface, ...). Add the game's full palette here. */
+    --color-primary: #ffd95a;
+    --color-surface: #3c2d80;
+    --text-sm: 0.9625rem;
+    --text-lg: 1.2375rem;
+    --text-2xl: 1.65rem;
+    --text-3xl: 2.0625rem;
+}
+
+:root {
+    font-family: "Arial Rounded MT Bold", "Trebuchet MS", "Avenir Next", sans-serif;
+    color-scheme: dark;
+    --ink: #2d215f;
+    --ink-soft: #5f54a0;
+    --cream: #fffaf1;
+    --sunny: #ffd95a;
+    --mint: #60dfac;
+    --coral: #ff7e7e;
+    --sky: #71c9ff;
+    --violet: #a687ff;
+    --blue: #7187ff;
+    --panel: rgba(255, 255, 255, 0.12);
+    --panel-strong: rgba(58, 39, 126, 0.92);
+}
+
+button,
+select,
+input {
+    font: inherit;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+    outline: 3px solid #fff4a7;
+    outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   Viewport + playable frame. Portrait is the template's primary presentation,
+   but landscape is a first-class responsive layout rather than a squeezed
+   portrait column. The full-page backdrop remains separate from the playable
+   frame, and page scroll/zoom stay locked.
+--------------------------------------------------------------------------- */
+
+:root {
+    --game-w: 100vw;
+    /* The sakura menu painting doubles as the page backdrop outside the
+       playable frame. Decorative art uses `cover`, so it may crop but never
+       distort. */
+    --scene-backdrop: url("/images/menu_sakura.png");
+    --page-backdrop: linear-gradient(rgba(32, 19, 83, 0.16), rgba(28, 15, 75, 0.42)), var(--scene-backdrop);
+    /* ViewDeck exposes oriented insets as custom properties because desktop
+       WKWebView cannot reliably emulate rotating env() values. RUN replaces
+       these variables inline with host-authoritative values when attached;
+       ordinary browsers fall through to their native safe-area environment. */
+    --safe-top: var(--viewdeck-safe-area-inset-top, env(safe-area-inset-top, 0px));
+    --safe-right: var(--viewdeck-safe-area-inset-right, env(safe-area-inset-right, 0px));
+    --safe-bottom: var(--viewdeck-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    --safe-left: var(--viewdeck-safe-area-inset-left, env(safe-area-inset-left, 0px));
+}
+
+@media (orientation: landscape) {
+    /* Accommodates modern 19.5:9–20:9 phones without stretching indefinitely
+       on ultrawide desktop windows. Decorative side art fills any remainder. */
+    :root {
+        --game-w: min(100vw, calc(100dvh * 2.2));
+    }
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body,
+body * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: #291b68;
+    font-size: 17.5px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Full-viewport presentation backdrop. This is deliberately separate from the
+   playable frame: desktop side areas show intentional game art rather than
+   empty/cropped app content. Use `cover`, not `fill`, so decorative artwork
+   may crop but is never geometrically distorted. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: var(--page-backdrop);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover, cover;
+}
+
+#root {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+}
+
+/* The playable frame every screen renders inside (see ui/App.tsx). */
+#app-frame {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--game-w);
+    overflow: hidden;
+    background-image: linear-gradient(180deg, rgba(40, 24, 104, 0.18), rgba(39, 22, 96, 0.5)), var(--scene-backdrop);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover, cover;
+    box-shadow: 0 0 70px rgba(21, 12, 70, 0.55);
+}
+
+/* Safe-area utilities consume either browser fallbacks or RUN host values. */
+@utility pt-safe-top {
+    padding-top: calc(0.5rem + var(--safe-top));
+}
+@utility pb-safe-bottom {
+    padding-bottom: calc(0.5rem + var(--safe-bottom));
+}
+
+.menu-shell,
+.subscreen {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-right: max(clamp(18px, 6vw, 38px), var(--safe-right));
+    padding-left: max(clamp(18px, 6vw, 38px), var(--safe-left));
+}
+
+.menu-shell {
+    justify-content: center;
+    gap: 13px;
+}
+.menu-header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+.eyebrow {
+    margin: 0;
+    color: #d8ceff;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: 0.12em;
+}
+.menu-logo {
+    position: relative;
+    width: fit-content;
+    margin: 8px auto 0;
+    filter: drop-shadow(0 8px 0 rgba(39, 25, 103, 0.32));
+}
+.menu-logo h1 {
+    margin: -3px 0 0;
+    border: 3px solid rgba(255, 255, 255, 0.78);
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fffef8, #ffeeb0);
+    padding: 5px 18px 8px;
+    color: #5a3cb6;
+    font-size: clamp(39px, 12.8vw, 65px);
+    font-weight: 1000;
+    line-height: 0.9;
+    letter-spacing: -0.075em;
+    text-shadow: 0 3px 0 #fff;
+    transform: rotate(-1.5deg);
+}
+.menu-logo-top {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    border: 3px solid #fff7c9;
+    border-radius: 999px;
+    background: linear-gradient(#ff8b84, #f35f79);
+    padding: 4px 18px 5px;
+    color: #fff;
+    font-size: clamp(17px, 5.2vw, 25px);
+    font-weight: 1000;
+    line-height: 1;
+    letter-spacing: 0.15em;
+    text-shadow: 0 2px 0 #c13f68;
+    transform: rotate(2deg);
+}
+.menu-logo-bolt {
+    position: absolute;
+    z-index: 2;
+    right: -18px;
+    bottom: -12px;
+    display: grid;
+    width: 43px;
+    height: 43px;
+    place-items: center;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: linear-gradient(#66e4b0, #32be91);
+    color: #fff8c4;
+    transform: rotate(9deg);
+}
+.menu-logo-bolt svg {
+    width: 24px;
+    fill: currentcolor;
+}
+.menu-subtitle {
+    margin: 10px 0 0;
+    color: #f2ecff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+.player-strip {
+    display: flex;
+    min-height: 50px;
+    align-items: center;
+    justify-content: space-between;
+    border: 2px solid rgba(255, 255, 255, 0.36);
+    border-radius: 20px;
+    background: rgba(46, 29, 113, 0.72);
+    padding: 5px 8px 5px 6px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.13),
+        0 6px 0 rgba(36, 23, 91, 0.38);
+}
+.player-level,
+.player-currency {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.player-avatar {
+    position: relative;
+    display: flex;
+    width: 37px;
+    height: 37px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 2px solid #fff;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #72d8ff, #5d7fea);
+    box-shadow: inset 0 -4px 0 rgba(35, 51, 139, 0.24);
+}
+.player-avatar span {
+    width: 5px;
+    height: 7px;
+    border-radius: 999px;
+    background: #fff;
+}
+.player-currency {
+    min-height: 36px;
+    border-radius: 999px;
+    background: rgba(19, 13, 72, 0.42);
+    padding: 0 12px 0 5px;
+    font-size: 14px;
+}
+.coin-glyph {
+    display: grid;
+    width: 27px;
+    height: 27px;
+    place-items: center;
+    border: 2px solid #fff4af;
+    border-radius: 50%;
+    background: linear-gradient(#ffe571, #ffbd3f);
+    color: #9a5d1f;
+    font-size: 13px;
+    box-shadow: inset 0 -3px 0 #e99531;
+}
+.play-button {
+    display: flex;
+    min-height: 64px;
+    align-items: center;
+    justify-content: space-between;
+    border: 3px solid #d9fff0;
+    border-radius: 23px;
+    background: linear-gradient(180deg, #72edb7 0%, #39cb95 100%);
+    padding: 0 10px 0 24px;
+    color: #173e47;
+    font-size: 18px;
+    font-weight: 1000;
+    letter-spacing: 0.06em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    box-shadow:
+        inset 0 -7px 0 rgba(20, 143, 104, 0.24),
+        0 7px 0 #247f71,
+        0 12px 22px rgba(26, 18, 81, 0.34);
+    transition:
+        transform 120ms ease,
+        box-shadow 120ms ease;
+}
+.play-button:active {
+    transform: translateY(4px) scale(0.99);
+    box-shadow:
+        inset 0 -4px 0 rgba(20, 143, 104, 0.2),
+        0 3px 0 #247f71,
+        0 7px 14px rgba(26, 18, 81, 0.28);
+}
+.play-glyph {
+    display: grid;
+    width: 43px;
+    height: 43px;
+    place-items: center;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+}
+.play-glyph svg {
+    width: 25px;
+    fill: #216c67;
+}
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px 10px;
+}
+.menu-tile {
+    display: flex;
+    min-height: 57px;
+    align-items: center;
+    gap: 9px;
+    border: 2px solid rgba(255, 255, 255, 0.72);
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff 0%, #fff6df 100%);
+    padding: 7px 9px;
+    color: var(--ink);
+    text-align: left;
+    font-size: 12px;
+    font-weight: 1000;
+    line-height: 1.1;
+    box-shadow:
+        inset 0 -4px 0 rgba(108, 78, 176, 0.09),
+        0 5px 0 rgba(39, 25, 103, 0.42);
+    transition:
+        transform 110ms ease,
+        box-shadow 110ms ease;
+}
+.menu-tile:active {
+    transform: translateY(3px);
+    box-shadow:
+        inset 0 -2px 0 rgba(108, 78, 176, 0.08),
+        0 2px 0 rgba(39, 25, 103, 0.42);
+}
+.menu-icon {
+    display: grid;
+    width: 39px;
+    height: 39px;
+    place-items: center;
+    flex: none;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 13px;
+    color: #fff;
+    box-shadow: inset 0 -4px 0 rgba(47, 34, 114, 0.13);
+}
+.menu-icon svg {
+    width: 25px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.menu-tile-sunny .menu-icon {
+    background: linear-gradient(#ffdf68, #ffb74e);
+}
+.menu-tile-mint .menu-icon {
+    background: linear-gradient(#75e6bb, #3fc797);
+}
+.menu-tile-coral .menu-icon {
+    background: linear-gradient(#ff9b91, #f56e78);
+}
+.menu-tile-sky .menu-icon {
+    background: linear-gradient(#82d9ff, #59aeea);
+}
+.menu-tile-violet .menu-icon {
+    background: linear-gradient(#b29aff, #8766e8);
+}
+.menu-tile-blue .menu-icon {
+    background: linear-gradient(#8ca2ff, #6877e8);
+}
+.template-stamp {
+    margin: 0;
+    color: #d8ceff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+.subscreen {
+    height: 100%;
+    min-height: 0;
+    padding-top: max(16px, var(--safe-top));
+}
+.subscreen-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 2px 13px;
+}
+.subscreen-header h2 {
+    margin: 2px 0 0;
+    font-size: clamp(26px, 8.8vw, 42px);
+    font-weight: 1000;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-shadow: 0 4px 0 rgba(39, 25, 103, 0.34);
+}
+.back-button {
+    display: grid;
+    width: 50px;
+    height: 50px;
+    place-items: center;
+    flex: none;
+    border: 3px solid #fff1bb;
+    border-radius: 18px;
+    background: linear-gradient(#ffd962, #ffb94e);
+    color: #704396;
+    box-shadow:
+        inset 0 -5px 0 rgba(202, 112, 42, 0.16),
+        0 5px 0 rgba(53, 29, 111, 0.48);
+}
+.back-button svg {
+    width: 28px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.back-button:active {
+    transform: translateY(3px);
+    box-shadow:
+        inset 0 -2px 0 rgba(202, 112, 42, 0.12),
+        0 2px 0 rgba(53, 29, 111, 0.48);
+}
+.subscreen-content {
+    min-height: 0;
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 28px 28px 0 0;
+    background: rgba(35, 23, 91, 0.38);
+    padding: 18px 16px max(30px, var(--safe-bottom));
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.08),
+        0 -4px 20px rgba(35, 20, 92, 0.16);
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+.subscreen-end {
+    display: block;
+    width: 1px;
+    height: 1px;
+}
+.screen-copy {
+    margin: 0 0 18px;
+    color: #f3efff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+.safety-note {
+    color: #d3c9f4;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.reward-track {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.reward-day {
+    display: flex;
+    min-height: 94px;
+    flex-direction: column;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.68);
+    border-radius: 18px;
+    background: linear-gradient(#fff, #fff5d9);
+    padding: 12px;
+    color: var(--ink);
+    box-shadow:
+        inset 0 -5px 0 rgba(104, 79, 169, 0.08),
+        0 5px 0 rgba(37, 24, 92, 0.38);
+}
+.reward-day:last-child {
+    grid-column: 1 / -1;
+    border-color: #ffe877;
+}
+.reward-day.current {
+    outline: 4px solid #63e1ad;
+    outline-offset: -5px;
+}
+.reward-day span,
+.reward-day small {
+    color: #7568a8;
+    font-size: 12px;
+    font-weight: 900;
+}
+.reward-day strong {
+    color: #6246bd;
+    font-size: 29px;
+}
+.disabled-action,
+.shop-card button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 15px;
+    background: rgba(49, 34, 112, 0.56);
+    color: #cbc2eb;
+    font-size: 13px;
+    font-weight: 900;
+}
+.claim-action {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 12px;
+    border: 3px solid #dffff1;
+    border-radius: 18px;
+    background: linear-gradient(#70eab5, #3acb96);
+    color: #174f50;
+    font-weight: 1000;
+    letter-spacing: 0.06em;
+    box-shadow:
+        inset 0 -5px 0 rgba(25, 125, 93, 0.18),
+        0 5px 0 #276f69;
+}
+.authority-label {
+    color: #ffe26e;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+}
+
+.quest-list,
+.settings-list {
+    display: grid;
+    gap: 10px;
+}
+.quest-card,
+.shop-card {
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-left: 6px solid #ff8a83;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.11);
+    padding: 14px;
+    box-shadow: 0 5px 0 rgba(37, 24, 92, 0.28);
+}
+.quest-card div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+}
+.quest-card progress {
+    width: 100%;
+    height: 8px;
+    margin-top: 12px;
+    accent-color: #60dfac;
+}
+.quest-card button {
+    min-width: 92px;
+    min-height: 44px;
+    margin-top: 9px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 13px;
+    background: rgba(45, 31, 105, 0.42);
+    color: #d3c9f4;
+    font-size: 13px;
+}
+.shop-card + .shop-card {
+    margin-top: 10px;
+}
+.shop-card h3 {
+    margin: 5px 0;
+    color: #ffe36d;
+}
+.shop-card p:not(.eyebrow) {
+    color: #eee9ff;
+    font-size: 14px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+}
+.stats-grid article {
+    display: flex;
+    min-height: 110px;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 2px solid rgba(255, 255, 255, 0.62);
+    border-radius: 18px;
+    background: linear-gradient(#fff, #f1ecff);
+    padding: 14px;
+    box-shadow:
+        inset 0 -5px 0 rgba(92, 63, 166, 0.08),
+        0 5px 0 rgba(37, 24, 92, 0.36);
+}
+.stats-grid span {
+    color: #7164a5;
+    font-size: 12px;
+    font-weight: 900;
+}
+.stats-grid strong {
+    color: #5c42b3;
+    font-size: 35px;
+}
+
+.setting-row,
+.setting-slider {
+    display: flex;
+    min-height: 56px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+}
+.setting-row > span,
+.setting-slider > span {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.setting-row input[type="checkbox"] {
+    width: 46px;
+    height: 26px;
+    accent-color: #60dfac;
+}
+.setting-slider {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 10px 0;
+}
+.setting-slider input {
+    width: 100%;
+    accent-color: #60dfac;
+}
+.setting-row button,
+.setting-row select {
+    min-height: 44px;
+    border: 2px solid rgba(255, 255, 255, 0.34);
+    border-radius: 12px;
+    background: rgba(44, 30, 104, 0.72);
+    padding: 0 12px;
+    color: #fff;
+}
+.setting-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.setting-actions input[type="checkbox"] {
+    width: 46px;
+    height: 26px;
+    accent-color: #60dfac;
+}
+.segmented {
+    display: flex;
+}
+.segmented button.active {
+    border-color: #ffe36d;
+    color: #ffe36d;
+}
+.feature-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.feature-status-grid article {
+    display: flex;
+    min-height: 72px;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 2px solid rgba(255, 255, 255, 0.24);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 11px;
+    box-shadow: 0 4px 0 rgba(37, 24, 92, 0.24);
+}
+.feature-status-grid span {
+    color: #cec4f2;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+}
+.feature-status-grid strong {
+    color: #ffe36d;
+    font-size: 15px;
+    font-weight: 1000;
+}
+.feature-demo-card {
+    margin-top: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.24);
+    border-left: 6px solid #ffe36d;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 14px;
+    box-shadow: 0 5px 0 rgba(37, 24, 92, 0.26);
+}
+.feature-demo-ad {
+    border-left-color: #ff847f;
+}
+.feature-demo-sdk {
+    border-left-color: #68cfff;
+}
+.feature-demo-renderer {
+    border-left-color: #ae8cff;
+}
+.feature-demo-card h3 {
+    margin: 4px 0 0;
+    font-size: 20px;
+}
+.feature-demo-card > p {
+    margin: 10px 0;
+    color: #eee9ff;
+    font-size: 14px;
+    line-height: 1.45;
+}
+.feature-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+.feature-actions-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.feature-actions-single {
+    grid-template-columns: 1fr;
+}
+.feature-actions-sdk button:last-child {
+    grid-column: 1 / -1;
+}
+.feature-actions button {
+    min-height: 46px;
+    border: 2px solid rgba(255, 255, 255, 0.34);
+    border-radius: 13px;
+    background: rgba(45, 31, 105, 0.66);
+    padding: 7px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.2;
+    box-shadow: 0 3px 0 rgba(30, 19, 78, 0.35);
+}
+.feature-actions button:active {
+    border-color: #ffe36d;
+    color: #ffe36d;
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(30, 19, 78, 0.35);
+}
+.feature-actions button:disabled {
+    cursor: wait;
+    opacity: 0.58;
+}
+.feature-output {
+    display: block;
+    min-height: 32px;
+    margin-top: 9px;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    padding-top: 9px;
+    color: #ffe36d;
+    overflow-wrap: anywhere;
+    font:
+        700 12px / 1.4 ui-monospace,
+        monospace;
+}
+.renderer-mode-switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 10px;
+    padding: 0;
+    border: 0;
+}
+.renderer-mode-switch button {
+    min-height: 48px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    background: rgba(45, 31, 105, 0.66);
+    color: #eee9ff;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.2;
+}
+.renderer-mode-switch button[aria-pressed="true"] {
+    border-color: #ffe36d;
+    background: #6650b4;
+    color: #fff3a8;
+}
+.renderer-lab-viewport {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    height: clamp(240px, 44dvh, 390px);
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.48);
+    border-radius: 22px;
+    background: #07141c;
+    box-shadow:
+        inset 0 0 36px #000a,
+        0 6px 0 rgba(34, 22, 85, 0.38);
+}
+.renderer-lab-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+.renderer-lab-world {
+    z-index: 0;
+}
+.renderer-lab-overlay {
+    z-index: 1;
+}
+.renderer-lab-status {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    left: 10px;
+    border: 2px solid #71cfff;
+    border-radius: 999px;
+    background: rgba(7, 20, 28, 0.86);
+    padding: 6px 8px;
+    color: #bcecff;
+    font:
+        800 11px / 1.25 ui-monospace,
+        monospace;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+}
+.renderer-lab-status-error {
+    border-color: #b5462d;
+    color: #f0a58f;
+}
+.renderer-lab-explanation {
+    margin-top: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.24);
+    border-left: 6px solid #ae8cff;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 14px;
+}
+.renderer-lab-explanation h3 {
+    margin: 4px 0 0;
+    font-size: 20px;
+}
+.renderer-lab-explanation > p:not(.eyebrow) {
+    margin: 10px 0;
+    color: #eee9ff;
+    font-size: 14px;
+    line-height: 1.45;
+}
+.renderer-lab-explanation ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 20px;
+    color: #eee9ff;
+    font-size: 13px;
+    line-height: 1.4;
+}
+.capability-drawer {
+    margin-top: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 18px;
+    background: rgba(37, 24, 92, 0.34);
+    overflow: hidden;
+}
+.capability-drawer summary {
+    min-height: 48px;
+    padding: 15px 12px;
+    color: #ffe36d;
+    cursor: pointer;
+    font:
+        800 12px ui-monospace,
+        monospace;
+    letter-spacing: 0.05em;
+}
+.capability-list {
+    display: grid;
+    gap: 1px;
+    border-top: 2px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.12);
+}
+.capability-list article {
+    background: rgba(45, 31, 105, 0.92);
+    padding: 11px 12px;
+}
+.capability-list article > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.capability-list strong {
+    font:
+        800 12px ui-monospace,
+        monospace;
+}
+.capability-list span {
+    border: 1px solid rgba(255, 255, 255, 0.36);
+    border-radius: 999px;
+    padding: 3px 5px;
+    color: #bcc9d2;
+    font:
+        700 10px ui-monospace,
+        monospace;
+}
+.capability-list span[data-safety="paid-or-billed"],
+.capability-list span[data-safety="privileged"] {
+    border-color: #b5462d;
+    color: #f0a58f;
+}
+.capability-list p {
+    margin: 6px 0 0;
+    color: #ddd5f6;
+    font-size: 13px;
+    line-height: 1.35;
+}
+.capability-list small {
+    display: block;
+    margin-top: 5px;
+    color: #ffe58a;
+    font:
+        11px / 1.35 ui-monospace,
+        monospace;
+}
+/* Top, not bottom. Every screen in this game puts its primary controls at the
+   bottom edge (the deck, the menu, the shop bag, the sticky CTA), so a
+   full-width bar down there covered whatever you had just interacted with.
+   It is also sized to its content now rather than stretching edge to edge. */
+.toast {
+    position: absolute;
+    z-index: 50;
+    /* Below the header row, not on top of it: the safe-area clearance plus the
+       height of a title line. */
+    top: calc(var(--koi-safe-top, 44px) + 62px);
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(320px, calc(100% - 36px));
+    width: max-content;
+    text-align: center;
+    border: 1px solid rgba(253, 246, 236, 0.16);
+    border-radius: 14px;
+    background: rgba(24, 17, 29, 0.92);
+    backdrop-filter: blur(8px);
+    color: var(--koi-cream, #fdf6ec);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.7);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+}
+
+.fatal-error {
+    display: grid;
+    min-height: 100%;
+    place-content: center;
+    gap: 12px;
+    padding: 32px;
+    text-align: center;
+}
+.fatal-error h1,
+.fatal-error p {
+    margin: 0;
+}
+.fatal-error button {
+    min-height: 48px;
+    border: 0;
+    border-radius: 16px;
+    background: #ffd95a;
+    color: #3b286e;
+    font-weight: 900;
+}
+.route-loading {
+    display: grid;
+    min-height: 100%;
+    place-content: center;
+    padding: 32px;
+    color: #ffe36d;
+    text-align: center;
+    font:
+        800 13px ui-monospace,
+        monospace;
+    letter-spacing: 0.08em;
+}
+
+.loading-screen {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding-right: max(34px, var(--safe-right));
+    padding-left: max(34px, var(--safe-left));
+    text-align: center;
+}
+.loading-mark {
+    position: relative;
+    width: 106px;
+    height: 94px;
+    border: 5px solid #fff;
+    border-radius: 32px;
+    background: linear-gradient(145deg, #72d9ff, #7373ec);
+    box-shadow:
+        inset 0 -12px 0 rgba(47, 46, 163, 0.2),
+        0 9px 0 rgba(38, 25, 96, 0.42);
+    animation: loading-float 1.8s ease-in-out infinite;
+}
+.loading-mark::before,
+.loading-mark::after {
+    content: "";
+    position: absolute;
+    top: 25px;
+    width: 18px;
+    height: 7px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.4);
+}
+.loading-mark::before {
+    left: -18px;
+}
+.loading-mark::after {
+    right: -18px;
+}
+/* The heart inside the floating tile. */
+.loading-mark-heart {
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 52px;
+    line-height: 1;
+    text-shadow: 0 2px 0 rgba(38, 25, 96, 0.35);
+}
+.loading-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.82;
+    filter: drop-shadow(0 5px 0 rgba(38, 25, 96, 0.36));
+}
+.loading-title span {
+    border-radius: 999px;
+    background: #f06e80;
+    padding: 5px 18px 6px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 1000;
+    letter-spacing: 0.12em;
+}
+.loading-title strong {
+    color: #fff4ac;
+    font-size: 39px;
+    letter-spacing: -0.04em;
+    text-shadow: 0 3px 0 #7252bd;
+}
+.loading-track {
+    width: 100%;
+    max-width: 300px;
+    height: 20px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    background: rgba(38, 25, 96, 0.44);
+    padding: 3px;
+}
+.loading-fill {
+    height: 100%;
+    min-width: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #59dda8, #ffe269);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.54);
+    transition: width 200ms ease-out;
+}
+.loading-copy {
+    margin: 0;
+    color: #e8e0ff;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+@keyframes loading-float {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-1deg);
+    }
+    50% {
+        transform: translateY(-7px) rotate(1deg);
+    }
+}
+
+.game-hud {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 14px max(14px, var(--safe-right)) 14px max(14px, var(--safe-left));
+}
+.hud-score,
+.hud-menu {
+    border: 3px solid rgba(255, 255, 255, 0.78);
+    background: rgba(67, 45, 145, 0.9);
+    color: #fff;
+    box-shadow:
+        inset 0 -5px 0 rgba(31, 19, 84, 0.2),
+        0 5px 0 rgba(24, 15, 66, 0.42);
+}
+.hud-score {
+    display: flex;
+    min-height: 50px;
+    align-items: center;
+    gap: 11px;
+    border-radius: 18px;
+    padding: 6px 12px;
+}
+.hud-score span {
+    color: #d8ceff;
+    font-size: 11px;
+    font-weight: 900;
+}
+.hud-score strong {
+    color: #ffe36d;
+    font-size: 23px;
+    line-height: 1;
+}
+.hud-menu {
+    min-width: 70px;
+    min-height: 50px;
+    border-radius: 18px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 1000;
+}
+.hud-menu:active {
+    transform: translateY(3px);
+    box-shadow:
+        inset 0 -2px 0 rgba(31, 19, 84, 0.2),
+        0 2px 0 rgba(24, 15, 66, 0.42);
+}
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(37, 24, 91, 0.72);
+    backdrop-filter: blur(5px);
+}
+.pause-overlay > div {
+    min-width: 210px;
+    border: 3px solid rgba(255, 255, 255, 0.66);
+    border-radius: 28px;
+    background: linear-gradient(#6951bd, #4b349d);
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 9px 0 rgba(27, 16, 74, 0.42);
+}
+.pause-overlay strong {
+    display: block;
+    margin-top: 4px;
+    color: #ffe36d;
+    font-size: 34px;
+}
+
+/* Development-only diagnostics. The component is removed from production
+   bundles through an import.meta.env.DEV-gated lazy import. */
+.development-tools {
+    position: absolute;
+    z-index: 100;
+    top: max(8px, var(--safe-top));
+    right: max(8px, var(--safe-right));
+    width: min(286px, calc(100% - 16px - var(--safe-left) - var(--safe-right)));
+    border: 1px solid #6b7c89;
+    border-radius: 4px;
+    background: rgba(8, 13, 20, 0.96);
+    color: #e8edf1;
+    font:
+        700 12px / 1.35 ui-monospace,
+        monospace;
+    box-shadow: 0 12px 36px #000a;
+    touch-action: pan-y;
+}
+.development-tools button,
+.development-tools select,
+.development-tools input {
+    min-height: 44px;
+}
+.development-tools-toggle {
+    width: 100%;
+    border: 0;
+    background: #f4c95d;
+    padding: 8px 12px;
+    color: #10151f;
+    text-align: left;
+    font-weight: 900;
+}
+.development-tools-body {
+    display: grid;
+    max-height: min(68dvh, 560px);
+    gap: 8px;
+    overflow-y: auto;
+    padding: 10px;
+    overscroll-behavior: contain;
+}
+.development-tools dl {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+}
+.development-tools dl > div {
+    display: grid;
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 8px;
+}
+.development-tools dt {
+    color: #93a8b8;
+}
+.development-tools dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: #f4c95d;
+}
+.development-tools label {
+    display: grid;
+    gap: 4px;
+}
+.development-tools select,
+.development-tools input[type="range"] {
+    width: 100%;
+}
+.development-tools select,
+.development-reset {
+    border: 1px solid #596875;
+    background: #18222d;
+    padding-inline: 10px;
+    color: #e8edf1;
+}
+.development-check {
+    grid-template-columns: 1fr 44px;
+    align-items: center;
+}
+.development-check input {
+    width: 22px;
+    justify-self: center;
+}
+.development-reset {
+    font-weight: 900;
+}
+.development-tools p {
+    margin: 0;
+    color: #93a8b8;
+    font-size: 11px;
+}
+.development-safe-area {
+    position: absolute;
+    z-index: 99;
+    top: var(--safe-top);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    left: var(--safe-left);
+    border: 2px dashed #f4c95d;
+    background: rgba(244, 201, 93, 0.06);
+    pointer-events: none;
+}
+
+@media (max-height: 680px) {
+    .menu-shell {
+        gap: 10px;
+    }
+    .menu-logo h1 {
+        font-size: 46px;
+    }
+    .menu-subtitle {
+        display: none;
+    }
+    .menu-tile {
+        min-height: 48px;
+    }
+}
+
+@media (orientation: landscape) {
+    .menu-shell,
+    .subscreen {
+        width: 100%;
+        max-width: 1180px;
+        margin-inline: auto;
+        padding-right: max(clamp(20px, 4vmin, 48px), var(--safe-right));
+        padding-left: max(clamp(20px, 4vmin, 48px), var(--safe-left));
+    }
+
+    .menu-shell {
+        display: grid;
+        grid-template-areas:
+            "identity summary"
+            "identity play"
+            "identity navigation"
+            "identity stamp";
+        grid-template-rows: auto auto auto auto;
+        grid-template-columns: minmax(200px, 0.8fr) minmax(300px, 1.2fr);
+        align-content: center;
+        column-gap: clamp(18px, 5vw, 88px);
+        row-gap: 10px;
+    }
+
+    .menu-header {
+        grid-area: identity;
+        align-self: center;
+    }
+
+    .menu-logo h1 {
+        font-size: clamp(46px, 9.5dvh, 76px);
+    }
+
+    .menu-subtitle {
+        max-width: 28rem;
+    }
+
+    .player-strip {
+        grid-area: summary;
+    }
+
+    .play-button {
+        grid-area: play;
+    }
+
+    .menu-grid {
+        grid-area: navigation;
+    }
+
+    .menu-tile:last-child {
+        grid-column: auto;
+    }
+
+    .template-stamp {
+        grid-area: stamp;
+    }
+
+    .subscreen-header h2 {
+        font-size: clamp(28px, 6.8dvh, 44px);
+    }
+
+    .subscreen-content {
+        padding-top: 14px;
+    }
+
+    .reward-track {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .reward-day:last-child {
+        grid-column: auto;
+    }
+
+    .stats-grid,
+    .feature-status-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+    .menu-shell {
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+        row-gap: 6px;
+    }
+
+    .menu-logo h1 {
+        font-size: 46px;
+    }
+
+    .menu-subtitle {
+        display: none;
+    }
+
+    .play-button {
+        min-height: 54px;
+    }
+
+    .menu-grid {
+        gap: 6px;
+    }
+
+    .menu-tile {
+        min-height: 44px;
+        padding-block: 4px;
+    }
+
+    .menu-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (orientation: landscape) and (max-width: 560px) {
+    .menu-shell,
+    .subscreen {
+        padding-right: max(12px, var(--safe-right));
+        padding-left: max(12px, var(--safe-left));
+    }
+
+    .menu-shell {
+        grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+        column-gap: 14px;
+    }
+
+    .menu-logo h1 {
+        font-size: clamp(30px, 8vw, 36px);
+    }
+
+    .menu-logo-top {
+        font-size: 14px;
+    }
+
+    .menu-logo-bolt {
+        width: 34px;
+        height: 34px;
+    }
+
+    .eyebrow {
+        font-size: 11px;
+    }
+
+    .menu-tile {
+        gap: 7px;
+        font-size: 12px;
+    }
+
+    .menu-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+    }
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+}
+
+/* ============================================================
+   KOI NO YOKAN
+   Portrait dating sim. Warm dusk palette against the painted
+   backgrounds; the HUD sits over live art, so every surface here
+   is translucent and blurred rather than opaque.
+   ============================================================ */
+
+:root {
+    --koi-ink: #2b1f2e;
+    --koi-cream: #fdf6ec;
+    --koi-rose: #e8607d;
+    --koi-rose-deep: #b8375a;
+    --koi-gold: #f2c063;
+    --koi-teal: #3f8f8a;
+    --koi-panel: rgba(43, 31, 46, 0.72);
+    --koi-panel-soft: rgba(253, 246, 236, 0.1);
+
+    /* Two identity colours, and they are not the same thing:
+       --koi-accent is YOU. App.tsx writes the chosen avatar's colour onto
+         #app-frame, so every piece of global chrome (buttons, meters, coins,
+         selection rings) carries the character you decided to be.
+       --koi-char is WHOEVER THIS COMPONENT IS SHOWING. A book row, a partner
+         card or the result screen sets it locally so that person's colour wins
+         inside their own card, then falls back to yours everywhere else.
+       Hence the canonical chain: var(--koi-char, var(--koi-accent)). */
+    --koi-accent: var(--koi-rose);
+    --koi-accent-deep: color-mix(in srgb, var(--koi-accent) 68%, #2b0d18);
+
+    /* Safe-area insets converted from physical pixels into design units.
+       Everything else inside a koi surface is a design unit and gets scaled by
+       --ui-scale, but a notch is a fixed number of real pixels — dividing here
+       keeps the clearance physically constant instead of growing with the
+       scale. --ui-scale is published by useUiScale() in App.tsx and is exactly
+       1 at phone size. */
+    --koi-safe-top: calc(max(var(--safe-top, 0px), 44px) / var(--ui-scale, 1));
+    --koi-safe-bottom: calc(var(--safe-bottom, 0px) / var(--ui-scale, 1));
+
+    /* Contrast for text drawn straight onto the painted backdrops. Two layers:
+       a tight dark edge that survives against pale blossom, and a wider soft
+       one that darkens the art behind a whole word. A stroke would fight the
+       typeface at these sizes; this reads as depth instead. */
+    --koi-halo: 0 1px 2px rgba(12, 6, 16, 0.95), 0 2px 12px rgba(12, 6, 16, 0.8);
+}
+
+/* Anything sitting on the sakura art with no panel of its own. Panelled text
+   (plates, menu buttons, settings groups, the hero card) already has a
+   background to sit on and is deliberately left alone. */
+.koi-stats-row,
+.koi-set-note,
+.koi-settings .koi-header .koi-title-sm,
+.koi-settings .koi-back,
+.koi-empty-state h2,
+.koi-empty-state p {
+    text-shadow: var(--koi-halo);
+}
+
+/* Design-resolution DOM: lay out in a box of `100% / scale` design units, then
+   scale it back up to fill the frame. This is the same trick the Pixi stage
+   uses, which is the point — the HUD and the scene now grow together. */
+.koi-screen,
+.koi-hud {
+    transform: scale(var(--ui-scale, 1));
+    transform-origin: top left;
+    width: calc(100% / var(--ui-scale, 1));
+    height: calc(100% / var(--ui-scale, 1));
+}
+
+/* The plan screen scrolls its middle, not its chrome: Back and Meet up are how
+   you leave, and selecting someone adds the brief, which pushed both of them
+   below the fold. */
+.koi-plan {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+}
+
+.koi-plan .koi-header {
+    grid-row: 1;
+}
+
+.koi-plan-scroll {
+    grid-row: 2;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 4px;
+}
+
+.koi-plan .koi-cta-sticky {
+    grid-row: 3;
+    position: static;
+    margin-top: 8px;
+}
+
+.koi-screen {
+    position: absolute;
+    /* Not `inset: 0` — the scaled box sets its own width/height above. */
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    /* `max(..., 44px)` rather than the inset alone: a Dynamic Island is ~59px
+       and the inset reads as 0 in any context that is not reporting one (a
+       plain browser, an embedded preview, a host that has not called
+       applyRunSafeArea yet). 44px is the classic status-bar height and clears
+       the island once the 18px of padding is added on top. */
+    padding: calc(18px + var(--koi-safe-top)) 18px calc(18px + var(--koi-safe-bottom));
+    overflow-y: auto;
+    background: radial-gradient(120% 80% at 50% 0%, #47304f 0%, #2b1f2e 55%, #1b1420 100%);
+    color: var(--koi-cream);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.koi-title {
+    margin: 0;
+    font-size: 34px;
+    letter-spacing: 0.22em;
+    font-weight: 800;
+    text-align: center;
+    color: var(--koi-cream);
+    /* Over painted art the title sits on whatever happens to be behind it —
+       blossom one moment, moon the next. The dark pair is its own contrast;
+       the rose glow is only decoration and cannot be relied on for it. */
+    text-shadow:
+        0 1px 3px rgba(20, 10, 24, 0.95),
+        0 2px 10px rgba(20, 10, 24, 0.9),
+        0 2px 18px rgba(232, 96, 125, 0.5);
+}
+
+.koi-title-sm {
+    margin: 0;
+    font-size: 19px;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+}
+
+.koi-subtitle {
+    text-shadow: 0 1px 6px rgba(20, 10, 24, 0.95);
+    /* The title is 34px with wide tracking; a negative margin here collided
+       the two lines. */
+    margin: 4px 0 0;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.koi-lead {
+    text-shadow: 0 1px 6px rgba(20, 10, 24, 0.95);
+    margin: 6px 0 0;
+    text-align: center;
+    font-size: 15px;
+    opacity: 0.85;
+}
+
+.koi-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.koi-header .koi-title-sm {
+    flex: 1;
+}
+
+/* Nothing but the balance — keep it on the trailing edge. */
+.koi-header-bare {
+    justify-content: flex-end;
+}
+
+/* A chip, not just a shadow. This is small gold type sitting on the busiest,
+   palest part of the painting — the blossom — and gold on pink is the one
+   combination a halo alone does not rescue. The chip guarantees a known
+   backdrop no matter which art is behind it. */
+.koi-coins {
+    font-weight: 700;
+    color: var(--koi-gold);
+    font-size: 15px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    background: rgba(20, 12, 26, 0.62);
+    border: 1px solid rgba(253, 246, 236, 0.12);
+    backdrop-filter: blur(4px);
+    text-shadow: 0 1px 2px rgba(12, 6, 16, 0.9);
+}
+
+.koi-back,
+.koi-link {
+    background: none;
+    border: none;
+    color: var(--koi-cream);
+    opacity: 0.75;
+    font-size: 14px;
+    padding: 4px 2px;
+    cursor: pointer;
+}
+
+.koi-section {
+    margin: 6px 0 -4px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    font-weight: 700;
+}
+
+.koi-hint {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.7;
+    line-height: 1.4;
+}
+
+.koi-empty {
+    opacity: 0.6;
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* A screen with nothing in it yet should still look composed and tell you how
+   to fill it. `flex: 1` so it occupies the space instead of leaving a void
+   that reads as a failed render. */
+.koi-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    padding: 0 12px;
+}
+
+.koi-empty-mark {
+    font-size: 46px;
+    line-height: 1;
+    color: var(--koi-accent);
+    opacity: 0.8;
+}
+
+.koi-empty-state h2 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.koi-empty-state p {
+    margin: 0;
+    max-width: 34ch;
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.65;
+}
+
+.koi-empty-state .koi-cta {
+    margin-top: 6px;
+    min-width: 200px;
+}
+
+/* --- buttons ------------------------------------------------ */
+
+.koi-cta,
+.koi-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 15px 18px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.koi-cta {
+    background: linear-gradient(
+        180deg,
+        var(--koi-char, var(--koi-accent)) 0%,
+        color-mix(in srgb, var(--koi-char, var(--koi-accent)) 68%, #2b0d18) 100%
+    );
+    color: #fff;
+    box-shadow: 0 8px 22px -4px color-mix(in srgb, var(--koi-char, var(--koi-accent)) 55%, transparent);
+}
+
+.koi-btn {
+    background: var(--koi-panel-soft);
+    color: var(--koi-cream);
+    border: 1px solid rgba(253, 246, 236, 0.16);
+}
+
+.koi-btn-quiet {
+    opacity: 0.6;
+}
+.koi-btn-sm,
+.koi-cta-sm {
+    padding: 9px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+}
+
+.koi-cta:disabled,
+.koi-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+    box-shadow: none;
+}
+
+.koi-cta-sticky {
+    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+}
+
+.koi-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+}
+
+/* Menu buttons carry a drawn icon beside their label. */
+.koi-menu .koi-cta,
+.koi-menu .koi-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.koi-menu-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+}
+
+.koi-fab-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+/* --- send a postcard ------------------------------------------ */
+
+/* The card itself is the painted postcard for whoever you play (one per cast
+   member in public/images/postcards, border baked in). Tilted a touch so it
+   reads as a thing, not a panel; the stamp rides its top corner. */
+.koi-postcard-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transform: rotate(-1deg);
+}
+
+.koi-postcard-art {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 14px 26px -12px rgba(12, 6, 16, 0.75);
+}
+
+.koi-postcard-stamp {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1.5px dashed color-mix(in srgb, var(--koi-char, #b06a7d) 75%, #2a2030);
+    border-radius: 4px;
+    background: rgba(251, 245, 232, 0.92);
+    color: var(--koi-char, #b06a7d);
+}
+
+.koi-postcard-stamp-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.koi-postcard-writing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.koi-postcard-from {
+    font-size: 14px;
+    font-style: italic;
+    color: rgba(253, 246, 236, 0.92);
+}
+
+.koi-postcard-note {
+    font-size: 11px;
+    color: rgba(253, 246, 236, 0.6);
+}
+
+.koi-postcard-lead {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(253, 246, 236, 0.7);
+}
+
+.koi-modal-postcard-art {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.koi-postcard-send {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.koi-postcard-send .koi-menu-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.koi-postcard-send:disabled {
+    opacity: 0.45;
+}
+
+/* --- avatar select ------------------------------------------ */
+
+/* --- avatar select: painted backdrop, petals, paged hero card ----------- */
+
+.koi-avatar {
+    justify-content: flex-start;
+    gap: 10px;
+    overflow: hidden;
+}
+
+/* The painted sakura menu art. Its centre is deliberately empty so the title
+   and card sit on open sky; the gradient only deepens the bottom for text. */
+.koi-menu-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(27, 20, 32, 0.15) 0%, rgba(27, 20, 32, 0.55) 62%, rgba(27, 20, 32, 0.92) 100%),
+        url("/images/menu_sakura.png") center / cover no-repeat;
+    z-index: 0;
+}
+
+/* The petals must keep their own absolute positioning. This selector is more
+   specific than `.koi-petals`, so without the second :not() it forces
+   `position: relative`, the container collapses to zero height, and every
+   petal is clipped away — the effect renders but is invisible. */
+.koi-avatar > *:not(.koi-menu-bg):not(.koi-petals),
+.koi-home > *:not(.koi-menu-bg):not(.koi-petals),
+.koi-settings > *:not(.koi-menu-bg):not(.koi-petals) {
+    position: relative;
+    z-index: 2;
+}
+
+/* The hub shares the avatar screen's painted sakura and falling petals, so it
+   needs the same clipping — a petal must not escape the frame. */
+.koi-home {
+    overflow: hidden;
+}
+
+.koi-petals {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Layer 1: the fall. Straight down plus a steady lean, linear so gravity
+   never appears to ease. */
+.koi-petal-fall {
+    position: absolute;
+    top: -8%;
+    display: block;
+    animation-name: koi-petal-fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+}
+
+@keyframes koi-petal-fall {
+    0% {
+        transform: translate3d(0, -10vh, 0);
+    }
+    100% {
+        transform: translate3d(var(--drift), 112vh, 0);
+    }
+}
+
+/* Layer 2: the flutter. Swings side to side and tips over as it goes, on its
+   own period — this is what reads as air rather than falling confetti. */
+.koi-petal {
+    display: block;
+    background: linear-gradient(140deg, #ffd7e6 0%, #f7a8c4 55%, #e87ba6 100%);
+    /* An off-round blob reads as a petal far better than a circle does. */
+    border-radius: 60% 20% 55% 25%;
+    animation-name: koi-petal-sway;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    will-change: transform;
+}
+
+@keyframes koi-petal-sway {
+    from {
+        transform: translateX(calc(var(--sway) * -1)) rotate(calc(var(--tilt) * var(--spin) * -1));
+    }
+    to {
+        transform: translateX(var(--sway)) rotate(calc(var(--tilt) * var(--spin)));
+    }
+}
+
+/* Layer 3: the gust. A slow lean applied to the whole field, so now and then
+   every petal drifts the same way at once. It lives on an inner element so the
+   clipping box stays exactly the viewport — animating the clip box moves its
+   own rect off-screen. */
+.koi-petals-field {
+    position: absolute;
+    inset: 0;
+    animation: koi-petal-gust 17s ease-in-out infinite alternate;
+}
+
+@keyframes koi-petal-gust {
+    from {
+        transform: translateX(-14px);
+    }
+    to {
+        transform: translateX(14px);
+    }
+}
+
+.koi-avatar-head {
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* In flow, not absolute. Floating it over the top-left put it straight through
+   the "KOI NO YOKAN" wordmark, and any absolute offset that cleared the title
+   would then collide with the lead line once the title is hidden. As a normal
+   child it simply takes its own space in both layouts. */
+.koi-avatar-back {
+    align-self: flex-start;
+    justify-self: start;
+    text-shadow: 0 2px 8px rgba(20, 10, 24, 0.9);
+}
+
+.koi-hero {
+    display: flex;
+    /* stretch, not center: centring left the card content-sized, so it had no
+       definite height for the portrait to size against — the image collapsed
+       to its minimum and the card floated with dead space under it. */
+    align-items: stretch;
+    gap: 4px;
+    flex: 1;
+    min-height: 0;
+}
+
+.koi-hero-arrow {
+    text-shadow: 0 2px 8px rgba(20, 10, 24, 0.9);
+    flex: 0 0 34px;
+    align-self: stretch;
+    border: none;
+    background: none;
+    color: var(--koi-cream);
+    font-size: 34px;
+    line-height: 1;
+    opacity: 0.55;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.koi-hero-arrow:active {
+    opacity: 1;
+}
+
+.koi-hero-card {
+    flex: 1;
+    min-width: 0;
+    /* Without this the card refuses to shrink below its content and overflows
+       its slot instead, painting over the pager and the lead line. */
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px 14px;
+    border-radius: 20px;
+    background: rgba(43, 31, 46, 0.55);
+    border: 1px solid color-mix(in srgb, var(--koi-char, #fdf6ec) 45%, transparent);
+    box-shadow: 0 10px 40px -18px var(--koi-char, transparent);
+    backdrop-filter: blur(6px);
+    /* Re-keyed on the character id, so paging replays the entrance.
+       Transform only — deliberately NOT opacity. A WKWebView that holds
+       animations pending (ViewDeck's capture surface does) leaves the element
+       stuck on the keyframe's `from` state, and an opacity-based entrance then
+       renders the whole card invisible while still laying out correctly. */
+    animation: koi-hero-in 0.28s ease-out;
+}
+
+@keyframes koi-hero-in {
+    from {
+        transform: translateY(8px) scale(0.985);
+    }
+    to {
+        transform: none;
+    }
+}
+
+/* The portrait takes the space the text does NOT need, rather than claiming a
+   fixed 34vh and letting everything else overflow. `flex-basis: 0` with grow
+   is what makes it the give in the card: a character with five trait badges
+   wraps to four rows, and at a fixed height that pushed the badges down over
+   the face pager and shoved the card up over "Who are you tonight?". */
+.koi-hero-portrait {
+    /* basis comes from `height`, so 34vh is the preferred size; grow takes any
+       slack a short trait list leaves, shrink gives it back to a long one. */
+    flex: 1 1 auto;
+    height: 34vh;
+    min-height: 90px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.45));
+}
+
+/* Portrait: transparent to layout, so the card stays a single column. */
+.koi-hero-info {
+    display: contents;
+}
+
+.koi-hero-name {
+    text-shadow: 0 2px 8px rgba(20, 10, 24, 0.85);
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.koi-hero-blurb {
+    text-shadow: 0 1px 5px rgba(20, 10, 24, 0.9);
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.72;
+    text-align: center;
+    line-height: 1.4;
+    max-width: 30ch;
+}
+
+.koi-traits {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+}
+
+.koi-trait {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.1);
+    border: 1px solid rgba(253, 246, 236, 0.16);
+    font-size: 10px;
+    letter-spacing: 0.02em;
+}
+
+.koi-trait-icon {
+    font-size: 13px;
+}
+
+.koi-trait-label {
+    opacity: 0.85;
+}
+
+.koi-hero-pager {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.koi-pager-dot {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(253, 246, 236, 0.2);
+    background: rgba(43, 31, 46, 0.6);
+    opacity: 0.55;
+    cursor: pointer;
+    transition:
+        opacity 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+/* Figures are trimmed with the head at the very top, so a square container
+   with `cover` + top alignment lands on the face without needing head crops
+   baked as separate assets. */
+.koi-pager-dot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+
+.koi-pager-dot.is-active {
+    opacity: 1;
+    border-color: var(--koi-char, var(--koi-accent));
+    /* A pale ring under the character-coloured one. The signature colours run
+       from Sora's bright orange to Reina's deep crimson, and crimson alone on
+       this dark strip was almost impossible to pick out. */
+    box-shadow:
+        0 0 0 2px rgba(255, 250, 245, 0.85),
+        0 0 14px -1px var(--koi-char, var(--koi-accent));
+    transform: scale(1.12);
+}
+
+.koi-hero-cta {
+    width: 100%;
+    background: linear-gradient(
+        180deg,
+        var(--koi-char, var(--koi-accent)) 0%,
+        color-mix(in srgb, var(--koi-char, var(--koi-accent)) 70%, #000) 100%
+    );
+    box-shadow: 0 8px 26px -8px var(--koi-char, var(--koi-accent));
+}
+
+/* --- home: the stage ---------------------------------------- */
+
+/* Art and plates are separate grid items in explicit rows, so the two figures
+   share row 1 (one floor line) and the two plates share row 2 (one baseline)
+   with no measured offsets anywhere. The previous version absolutely placed
+   each caption into a hand-measured 104px band under its figure, which had to
+   be re-measured whenever the caption's content changed. */
+.koi-stage {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    column-gap: 12px;
+    row-gap: 8px;
+    justify-items: center;
+}
+
+.koi-art-you {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.koi-art-them {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.koi-plate-you {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.koi-plate-them {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.koi-stage .koi-stats-row {
+    grid-column: 1 / -1;
+    grid-row: 3;
+}
+
+.koi-stage-art {
+    min-height: 0;
+    max-width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.koi-stage-art img {
+    max-height: 100%;
+    max-width: 100%;
+    transform-origin: bottom center;
+    /* Nothing bakes a contact shadow here the way the date backdrops do, so
+       ground the figure with a drop shadow or they float on the sakura. */
+    filter: drop-shadow(0 7px 9px rgba(18, 9, 22, 0.6));
+}
+
+.koi-stage-plate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    text-align: center;
+    max-width: 100%;
+    padding: 6px 12px;
+    border-radius: 14px;
+    background: rgba(27, 20, 32, 0.62);
+    border: 1px solid color-mix(in srgb, var(--koi-char, var(--koi-accent)) 50%, transparent);
+    box-shadow: 0 8px 26px -12px var(--koi-char, var(--koi-accent));
+}
+
+.koi-stage-plate strong {
+    font-size: 17px;
+}
+
+/* Your own plate is the door back to the picker, so it has to read as a
+   control, not a label. */
+button.koi-stage-plate {
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+button.koi-stage-plate:active {
+    background: rgba(27, 20, 32, 0.8);
+}
+
+.koi-plate-hint {
+    margin-top: 2px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+}
+
+.koi-stage-label {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.koi-stage-tier {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--koi-char, var(--koi-accent));
+}
+
+/* The unfilled partner slot. A dashed outline rather than blank space: it
+   reads as somewhere to put someone, which is exactly what it is, and it is
+   the same tap target as "Go on a date". It occupies both the art and the
+   plate row, because it is standing in for both. */
+.koi-stage-empty {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: end;
+    max-height: 72%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 10px;
+    border: 1px dashed color-mix(in srgb, var(--koi-cream) 30%, transparent);
+    border-radius: 20px;
+    background: rgba(253, 246, 236, 0.05);
+    color: var(--koi-cream);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.koi-stage-empty strong {
+    font-size: 14px;
+}
+
+.koi-stage-silhouette {
+    font-size: 30px;
+    line-height: 1;
+    color: var(--koi-accent);
+    opacity: 0.8;
+}
+
+/* --- settings button, everywhere ------------------------------ */
+
+/* `fixed` resolves against #app-frame, which is transformed and is therefore
+   the containing block for its fixed descendants. It carries its own copy of
+   --ui-scale because it lives outside the scaled screens. */
+.koi-fab {
+    position: fixed;
+    z-index: 45;
+    top: calc(8px + max(var(--safe-top, 0px), 44px));
+    right: max(12px, var(--safe-right, 0px));
+    transform: scale(var(--ui-scale, 1));
+    transform-origin: top right;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(253, 246, 236, 0.16);
+    background: rgba(20, 12, 26, 0.62);
+    backdrop-filter: blur(4px);
+    color: var(--koi-cream);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.koi-fab:active {
+    background: rgba(20, 12, 26, 0.85);
+}
+
+/* Room reserved on every header row and on the date HUD, so a balance or a
+   gauge never ends up underneath the button. */
+.koi-header,
+.koi-hud-header {
+    padding-right: var(--koi-fab-space, 40px);
+}
+
+@media (orientation: landscape) {
+    .koi-fab {
+        right: max(12px, var(--safe-right, 0px));
+    }
+}
+
+/* --- date brief ---------------------------------------------- */
+
+/* What you know about tonight's company, shown the moment you pick them. */
+.koi-brief {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(27, 20, 32, 0.55);
+    border: 1px solid color-mix(in srgb, var(--koi-char, var(--koi-accent)) 40%, transparent);
+}
+
+.koi-brief-blurb {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(253, 246, 236, 0.78);
+}
+
+.koi-brief-traits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.koi-brief-traits li {
+    padding: 4px 9px;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.1);
+    border: 1px solid rgba(253, 246, 236, 0.14);
+    font-size: 10px;
+}
+
+.koi-brief-topics {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0;
+}
+
+.koi-brief-label {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(253, 246, 236, 0.5);
+}
+
+.koi-brief-glyph {
+    font-size: 15px;
+}
+
+/* --- store: rewarded ads, offers and heart packs -------------- */
+
+.koi-store {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Rewarded ads read as an offer, not as an ad slot: the player is choosing to
+   trade attention for something, so it is styled like the thing they get. */
+.koi-store-ad {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 14px;
+    text-align: left;
+    color: var(--koi-cream);
+    font-family: inherit;
+    cursor: pointer;
+    background: rgba(24, 17, 29, 0.7);
+    border: 1px dashed color-mix(in srgb, var(--koi-gold) 55%, transparent);
+    font-size: 17px;
+}
+
+.koi-store-ad-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.koi-store-ad strong {
+    font-size: 13px;
+}
+
+.koi-store-ad span span,
+.koi-store-ad-body > span {
+    font-size: 11px;
+    opacity: 0.65;
+}
+
+.koi-offer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.koi-offer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    text-align: left;
+    color: var(--koi-cream);
+    font-family: inherit;
+    cursor: pointer;
+    background: rgba(253, 246, 236, 0.08);
+    border: 1px solid color-mix(in srgb, var(--koi-accent) 45%, transparent);
+}
+
+.koi-offer-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.koi-offer-blurb {
+    font-size: 11px;
+    line-height: 1.35;
+    opacity: 0.7;
+}
+
+.koi-offer-price {
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--koi-gold);
+}
+
+.koi-pack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+}
+
+.koi-pack {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 6px;
+    border-radius: 14px;
+    color: var(--koi-cream);
+    font-family: inherit;
+    cursor: pointer;
+    background: rgba(253, 246, 236, 0.08);
+    border: 1px solid rgba(253, 246, 236, 0.16);
+}
+
+.koi-pack strong {
+    font-size: 13px;
+}
+
+.koi-pack.is-featured {
+    border-color: var(--koi-gold);
+    background: color-mix(in srgb, var(--koi-gold) 14%, transparent);
+}
+
+.koi-pack-bonus {
+    font-size: 9px;
+    font-weight: 800;
+    color: #8ff0bd;
+}
+
+.koi-pack-price {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--koi-gold);
+}
+
+/* --- confirm dialog ----------------------------------------- */
+
+/* `fixed`, not `absolute`: the screen it sits in is transform-scaled, which
+   makes it the containing block for fixed descendants — so this covers the
+   whole screen at the right scale and does not scroll away with the list. */
+.koi-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(14, 9, 18, 0.66);
+    backdrop-filter: blur(3px);
+    animation: koi-modal-fade 0.14s ease-out;
+}
+
+.koi-modal {
+    width: min(320px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 20px 16px;
+    border-radius: 22px;
+    text-align: center;
+    background: rgba(24, 17, 29, 0.96);
+    border: 1px solid color-mix(in srgb, var(--koi-accent) 40%, transparent);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+    animation: koi-modal-rise 0.16s ease-out;
+}
+
+.koi-modal-art {
+    width: 78px;
+    height: 78px;
+    object-fit: contain;
+}
+
+.koi-modal-title {
+    margin: 0;
+    font-size: 19px;
+}
+
+.koi-modal-cost {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0 0 6px;
+}
+
+.koi-modal-price {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--koi-accent);
+}
+
+.koi-modal-after {
+    font-size: 12px;
+    opacity: 0.55;
+}
+
+.koi-modal-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.koi-modal-actions > * {
+    flex: 1;
+}
+
+/* Transform-only, like the hero card: an opacity keyframe stays pending in a
+   frame-starved webview and the dialog never becomes visible. */
+@keyframes koi-modal-rise {
+    from {
+        transform: translateY(10px) scale(0.97);
+    }
+    to {
+        transform: none;
+    }
+}
+
+@keyframes koi-modal-fade {
+    from {
+        backdrop-filter: blur(0);
+    }
+    to {
+        backdrop-filter: blur(3px);
+    }
+}
+
+/* --- settings ----------------------------------------------- */
+
+.koi-settings {
+    overflow: hidden;
+}
+
+/* The list scrolls, the header does not — eight rows plus a note overflow a
+   phone in both orientations. */
+.koi-set-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    /* space-between rather than centring: it fills the column without leaving
+       a slab of empty screen under the last group, and because it still puts
+       the first child at the start edge, nothing is cut off when the list is
+       long enough to scroll. */
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 6px;
+}
+
+.koi-set-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 14px;
+    border-radius: 18px;
+    /* Opaque enough to read against the painted sakura — at 0.5 the blossoms
+       came through the labels and the buttons. */
+    background: rgba(24, 17, 29, 0.82);
+    backdrop-filter: blur(6px);
+    border: 1px solid color-mix(in srgb, var(--koi-accent) 22%, transparent);
+}
+
+.koi-set-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 42px;
+}
+
+.koi-set-row + .koi-set-row {
+    border-top: 1px solid rgba(253, 246, 236, 0.08);
+}
+
+.koi-set-label {
+    font-size: 14px;
+}
+
+.koi-set-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.koi-set-note {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    opacity: 0.5;
+    text-align: center;
+}
+
+/* A pill switch rather than the platform checkbox, which renders as a bare
+   system square against the painted backdrop. */
+.koi-switch {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 0 0 auto;
+    width: 46px;
+    height: 27px;
+    border-radius: 99px;
+    border: 1px solid rgba(253, 246, 236, 0.22);
+    background: rgba(253, 246, 236, 0.1);
+    position: relative;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.koi-switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: var(--koi-cream);
+    transition: transform 0.15s ease;
+}
+
+.koi-switch:checked {
+    background: var(--koi-accent);
+    border-color: color-mix(in srgb, var(--koi-accent) 70%, #fff);
+}
+
+.koi-switch:checked::after {
+    transform: translateX(19px);
+}
+
+/* The INPUT is the touch target, the track is only paint. Styling the height
+   on the input itself made the whole control 5px tall — the thumb looked
+   18px but you had a 5px band to actually hit. */
+.koi-slider {
+    appearance: none;
+    -webkit-appearance: none;
+    width: min(150px, 42vw);
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Both engines need their own track and thumb pseudo-elements or the platform
+   default shows through. */
+.koi-slider::-webkit-slider-runnable-track {
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.16);
+}
+
+.koi-slider::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    /* Centres an 18px thumb on a 5px track. */
+    margin-top: -6.5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--koi-cream);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.6);
+}
+
+.koi-slider::-moz-range-track {
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.16);
+}
+
+.koi-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: var(--koi-cream);
+}
+
+.koi-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(253, 246, 236, 0.2);
+    background: rgba(27, 20, 32, 0.75);
+    color: var(--koi-cream);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.koi-segmented {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 12px;
+    background: rgba(253, 246, 236, 0.08);
+}
+
+.koi-segmented button {
+    padding: 7px 14px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: var(--koi-cream);
+    opacity: 0.55;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.koi-segmented button.is-active {
+    opacity: 1;
+    background: var(--koi-accent);
+    color: #fff;
+}
+
+.koi-stats-row {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    /* Alpha on the colour rather than `opacity`, which would fade the halo
+       along with the text and undo the contrast it is there to provide. */
+    color: rgba(253, 246, 236, 0.82);
+}
+
+/* --- pickers ------------------------------------------------ */
+
+/* A horizontal strip inside a vertical flex column will shrink VERTICALLY when
+   the column runs short, squashing its cards to nothing. Selecting a person
+   adds the brief below, which is exactly the moment space runs out: the cards
+   collapsed from 188px to 24px on a 740px screen. These strips keep their
+   height and the screen scrolls instead. */
+.koi-pick-row {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.koi-pick {
+    flex: 0 0 108px;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 6px;
+    border-radius: 14px;
+    background: var(--koi-panel-soft);
+    border: 2px solid transparent;
+    color: inherit;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.koi-pick img {
+    height: 120px;
+    object-fit: contain;
+    object-position: bottom;
+}
+.koi-pick.is-selected {
+    border-color: var(--koi-char, var(--koi-accent));
+    background: color-mix(in srgb, var(--koi-char, var(--koi-accent)) 18%, transparent);
+}
+.koi-pick-name {
+    font-weight: 700;
+    font-size: 14px;
+}
+.koi-pick-meta {
+    font-size: 10px;
+    opacity: 0.62;
+}
+
+.koi-loc-list {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.koi-loc {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 14px;
+    background: var(--koi-panel-soft);
+    border: 2px solid transparent;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+
+.koi-loc img {
+    width: 84px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.koi-loc.is-selected {
+    border-color: var(--koi-accent);
+    background: color-mix(in srgb, var(--koi-accent) 16%, transparent);
+}
+.koi-loc.is-locked {
+    opacity: 0.4;
+}
+.koi-loc-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.koi-loc-body strong {
+    font-size: 15px;
+}
+.koi-loc-body em {
+    font-size: 11px;
+    opacity: 0.65;
+    font-style: normal;
+    line-height: 1.35;
+}
+
+/* --- book --------------------------------------------------- */
+
+/* Named -list, NOT .koi-book: the screen's <main> already carries .koi-book,
+   and a bare `.koi-book { padding: 0 }` later in the sheet has equal
+   specificity to .koi-screen, so it silently wiped the screen's safe-area
+   padding and pushed the title under the Dynamic Island. */
+.koi-book-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.koi-book-row {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 16px;
+    background: var(--koi-panel-soft);
+    border: 1px solid rgba(253, 246, 236, 0.1);
+}
+
+.koi-book-row img {
+    width: 74px;
+    height: 150px;
+    object-fit: contain;
+    object-position: bottom;
+}
+.koi-book-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.koi-book-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.koi-book-head strong {
+    font-size: 17px;
+}
+.koi-book-blurb {
+    margin: 0;
+    font-size: 11px;
+    opacity: 0.6;
+    line-height: 1.4;
+}
+.koi-book-meta {
+    margin: 0;
+    font-size: 11px;
+    opacity: 0.7;
+}
+.koi-book-topics {
+    margin: 0;
+    font-size: 11px;
+    opacity: 0.7;
+}
+.koi-book-topics span {
+    font-size: 15px;
+    margin-left: 3px;
+}
+
+.koi-badge {
+    background: var(--koi-char, var(--koi-accent));
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 99px;
+    color: #fff;
+    font-weight: 800;
+}
+
+/* Native <meter> so the affection bar is announced correctly; both engines
+   need their own pseudo-elements styled or it falls back to a system widget. */
+.koi-meter {
+    display: block;
+    width: 100%;
+    height: 7px;
+    border: none;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.14);
+    overflow: hidden;
+    appearance: none;
+}
+
+.koi-meter::-webkit-meter-bar {
+    background: rgba(253, 246, 236, 0.14);
+    border: none;
+    border-radius: 99px;
+}
+
+.koi-meter::-webkit-meter-optimum-value,
+.koi-meter::-webkit-meter-suboptimum-value,
+.koi-meter::-webkit-meter-even-less-good-value {
+    background: linear-gradient(90deg, var(--koi-gold), var(--koi-char, var(--koi-accent)));
+    border-radius: 99px;
+}
+
+.koi-meter::-moz-meter-bar {
+    background: linear-gradient(90deg, var(--koi-gold), var(--koi-char, var(--koi-accent)));
+    border-radius: 99px;
+}
+
+.koi-meter-lg {
+    height: 11px;
+}
+
+/* --- gift shop ---------------------------------------------- */
+
+/* Rows have a floor and the screen scrolls, rather than the grid compressing
+   every row to fit. With six gifts the old `1fr` rows filled the screen nicely;
+   with fourteen it squeezed each card so short that the art overlapped its own
+   buy button and the button became unclickable. */
+.koi-gift-grid {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: minmax(148px, auto);
+    gap: 10px;
+}
+
+/* Anchored to the bottom so the shop reads as a shelf above and a bag below,
+   rather than as a grid with half a screen of nothing underneath it. */
+.koi-bag {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: var(--koi-panel-soft);
+    border: 1px solid color-mix(in srgb, var(--koi-accent) 26%, transparent);
+}
+
+.koi-bag .koi-section {
+    margin: 0;
+}
+
+.koi-bag-row {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.koi-bag-row li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 99px;
+    background: rgba(27, 20, 32, 0.5);
+    font-size: 12px;
+}
+
+.koi-bag-row img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.koi-bag-row strong {
+    color: var(--koi-accent);
+}
+
+.koi-bag-empty {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    opacity: 0.6;
+}
+
+.koi-gift {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Name, topic and price pinned to the bottom of the card. Every card is
+       the same height, so bottom-anchoring is what makes those three line up
+       across a row — centring them cannot, because each gift PNG has its own
+       aspect ratio and therefore its own rendered height. */
+    justify-content: flex-end;
+    gap: 5px;
+    padding: 10px 6px;
+    border-radius: 14px;
+    background: var(--koi-panel-soft);
+}
+
+/* `margin-block: auto` floats the art in whatever space is left above the
+   text. Capped at 96px because the source PNGs are only 256px on the long
+   edge — past that a 3x screen is upscaling them. */
+.koi-gift img {
+    flex: 0 1 auto;
+    /* A floor, NOT `min-height: 0`. Rotated, the cards are short enough that
+       the name and price consume the whole card, and a freely shrinkable image
+       collapsed to zero height — the shop rendered with no gift art at all. */
+    min-height: 44px;
+    margin-block: auto;
+    width: auto;
+    max-width: 76%;
+    max-height: 96px;
+    object-fit: contain;
+}
+.koi-gift strong {
+    font-size: 12px;
+}
+.koi-gift-topic {
+    font-size: 14px;
+    opacity: 0.8;
+}
+.koi-gift-owned {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--koi-gold);
+}
+
+/* --- result ------------------------------------------------- */
+
+/* The portrait is the reward, so it gets the room: the art takes whatever the
+   readout and the buttons leave, and the whole block sits low rather than
+   floating in the middle of an empty screen.
+   The backdrop is mixed from THEIR colour, so the screen belongs to the person
+   it is about rather than being the same purple for everyone. */
+.koi-result {
+    background: radial-gradient(
+        120% 78% at 50% 14%,
+        color-mix(in srgb, var(--koi-char, var(--koi-accent)) 46%, #2b1f2e) 0%,
+        color-mix(in srgb, var(--koi-char, var(--koi-accent)) 22%, #241a29) 46%,
+        #16101b 100%
+    );
+    align-items: center;
+    text-align: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.koi-result-portrait {
+    flex: 1 1 auto;
+    min-height: 200px;
+    max-height: 52vh;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: bottom;
+}
+.koi-result .koi-meter {
+    width: 100%;
+}
+.koi-result .koi-cta,
+.koi-result .koi-btn {
+    width: 100%;
+}
+
+.koi-verdict {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+}
+.koi-verdict.is-good {
+    color: var(--koi-gold);
+}
+.koi-verdict.is-bad {
+    color: #ff9a9a;
+}
+
+.koi-result-stats {
+    display: flex;
+    gap: 22px;
+    margin: 4px 0;
+}
+.koi-result-stats div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.koi-result-stats dt {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+.koi-result-stats dd {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+/* --- in-date HUD -------------------------------------------- */
+
+.koi-hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    padding: calc(10px + var(--koi-safe-top)) 10px calc(8px + var(--koi-safe-bottom));
+    pointer-events: none;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--koi-cream);
+}
+
+.koi-hud > * {
+    pointer-events: auto;
+}
+
+.koi-gauges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background: var(--koi-panel);
+    backdrop-filter: blur(8px);
+}
+
+.koi-gauge {
+    flex: 1;
+    /* Without this a gauge cannot shrink below its label plus its state, so a
+       long reading pushed the whole row into wrapping instead of ellipsising. */
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+/* The bar itself brightens while a move resolves, so the eye is drawn to it
+   at the moment it moves rather than after. */
+.koi-bar.is-moving {
+    box-shadow: 0 0 0 1px rgba(253, 246, 236, 0.35);
+}
+
+.koi-gauge-delta {
+    margin-left: 5px;
+    padding: 1px 5px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+    /* Transform-only entrance: an opacity keyframe stays pending in a
+       frame-starved webview and the chip would never appear. */
+    animation: koi-delta-in 0.22s ease-out;
+}
+
+.koi-gauge-delta.is-up {
+    background: rgba(110, 231, 168, 0.22);
+    color: #8ff0bd;
+}
+
+.koi-gauge-delta.is-down {
+    background: rgba(232, 96, 125, 0.22);
+    color: #ff9db1;
+}
+
+@keyframes koi-delta-in {
+    from {
+        transform: translateY(-4px) scale(0.8);
+    }
+    to {
+        transform: none;
+    }
+}
+
+.koi-gauge-label {
+    display: flex;
+    align-items: center;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+.koi-gauge-spark {
+    flex: 0 0 auto;
+    align-items: center;
+}
+.koi-gauge-spark strong {
+    font-size: 18px;
+    color: var(--koi-gold);
+    white-space: nowrap;
+}
+
+.koi-bar {
+    position: relative;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.16);
+    overflow: hidden;
+}
+
+/* 0.12s linear was over before the eye caught it, so a bar "just changed" with
+   no sense of by how much or in which direction. Long enough to read as motion,
+   eased so the end of the move is where the attention lands. */
+.koi-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.45s cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+
+.koi-bar-mood > span {
+    background: linear-gradient(90deg, #7ad0c4, #a8ffb0);
+}
+.koi-bar-tension > span {
+    background: linear-gradient(90deg, #f2c063, #e8607d);
+}
+
+/* The band is drawn on the bar because reading it is the core skill. */
+.koi-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(168, 255, 176, 0.22);
+    border-left: 1px solid rgba(168, 255, 176, 0.5);
+    border-right: 1px solid rgba(168, 255, 176, 0.5);
+}
+
+.koi-bar-tension.is-in-band {
+    box-shadow: 0 0 0 1.5px rgba(168, 255, 176, 0.55);
+}
+
+/* --- date HUD readouts ---------------------------------------- */
+
+/* Name on the left, current reading on the right. Both are needed: the reading
+   alone ("Neutral") does not say what is neutral. */
+.koi-gauge-head {
+    /* Lets the reading ellipsise instead of forcing the gauge row to wrap. */
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.koi-gauge-name {
+    flex: 0 0 auto;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(253, 246, 236, 0.6);
+    white-space: nowrap;
+}
+
+.koi-gauge-state {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* A bar with its two extremes marked, so which way is good is never a guess. */
+.koi-scale {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.koi-scale > .koi-bipolar,
+.koi-scale > .koi-zones {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.koi-scale-end {
+    flex: 0 0 auto;
+    font-size: 10px;
+    line-height: 1;
+    opacity: 0.65;
+}
+
+/* Tension as three named zones instead of a fill with a stripe over it. */
+.koi-zones {
+    position: relative;
+    display: flex;
+    height: 8px;
+    border-radius: 99px;
+    overflow: visible;
+}
+
+.koi-zone {
+    height: 100%;
+}
+
+/* Rounded by role, not by position: the marker is the last child of this
+   container, so `:last-child` styled the marker and left the hot zone with a
+   square right end. */
+.koi-zone.is-cold {
+    border-radius: 99px 0 0 99px;
+    background: rgba(143, 162, 200, 0.42);
+}
+
+.koi-zone.is-good {
+    background: linear-gradient(90deg, #6ee7a8, #a8ffb0);
+}
+
+.koi-zone.is-hot {
+    border-radius: 0 99px 99px 0;
+    background: rgba(232, 96, 125, 0.5);
+}
+
+/* The sweet spot lights up when they are actually in it. */
+.koi-zones.is-in-band .koi-zone.is-good {
+    box-shadow: 0 0 10px -1px rgba(110, 231, 168, 0.9);
+}
+
+/* Mood grows out of the centre in either direction, so "how it is going" is a
+   direction and a distance rather than a level. */
+.koi-bipolar {
+    position: relative;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(253, 246, 236, 0.16);
+    overflow: hidden;
+}
+
+.koi-bipolar-centre {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    left: 50%;
+    width: 2px;
+    margin-left: -1px;
+    background: rgba(253, 246, 236, 0.55);
+    border-radius: 2px;
+    z-index: 2;
+}
+
+.koi-bipolar > span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 99px;
+    transition:
+        left 0.45s cubic-bezier(0.22, 0.9, 0.3, 1),
+        width 0.45s cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+
+.koi-bipolar > span.is-warm {
+    background: linear-gradient(90deg, #7ad0c4, #a8ffb0);
+}
+
+.koi-bipolar > span.is-cool {
+    background: linear-gradient(90deg, #8a93b5, #e8607d);
+}
+
+/* A caret riding the tension value, so the number has a position you can see
+   relative to the band rather than an edge you have to infer. */
+.koi-tension-marker {
+    position: absolute;
+    top: -3px;
+    width: 3px;
+    height: calc(100% + 6px);
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: var(--koi-cream);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+    transition: left 0.45s cubic-bezier(0.22, 0.9, 0.3, 1);
+    z-index: 3;
+}
+
+/* The live subjects, sitting directly under the gauges. */
+.koi-topics {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 5px 11px;
+    border-radius: 99px;
+    align-self: flex-start;
+    background: rgba(24, 17, 29, 0.78);
+    border: 1px solid color-mix(in srgb, var(--koi-gold) 40%, transparent);
+    backdrop-filter: blur(6px);
+}
+
+.koi-topics-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(253, 246, 236, 0.55);
+    /* A wrapped label turns this chip into a tall block wherever it is put. */
+    white-space: nowrap;
+}
+
+.koi-topic-chip {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* The one line that says what to do next. */
+.koi-coach {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 7px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(24, 17, 29, 0.78);
+    backdrop-filter: blur(6px);
+    border: 1px solid transparent;
+}
+
+.koi-coach-icon {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.koi-coach-good {
+    border-color: rgba(110, 231, 168, 0.5);
+    color: #b8f5d2;
+}
+
+.koi-coach-cold {
+    border-color: rgba(143, 162, 200, 0.5);
+    color: #c5d2ea;
+}
+
+.koi-coach-hot {
+    border-color: rgba(232, 96, 125, 0.55);
+    color: #ffc0cd;
+}
+
+/* Bottom-left, on the row above the deck. */
+.koi-hud-foot {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-top: auto;
+    padding: 0 2px 8px;
+}
+
+.koi-moves {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 11px;
+    border-radius: 14px;
+    line-height: 1.05;
+    background: rgba(24, 17, 29, 0.78);
+    border: 1px solid rgba(253, 246, 236, 0.14);
+    backdrop-filter: blur(6px);
+}
+
+.koi-moves strong {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--koi-gold);
+}
+
+.koi-moves span {
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.65;
+}
+
+.koi-giftbar {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.koi-giftchip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 9px;
+    border-radius: 99px;
+    background: var(--koi-panel);
+    border: 2px solid transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.koi-giftchip img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+}
+.koi-giftchip.is-selected {
+    border-color: var(--koi-gold);
+}
+
+.koi-deck {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    /* The foot row above carries the `margin-top: auto` that pushes this group
+       to the bottom. Two auto margins in one column split the free space
+       between them, which left the move counter floating mid-scene. */
+    /* 30% is enough on a tall phone but not on a 667px one, where the move
+       panel needs ~227px and 30% is 200 — the panel was squashed and clipped.
+       The floor guarantees it fits everywhere. */
+    max-height: max(30%, 236px);
+    /* Sized to its contents. A fixed height kept the panel from jumping, but it
+       also left a band of empty deck under the cards on every turn you were not
+       mid-move. The deck is bottom-anchored, so a taller move panel grows
+       upward and the bottom edge never moves. */
+    overflow-y: auto;
+    padding: 10px;
+    /* Rounded all round, and lifted off the bottom edge so the rounding is
+       actually visible rather than being cropped by the screen. */
+    border-radius: 16px;
+    /* Sits low: this is the thing under the player's thumb. */
+    margin-bottom: 0;
+    background: var(--koi-panel);
+    backdrop-filter: blur(10px);
+}
+
+/* Wraps rather than overflowing. `flex: 1` alone will not shrink a tab below
+   its text, so in the narrow landscape column the fifth family (RISKY) was
+   pushed outside the panel — and since the row does not scroll, that whole
+   family was simply unreachable. */
+.koi-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.koi-tab {
+    flex: 1 1 auto;
+    min-width: 0;
+    /* Tight: five families plus their icons have to share one row of a phone.
+       The wrap above is the safety net, but a wrapped tab row costs a whole
+       line of the deck. */
+    padding: 6px 3px;
+    border-radius: 9px;
+    border: 1px solid rgba(253, 246, 236, 0.14);
+    background: transparent;
+    color: var(--koi-cream);
+    opacity: 0.5;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.koi-tab.is-open {
+    opacity: 1;
+    background: rgba(253, 246, 236, 0.14);
+    border-color: rgba(253, 246, 236, 0.4);
+}
+
+.koi-tab.koi-family-intimate.is-open {
+    border-color: var(--koi-gold);
+}
+.koi-tab.koi-family-bold.is-open,
+.koi-tab.koi-family-risky.is-open {
+    border-color: var(--koi-rose);
+}
+
+.koi-deck-group h3 {
+    margin: 0 0 5px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.5;
+}
+
+.koi-cards {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 3px;
+}
+
+.koi-card {
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 96px;
+    max-width: 150px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 10px;
+    border-radius: 11px;
+    border: 1px solid rgba(253, 246, 236, 0.16);
+    background: rgba(253, 246, 236, 0.08);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* Gift cards show the item itself. */
+.koi-card-giftart {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.koi-tab.koi-family-gift.is-open {
+    border-color: var(--koi-gold);
+}
+
+.koi-card-icon {
+    flex: 0 0 auto;
+    font-size: 19px;
+    line-height: 1;
+}
+
+.koi-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.koi-card-label {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.15;
+}
+.koi-card-hint {
+    font-size: 9px;
+    opacity: 0.55;
+    line-height: 1.25;
+}
+
+/* The live read on a card: how they feel about it, and what it does to the
+   tension. Both were already computed and both were hidden until after the
+   move had been played. */
+.koi-card-read {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    line-height: 1.2;
+}
+
+.koi-card-mod {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+}
+
+.koi-card-mod.is-up {
+    color: #8ff0bd;
+}
+
+.koi-card-mod.is-flat {
+    color: rgba(253, 246, 236, 0.4);
+}
+
+.koi-card-mod.is-down {
+    color: #ff9db1;
+}
+
+.koi-card-band {
+    font-size: 10px;
+    line-height: 1;
+}
+
+.koi-card-read .koi-card-hint {
+    flex: 1 1 100%;
+}
+
+.koi-card:disabled {
+    cursor: default;
+}
+.koi-card.is-locked {
+    opacity: 0.32;
+}
+.koi-card.is-cooling {
+    opacity: 0.45;
+}
+
+.koi-card-cool {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--koi-gold);
+}
+
+/* --- the move, mid-performance ------------------------------------------- */
+
+/* Takes the whole deck while a move plays out, but stays SHORT: stacked and
+   centred it ran to 227px and buried the cast's feet. Three tight rows now. */
+.koi-perform {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 9px 12px 10px;
+    justify-content: center;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--koi-verdict, var(--koi-accent)) 14%, transparent);
+    /* Transform only. An opacity keyframe stays pending in a frame-starved
+       webview and the panel would never appear. */
+    animation: koi-perform-in 0.18s ease-out;
+}
+
+@keyframes koi-perform-in {
+    from {
+        transform: scale(0.97);
+    }
+    to {
+        transform: none;
+    }
+}
+
+.koi-verdict-great {
+    --koi-verdict: #6ee7a8;
+}
+.koi-verdict-good {
+    --koi-verdict: var(--koi-gold);
+}
+.koi-verdict-flat {
+    --koi-verdict: #9aa0b5;
+}
+.koi-verdict-bad {
+    --koi-verdict: #e8607d;
+}
+
+.koi-perform-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+}
+
+.koi-perform-icon {
+    flex: 0 0 auto;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.koi-perform-titles {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.koi-perform-label {
+    font-size: 15px;
+    line-height: 1.1;
+}
+
+/* Whether they like this, shown from the moment the move starts. */
+.koi-mod {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.koi-mod-up {
+    color: #8ff0bd;
+}
+
+.koi-mod-flat {
+    color: rgba(253, 246, 236, 0.5);
+}
+
+.koi-mod-down {
+    color: #ff9db1;
+}
+
+/* Sits with the pips: it is their sum, not a headline. */
+.koi-perform-spark {
+    margin-left: 4px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 20px;
+    color: var(--koi-verdict, var(--koi-accent));
+}
+
+/* One pip per second. */
+.koi-ticks {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 20px;
+}
+
+.koi-tick {
+    width: 20px;
+    height: 20px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    background: rgba(253, 246, 236, 0.1);
+    border: 1px solid rgba(253, 246, 236, 0.14);
+    /* Transform only: an opacity keyframe stays pending in a frame-starved
+       webview and the pip would never appear. */
+    animation: koi-tick-in 0.16s ease-out;
+}
+
+/* The still-unknown next second. Deliberately a question mark: the player must
+   not be able to see how much longer the moment has to run. */
+.koi-tick.is-rolling {
+    color: rgba(253, 246, 236, 0.45);
+    animation: koi-tick-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes koi-tick-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.14);
+    }
+}
+
+.koi-tick.is-plus {
+    background: rgba(110, 231, 168, 0.3);
+    border-color: rgba(110, 231, 168, 0.7);
+    color: #b8f5d2;
+}
+
+.koi-tick.is-zero {
+    color: rgba(253, 246, 236, 0.5);
+}
+
+.koi-tick.is-minus {
+    background: rgba(232, 96, 125, 0.28);
+    border-color: rgba(232, 96, 125, 0.65);
+    color: #ffc0cd;
+}
+
+@keyframes koi-tick-in {
+    from {
+        transform: scale(0.5);
+    }
+    to {
+        transform: none;
+    }
+}
+
+.koi-perform-note {
+    /* Two lines reserved from the start, so the panel does not grow by a line
+       when the explanation replaces the ellipsis. */
+    min-height: 2.6em;
+    font-size: 11.5px;
+    line-height: 1.3;
+    text-align: center;
+    color: rgba(253, 246, 236, 0.8);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.koi-perform-continue {
+    align-self: center;
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    background: color-mix(in srgb, var(--koi-verdict, var(--koi-accent)) 32%, transparent);
+    border: 1px solid color-mix(in srgb, var(--koi-verdict, var(--koi-accent)) 65%, transparent);
+    animation: koi-continue-in 0.2s ease-out;
+}
+
+/* Same box, invisible: holds the width while the roll is still running. */
+.koi-perform-continue.is-reserved {
+    visibility: hidden;
+    animation: none;
+}
+
+@keyframes koi-continue-in {
+    from {
+        transform: translateY(4px);
+    }
+    to {
+        transform: none;
+    }
+}
+
+/* What the previous move did, parked next to the move counter. */
+.koi-lastmove {
+    flex: 0 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px;
+    border-radius: 14px;
+    background: rgba(24, 17, 29, 0.78);
+    border: 1px solid rgba(253, 246, 236, 0.14);
+    backdrop-filter: blur(6px);
+}
+
+.koi-lastmove-icon {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.koi-lastmove-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.koi-lastmove-label {
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.koi-lastmove-stats {
+    display: flex;
+    gap: 7px;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.koi-lastmove-stats .is-up {
+    color: #8ff0bd;
+}
+
+.koi-lastmove-stats .is-down {
+    color: #ff9db1;
+}
+
+.koi-family-bold .koi-card {
+    border-color: rgba(232, 96, 125, 0.4);
+}
+.koi-family-intimate .koi-card {
+    border-color: rgba(242, 192, 99, 0.55);
+    background: rgba(242, 192, 99, 0.1);
+}
+.koi-family-risky .koi-card {
+    border-color: rgba(255, 154, 154, 0.35);
+}
+
+/* --- landscape ------------------------------------------------------------
+   The deck is 37 cards; stacked at the bottom of a 360px-tall viewport it
+   would eat the scene. In landscape it becomes a right-hand column instead,
+   leaving the left two thirds as an unobstructed stage. */
+
+@media (orientation: landscape) {
+    .koi-hud {
+        display: grid;
+        /* minmax(0, 1fr), NOT 1fr. A bare `1fr` is `minmax(auto, 1fr)`, and
+           that auto floor is the column's min-content width — so the header
+           column refused to shrink below its contents, the grid overflowed,
+           and the deck was pushed off the right edge of the screen entirely.
+           The deck column also comes down to 200px so it fits a short phone. */
+        grid-template-columns: minmax(0, 1fr) minmax(200px, 34%);
+        grid-template-rows: auto 1fr auto;
+        column-gap: 10px;
+        /* Insets divided by the scale: they are physical pixels, the 8px
+           gutters are design units. */
+        padding: calc(8px + var(--safe-top, 0px) / var(--ui-scale, 1))
+            calc(8px + max(60px, var(--safe-right, 0px)) / var(--ui-scale, 1))
+            calc(8px + var(--safe-bottom, 0px) / var(--ui-scale, 1))
+            calc(8px + max(60px, var(--safe-left, 0px)) / var(--ui-scale, 1));
+    }
+
+    /* Gauges and reading share one row in landscape: stacked, the header was
+       28% of the height and the cast's heads ended up behind it. */
+    .koi-gauges {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        flex: 1;
+    }
+
+    /* Gauges down the left, the two one-line chips stacked beside them. As a
+       single flex row all three competed for the same width and the topic
+       pill's label wrapped onto four lines, turning a chip into a blob. */
+    /* Gauges on the left, the two one-line chips stacked on the right.
+       BOTH columns are bounded. `auto` on the second took max-content, and the
+       coach line was `nowrap`, so one long sentence claimed the whole row and
+       collapsed the gauges column to 0px. */
+    .koi-hud-header {
+        grid-column: 1;
+        grid-row: 1;
+        display: grid;
+        /* Gauges get their own full-width row; the two chips share the row
+           below. Side by side, the columns fought: whichever won left the other
+           either 24px wide or wrapped into a 194px-tall block, depending on the
+           screen. Stacked, neither can starve the other at any size. */
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-items: center;
+        gap: 5px 8px;
+        /* Same lesson as the parent grid, one level down: without an explicit
+           zero floor the item's automatic minimum is its min-content — the
+           nowrap gauge row — so on the narrowest phones the header overflowed
+           its track and the "Tonight" gauge slid under the action deck. */
+        min-width: 0;
+        /* The fab space belongs to portrait: there the header spans the full
+           width and would slide under the settings gear. In landscape the
+           header owns only the left column and never comes near the gear —
+           the 40px just starved the gauges. */
+        padding-right: 0;
+    }
+
+    .koi-hud-header > .koi-gauges {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        min-width: 0;
+        /* On a short landscape phone the three readouts need ~289px and the row
+           is 197px. Wrapping drops "Tonight" onto its own line instead of
+           letting the bars run out past the panel. */
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
+
+    .koi-hud-header > .koi-gauges > .koi-gauge {
+        min-width: 84px;
+    }
+
+    .koi-hud-header > .koi-topics {
+        grid-column: 1;
+        grid-row: 2;
+        margin-top: 0;
+        padding: 5px 9px;
+    }
+
+    /* "Wants to talk about" is ~140px of a row the coaching line needs. The
+       chips still read as a topic list next to a speech glyph, and the full
+       wording is one tap away in portrait. */
+    .koi-hud-header .koi-topics-label {
+        font-size: 0;
+    }
+
+    .koi-hud-header .koi-topics-label::before {
+        content: "💬";
+        font-size: 13px;
+    }
+
+    /* One line, truncated rather than wrapped: this row has a fixed height and
+       the sentence is advice, not something to read twice. */
+    .koi-hud-header > .koi-coach {
+        grid-column: 2;
+        grid-row: 2;
+        margin-top: 0;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .koi-hud-header > .koi-coach > span:last-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .koi-hud-foot {
+        grid-column: 1;
+        grid-row: 3;
+        margin-top: 0;
+        align-self: end;
+        padding-bottom: 0;
+    }
+
+    .koi-deck {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        max-height: 100%;
+        border-radius: 16px;
+        padding: 8px;
+        /* The portrait rule pins the deck to the bottom of a flex column; as a
+           grid item that same `auto` margin shoved the takeover panel into the
+           bottom corner instead of filling the actions column. */
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    /* One per row, not two. Two cards in a ~200px column left each about 96px,
+       so every label wrapped to three lines and the hint spilled out past the
+       card's own edge. Full width fits the label, the read and the hint. */
+    .koi-cards {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        overflow-x: visible;
+        overflow-y: auto;
+    }
+
+    .koi-card {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+    }
+
+    /* Landscape is wide and short. Capping the content to a portrait-width
+       column and stacking it wasted the width and pushed every meta screen
+       into vertical overflow — home by 65px, the shop by 109, plan by 140.
+       Each screen becomes columns instead, so the short axis is enough. */
+    /* Same reasoning as the portrait `max(..., 44px)` on the top inset: rotated,
+       the Dynamic Island and the curved corners eat the leading edge (59px of
+       inset on a 16 Pro, 34px trailing), and the inset reads as 0 in any
+       context not reporting one — a plain browser, a preview harness, or the
+       SDK mock, which publishes zeroes inline and overrides the env() fallback.
+       CSS cannot tell which side the island landed on, so both edges get the
+       floor; when the host does report the real inset, max() takes it. */
+    .koi-screen {
+        padding-left: calc(max(60px, var(--safe-left, 0px)) / var(--ui-scale, 1));
+        padding-right: calc(max(60px, var(--safe-right, 0px)) / var(--ui-scale, 1));
+    }
+
+    /* Drop the portrait island floor. Rotated, the island sits on a side edge —
+       which the 59px gutters above already clear — and the top inset really is
+       zero, so reserving 44px there just wasted a sixth of the short axis. */
+    .koi-screen,
+    .koi-hud {
+        --koi-safe-top: calc(var(--safe-top, 0px) / var(--ui-scale, 1));
+    }
+
+    /* Home, rotated: three columns — your figure at full height, then who you
+       are and who you are seeing, then the menu.
+       Stacking the name plate and stats under the figure (the obvious reading
+       of the portrait layout) wasted the bottom of the screen and squeezed the
+       figure into the top half. `display: contents` on the stage and on your
+       own slot lifts the art and its caption out as separate items of this
+       grid, so the art can own a full-height column while its caption sits in
+       the next one. */
+    .koi-home {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(230px, 1.1fr);
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+        column-gap: 16px;
+        row-gap: 6px;
+    }
+
+    .koi-home .koi-header {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    .koi-home .koi-stage {
+        grid-column: 1 / 3;
+        grid-row: 2 / -1;
+        /* Your figure down the left at full height; everything about you and
+           whoever you are seeing stacked in the column beside it. */
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        column-gap: 16px;
+        row-gap: 6px;
+    }
+
+    .koi-home .koi-art-you {
+        grid-column: 1;
+        grid-row: 1 / -1;
+    }
+
+    .koi-home .koi-plate-you {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+    }
+
+    .koi-home .koi-stage .koi-stats-row {
+        grid-column: 2;
+        grid-row: 2;
+        justify-content: center;
+    }
+
+    .koi-home .koi-art-them {
+        grid-column: 2;
+        grid-row: 3;
+    }
+
+    .koi-home .koi-plate-them {
+        grid-column: 2;
+        grid-row: 4;
+    }
+
+    .koi-home .koi-stage-empty {
+        grid-column: 2;
+        grid-row: 3 / span 2;
+        align-self: center;
+        max-height: 100%;
+    }
+
+    .koi-home .koi-menu {
+        grid-column: 3;
+        grid-row: 2 / -1;
+        margin-top: 0;
+        align-self: center;
+    }
+
+    /* Settings: all three groups on screen at once. Placed explicitly rather
+       than auto-flowed — auto-placement puts Game in row 2 of column 1, under
+       the tall Sound group, which pushes it off the bottom of a 393px screen.
+       Sound (four rows) takes a full-height column; the two short groups stack
+       beside it. */
+    .koi-set-scroll {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        align-content: start;
+        column-gap: 14px;
+        row-gap: 10px;
+    }
+
+    .koi-set-group:nth-of-type(1) {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        /* Sized to its four rows, not stretched to the column: a panel with a
+           third of itself empty looks like something failed to load. */
+        align-self: start;
+    }
+
+    .koi-set-group:nth-of-type(2) {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .koi-set-group:nth-of-type(3) {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    /* Rotated, the short axis is the whole budget: the taller column is five
+       rows plus the note, and at the portrait row height that ran ~30px past
+       the bottom and clipped Quality. */
+    .koi-set-row {
+        min-height: 36px;
+    }
+
+    .koi-set-group {
+        padding: 8px 14px;
+    }
+
+    .koi-set-note {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        font-size: 10px;
+    }
+
+    /* Plan, rotated: the outer grid still pins Back and Meet up; the scroller
+       between them becomes the two columns. Placing these on .koi-plan itself
+       stopped working once they moved inside the scroller, and `display:
+       contents` is not an option here — WebKit declines to paint block children
+       inside such a subtree. */
+    .koi-plan-scroll {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        column-gap: 18px;
+        row-gap: 6px;
+        align-content: stretch;
+    }
+
+    .koi-plan-scroll .koi-section:nth-of-type(1) {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .koi-plan-scroll .koi-pick-row {
+        grid-column: 1;
+        grid-row: 2;
+        flex-wrap: wrap;
+        overflow-y: auto;
+        align-content: flex-start;
+    }
+
+    .koi-plan .koi-pick {
+        flex: 0 0 88px;
+    }
+
+    .koi-plan .koi-pick img {
+        height: 58px;
+    }
+
+    .koi-plan .koi-pick-name {
+        font-size: 12px;
+    }
+
+    .koi-plan-scroll .koi-section:nth-of-type(2) {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    /* Spans both content rows so all three locations are visible at once. */
+    .koi-plan-scroll .koi-loc-list {
+        grid-column: 2;
+        grid-row: 2 / span 2;
+        overflow-y: auto;
+    }
+
+    /* Under the faces, in the same column as the person it describes. */
+    .koi-plan-scroll .koi-brief {
+        grid-column: 1;
+        grid-row: 3;
+        gap: 4px;
+        padding: 6px 10px;
+    }
+
+    /* Two lines at most: every line here is a line taken off the face cards. */
+    .koi-plan .koi-brief-blurb {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 11px;
+    }
+
+    .koi-plan .koi-brief-traits li {
+        font-size: 9px;
+        padding: 3px 7px;
+    }
+
+    /* The book rows are already wide; two per row uses the space. */
+    .koi-book .koi-book-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .koi-book .koi-book-row img {
+        height: 132px;
+    }
+
+    /* More gifts per row rather than a tall scroll. */
+    .koi-shop .koi-gift-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .koi-shop .koi-gift img {
+        max-height: 56px;
+    }
+
+    /* The bag lies down rotated. Stacked it ate ~80px of the short axis and
+       left the gift cards too short to hold their own art, which then spilled
+       up over the hint text. */
+    .koi-shop .koi-bag {
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        padding: 8px 14px;
+    }
+
+    .koi-shop .koi-bag .koi-section {
+        flex: 0 0 auto;
+    }
+
+    /* Result: portrait beside the numbers. */
+    .koi-result {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 20px;
+        align-content: center;
+        justify-items: center;
+    }
+
+    .koi-result-portrait {
+        grid-row: 1 / span 6;
+        height: 62vh;
+    }
+
+    .koi-result > *:not(.koi-result-portrait) {
+        grid-column: 2;
+        width: 100%;
+        max-width: 460px;
+    }
+
+    /* Landscape. The card takes every spare pixel of height; the faces and the
+       confirm button share one compact row beneath it.
+       Two earlier attempts failed here and are worth not repeating: a vertical
+       strip down the left edge clipped and grew a scrollbar (eight 38px faces
+       need 339px and there are only ~250 to give), and a full-width button
+       took a whole row away from the character art. */
+    .koi-avatar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        column-gap: 14px;
+        row-gap: 8px;
+        /* Capped and centred: at full width the card left ~240px of dead space
+           to the right of the traits, and the button drifted away from it.
+           Constraining the content keeps card, faces and button as one block
+           with the painted tree visible either side. */
+        padding-top: calc(6px + max(var(--safe-top, 0px), 20px) / var(--ui-scale, 1));
+        padding-bottom: calc(10px + var(--safe-bottom, 0px) / var(--ui-scale, 1));
+        padding-left: max(calc(max(60px, var(--safe-left, 0px)) / var(--ui-scale, 1)), calc((100% - 720px) / 2));
+        padding-right: max(calc(max(60px, var(--safe-right, 0px)) / var(--ui-scale, 1)), calc((100% - 720px) / 2));
+    }
+
+    .koi-avatar-head {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+
+    .koi-avatar-back {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .koi-title {
+        font-size: 21px;
+    }
+
+    .koi-subtitle {
+        margin-top: 0;
+        font-size: 10px;
+    }
+
+    /* Redundant in landscape — the card already asks the question. */
+    .koi-avatar .koi-lead {
+        display: none;
+    }
+
+    .koi-hero {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        min-height: 0;
+    }
+
+    .koi-hero-card {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 20px;
+        height: 100%;
+        padding: 8px 22px;
+        overflow: hidden;
+    }
+
+    /* The whole point of the reflow: the art gets the full card height. */
+    .koi-hero-portrait {
+        height: 100%;
+        min-height: 0;
+        flex: 0 0 auto;
+        max-width: 36%;
+        align-self: flex-end;
+    }
+
+    .koi-hero-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .koi-hero-blurb {
+        text-align: left;
+        max-width: none;
+        font-size: 13px;
+    }
+
+    .koi-traits {
+        justify-content: flex-start;
+        margin-top: 2px;
+    }
+
+    /* The strip is the navigation now; the chevrons are noise. */
+    .koi-hero-arrow {
+        display: none;
+    }
+
+    /* Centred under the card rather than shoved into a corner, and on the same
+       row as the button so the two read as one control bar. */
+    .koi-hero-pager {
+        grid-column: 1;
+        grid-row: 3;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .koi-pager-dot {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+    }
+
+    .koi-hero-cta {
+        grid-column: 2;
+        grid-row: 3;
+        width: auto;
+        align-self: center;
+        padding: 12px 30px;
+        font-size: 15px;
+    }
+    .koi-result-portrait {
+        height: 38vh;
+    }
+    .koi-book-row img {
+        height: 26vh;
+    }
+}
+
+/* A short landscape phone cannot fit the topic chips and the coaching line on
+   one row without truncating the advice, which is the half worth reading.
+   Giving the coach its own row made the header three rows tall, and at the
+   fixed 720-unit landscape height that third row landed exactly where the
+   cast's thought balloons float (the balloons are tethered to the crown and
+   cannot move). The chips go instead: the partner's in-scene bubble already
+   rotates tonight's topic, and every card's ▲ read marks a hit, so the pill
+   was the most redundant element on the row. */
+@media (orientation: landscape) and (max-width: 800px) {
+    .koi-hud-header {
+        /* ONE bounded column. The two-column shape exists to seat the topic
+           pill beside the coach; with the pill hidden the `auto` track only
+           served to be inflated by the coach's nowrap min-content, which
+           pushed the whole header past its grid track and the "Tonight"
+           gauge under the action deck. */
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        gap: 4px 8px;
+    }
+
+    .koi-hud-header > .koi-topics {
+        display: none;
+    }
+
+    .koi-hud-header > .koi-coach {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: start;
+        /* Bounded by the track now, so a long sentence ellipsises instead of
+           forcing the header wider. */
+        max-width: 100%;
+    }
+
+    /* Every pixel off the top band is more sky between the header and the
+       side-anchored balloons. */
+    .koi-hud-header > .koi-gauges {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    /* The ☹/☺ and 🧊/🥵 end caps are the first thing to go here: they cost
+       ~60px of a 337px row, and the state word beside each label already says
+       which way things are going. */
+    .koi-hud-header .koi-scale-end {
+        display: none;
+    }
+
+    /* No wrapping: three lines of gauges covered the cast wholesale. But the
+       84px floor has to go with it — on the narrowest phones the row is ~220px,
+       and holding 84px per gauge pushed "Tonight" out of the track and under
+       the action deck. The bars compress; the words stay readable. */
+    .koi-hud-header .koi-gauges {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    /* Specificity has to match the base landscape floor (three classes), or
+           84px per gauge wins and the row overflows anyway. */
+    .koi-hud-header > .koi-gauges > .koi-gauge {
+        min-width: 0;
+    }
+
+    .koi-hud-header .koi-gauge-spark {
+        min-width: 0;
+    }
+
+    /* Name above reading rather than beside it. Side by side they share one
+       narrow gauge and the reading loses: "In the zone" rendered as "In the".
+       Stacked, each gets the gauge's full width for the cost of one short line. */
+    .koi-hud-header .koi-gauge-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+    }
+
+    .koi-hud-header .koi-gauge-state {
+        font-size: 11px;
+    }
+}

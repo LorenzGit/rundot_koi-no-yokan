@@ -1,0 +1,106 @@
+{
+  "char_f_artist": {
+    "name": "Mizuki",
+    "archetype": "night-owl artist",
+    "heightCm": 169,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 400,
+      "h": 1442
+    },
+    "crownY": 20,
+    "bodyPx": 1422,
+    "strippedPx": 0
+  },
+  "char_f_tsundere": {
+    "name": "Rin",
+    "archetype": "cheerful tsundere",
+    "heightCm": 171,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 533,
+      "h": 1708
+    },
+    "crownY": 16,
+    "bodyPx": 1692,
+    "strippedPx": 5
+  },
+  "char_m_senpai": {
+    "name": "Haruto",
+    "archetype": "cool senpai",
+    "heightCm": 184,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 422,
+      "h": 1369
+    },
+    "crownY": 19,
+    "bodyPx": 1350,
+    "strippedPx": 41
+  },
+  "char_m_athlete": {
+    "name": "Sora",
+    "archetype": "sunny athlete",
+    "heightCm": 179,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 331,
+      "h": 853
+    },
+    "crownY": 18,
+    "bodyPx": 835,
+    "strippedPx": 0
+  },
+  "char_f_siren": {
+    "name": "Reina",
+    "archetype": "sultry siren",
+    "heightCm": 174,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 448,
+      "h": 1456
+    },
+    "crownY": 12,
+    "bodyPx": 1444,
+    "strippedPx": 0
+  },
+  "char_m_charmer": {
+    "name": "Kaito",
+    "archetype": "smouldering charmer",
+    "heightCm": 186,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 410,
+      "h": 1365
+    },
+    "crownY": 11,
+    "bodyPx": 1354,
+    "strippedPx": 0
+  },
+  "char_f_runner": {
+    "name": "Kaede",
+    "archetype": "competitive runner",
+    "heightCm": 172,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 633,
+      "h": 1703
+    },
+    "crownY": 25,
+    "bodyPx": 1678,
+    "strippedPx": 1
+  },
+  "char_m_climber": {
+    "name": "Ren",
+    "archetype": "grounded climber",
+    "heightCm": 181,
+    "crownAdjustPx": 0,
+    "figure": {
+      "w": 374,
+      "h": 1182
+    },
+    "crownY": 11,
+    "bodyPx": 1171,
+    "strippedPx": 132
+  }
+}

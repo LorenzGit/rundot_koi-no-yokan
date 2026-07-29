@@ -1,0 +1,33 @@
+{
+  "$comment": [
+    "Koi no Yokan shop catalog. Registered with RUN at deploy; the ids here",
+    "are the ones src/config/platform.ts must reference. Until this is",
+    "deployed and those PLATFORM_IDS placeholders are replaced with the real",
+    "ids, every purchase surface in the game hides itself rather than",
+    "offering a button that cannot complete.",
+    "",
+    "Prices are in RB (RUN Bits, the platform hard currency, ~100 RB = $1).",
+    "The six heart tiers follow RUN's pricing template: a flat base rate with",
+    "a growing bonus that pushes toward the larger packs."
+  ],
+  "items": [
+    { "id": "koi_hearts_400", "name": "250 Hearts", "priceRb": 400, "type": "consumable" },
+    { "id": "koi_hearts_800", "name": "600 Hearts", "priceRb": 800, "type": "consumable" },
+    { "id": "koi_hearts_1600", "name": "1,500 Hearts", "priceRb": 1600, "type": "consumable" },
+    { "id": "koi_hearts_2400", "name": "2,500 Hearts", "priceRb": 2400, "type": "consumable" },
+    { "id": "koi_hearts_4000", "name": "5,000 Hearts", "priceRb": 4000, "type": "consumable" },
+    { "id": "koi_hearts_8000", "name": "12,500 Hearts", "priceRb": 8000, "type": "consumable" },
+
+    { "id": "koi_first_date_kit", "name": "First Date Kit", "priceRb": 100, "type": "consumable", "oneTime": true },
+    { "id": "koi_postcard", "name": "Postcard", "priceRb": 50, "type": "consumable" },
+    { "id": "koi_romantic_bundle", "name": "Hopeless Romantic", "priceRb": 1200, "type": "consumable" },
+    {
+      "id": "koi_confidant",
+      "name": "Confidant",
+      "priceRb": 2400,
+      "type": "entitlement",
+      "entitlementId": "koi_entitlement_confidant",
+      "oneTime": true
+    }
+  ]
+}
