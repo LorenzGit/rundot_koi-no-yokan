@@ -439,7 +439,6 @@ export default function DateHud() {
                         <span className="koi-wish-name">{wishGift.name}</span>
                     </div>
                 )}
-
                 <div className={`koi-coach koi-coach-${coach.tone}`}>
                     <span className="koi-coach-icon" aria-hidden="true">
                         {coach.icon}
@@ -481,6 +480,16 @@ export default function DateHud() {
             </div>
 
             <div className="koi-deck">
+                {/* Landscape gets the wish here instead: the header row there is
+                    at capacity beside the balloons, and this column has room.
+                    Portrait keeps the header pill; CSS shows exactly one. */}
+                {wishGift && (
+                    <div className="koi-wish koi-wish-deck" title={`${wishGift.name} is always a strong gift tonight`}>
+                        <span className="koi-wish-label">Wishes for</span>
+                        <img className="koi-wish-art" src={wishGift.image} alt="" />
+                        <span className="koi-wish-name">{wishGift.name}</span>
+                    </div>
+                )}
                 {performing ? (
                     <button
                         type="button"

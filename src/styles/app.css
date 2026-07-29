@@ -3679,6 +3679,11 @@ button.koi-stage-plate:active {
     vertical-align: 1px;
 }
 
+/* Portrait shows the wish in the header pill; the deck copy is for landscape. */
+.koi-deck > .koi-wish {
+    display: none;
+}
+
 /* The one line that says what to do next. */
 .koi-coach {
     display: flex;
@@ -4256,10 +4261,17 @@ button.koi-stage-plate:active {
    leaving the left two thirds as an unobstructed stage. */
 
 @media (orientation: landscape) {
-    /* The wish pill hides rotated: the header is at capacity beside the
-       balloons, and the bag still marks the wished-for card. */
+    /* The wish moves out of the header (at capacity beside the balloons) and
+       into the deck column, which has a full-height stable strip for it. */
     .koi-hud-header > .koi-wish {
         display: none;
+    }
+
+    .koi-deck > .koi-wish {
+        display: flex;
+        align-self: stretch;
+        justify-content: center;
+        margin: 0 0 8px;
     }
 
     .koi-hud {
