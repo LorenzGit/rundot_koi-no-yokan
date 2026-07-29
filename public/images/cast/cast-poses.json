@@ -14,7 +14,7 @@
       "heightCm": 169,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_f_artist_figure.png",
+        "src": "images/cast/char_f_artist_figure.png",
         "file": "public/images/cast/char_f_artist_figure.png",
         "w": 400,
         "h": 1442,
@@ -23,7 +23,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_f_artist_neutral.png",
+          "src": "images/cast/char_f_artist_neutral.png",
           "file": "public/images/cast/char_f_artist_neutral.png",
           "w": 183,
           "h": 698,
@@ -38,7 +38,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_f_artist_happy.png",
+          "src": "images/cast/char_f_artist_happy.png",
           "file": "public/images/cast/char_f_artist_happy.png",
           "w": 225,
           "h": 701,
@@ -53,7 +53,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_f_artist_sad.png",
+          "src": "images/cast/char_f_artist_sad.png",
           "file": "public/images/cast/char_f_artist_sad.png",
           "w": 172,
           "h": 699,
@@ -68,7 +68,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_f_artist_surprised.png",
+          "src": "images/cast/char_f_artist_surprised.png",
           "file": "public/images/cast/char_f_artist_surprised.png",
           "w": 206,
           "h": 701,
@@ -83,7 +83,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_f_artist_angry.png",
+          "src": "images/cast/char_f_artist_angry.png",
           "file": "public/images/cast/char_f_artist_angry.png",
           "w": 197,
           "h": 700,
@@ -98,7 +98,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_f_artist_in_love.png",
+          "src": "images/cast/char_f_artist_in_love.png",
           "file": "public/images/cast/char_f_artist_in_love.png",
           "w": 177,
           "h": 700,
@@ -119,7 +119,7 @@
       "heightCm": 171,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_f_tsundere_figure.png",
+        "src": "images/cast/char_f_tsundere_figure.png",
         "file": "public/images/cast/char_f_tsundere_figure.png",
         "w": 533,
         "h": 1708,
@@ -128,7 +128,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_f_tsundere_neutral.png",
+          "src": "images/cast/char_f_tsundere_neutral.png",
           "file": "public/images/cast/char_f_tsundere_neutral.png",
           "w": 199,
           "h": 705,
@@ -143,7 +143,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_f_tsundere_happy.png",
+          "src": "images/cast/char_f_tsundere_happy.png",
           "file": "public/images/cast/char_f_tsundere_happy.png",
           "w": 220,
           "h": 704,
@@ -158,7 +158,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_f_tsundere_sad.png",
+          "src": "images/cast/char_f_tsundere_sad.png",
           "file": "public/images/cast/char_f_tsundere_sad.png",
           "w": 193,
           "h": 704,
@@ -173,7 +173,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_f_tsundere_surprised.png",
+          "src": "images/cast/char_f_tsundere_surprised.png",
           "file": "public/images/cast/char_f_tsundere_surprised.png",
           "w": 208,
           "h": 705,
@@ -188,7 +188,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_f_tsundere_angry.png",
+          "src": "images/cast/char_f_tsundere_angry.png",
           "file": "public/images/cast/char_f_tsundere_angry.png",
           "w": 196,
           "h": 704,
@@ -203,7 +203,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_f_tsundere_in_love.png",
+          "src": "images/cast/char_f_tsundere_in_love.png",
           "file": "public/images/cast/char_f_tsundere_in_love.png",
           "w": 189,
           "h": 704,
@@ -224,7 +224,7 @@
       "heightCm": 184,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_m_senpai_figure.png",
+        "src": "images/cast/char_m_senpai_figure.png",
         "file": "public/images/cast/char_m_senpai_figure.png",
         "w": 422,
         "h": 1369,
@@ -233,7 +233,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_m_senpai_neutral.png",
+          "src": "images/cast/char_m_senpai_neutral.png",
           "file": "public/images/cast/char_m_senpai_neutral.png",
           "w": 217,
           "h": 761,
@@ -248,7 +248,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_m_senpai_happy.png",
+          "src": "images/cast/char_m_senpai_happy.png",
           "file": "public/images/cast/char_m_senpai_happy.png",
           "w": 238,
           "h": 760,
@@ -263,7 +263,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_m_senpai_sad.png",
+          "src": "images/cast/char_m_senpai_sad.png",
           "file": "public/images/cast/char_m_senpai_sad.png",
           "w": 177,
           "h": 759,
@@ -278,7 +278,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_m_senpai_surprised.png",
+          "src": "images/cast/char_m_senpai_surprised.png",
           "file": "public/images/cast/char_m_senpai_surprised.png",
           "w": 262,
           "h": 761,
@@ -293,7 +293,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_m_senpai_angry.png",
+          "src": "images/cast/char_m_senpai_angry.png",
           "file": "public/images/cast/char_m_senpai_angry.png",
           "w": 243,
           "h": 760,
@@ -308,7 +308,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_m_senpai_in_love.png",
+          "src": "images/cast/char_m_senpai_in_love.png",
           "file": "public/images/cast/char_m_senpai_in_love.png",
           "w": 194,
           "h": 760,
@@ -329,7 +329,7 @@
       "heightCm": 179,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_m_athlete_figure.png",
+        "src": "images/cast/char_m_athlete_figure.png",
         "file": "public/images/cast/char_m_athlete_figure.png",
         "w": 331,
         "h": 853,
@@ -338,7 +338,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_m_athlete_neutral.png",
+          "src": "images/cast/char_m_athlete_neutral.png",
           "file": "public/images/cast/char_m_athlete_neutral.png",
           "w": 212,
           "h": 742,
@@ -353,7 +353,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_m_athlete_happy.png",
+          "src": "images/cast/char_m_athlete_happy.png",
           "file": "public/images/cast/char_m_athlete_happy.png",
           "w": 271,
           "h": 745,
@@ -368,7 +368,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_m_athlete_sad.png",
+          "src": "images/cast/char_m_athlete_sad.png",
           "file": "public/images/cast/char_m_athlete_sad.png",
           "w": 214,
           "h": 743,
@@ -383,7 +383,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_m_athlete_surprised.png",
+          "src": "images/cast/char_m_athlete_surprised.png",
           "file": "public/images/cast/char_m_athlete_surprised.png",
           "w": 246,
           "h": 743,
@@ -398,7 +398,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_m_athlete_angry.png",
+          "src": "images/cast/char_m_athlete_angry.png",
           "file": "public/images/cast/char_m_athlete_angry.png",
           "w": 237,
           "h": 744,
@@ -413,7 +413,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_m_athlete_in_love.png",
+          "src": "images/cast/char_m_athlete_in_love.png",
           "file": "public/images/cast/char_m_athlete_in_love.png",
           "w": 214,
           "h": 745,
@@ -434,7 +434,7 @@
       "heightCm": 174,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_f_siren_figure.png",
+        "src": "images/cast/char_f_siren_figure.png",
         "file": "public/images/cast/char_f_siren_figure.png",
         "w": 448,
         "h": 1456,
@@ -443,7 +443,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_f_siren_neutral.png",
+          "src": "images/cast/char_f_siren_neutral.png",
           "file": "public/images/cast/char_f_siren_neutral.png",
           "w": 171,
           "h": 715,
@@ -458,7 +458,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_f_siren_happy.png",
+          "src": "images/cast/char_f_siren_happy.png",
           "file": "public/images/cast/char_f_siren_happy.png",
           "w": 218,
           "h": 715,
@@ -473,7 +473,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_f_siren_sad.png",
+          "src": "images/cast/char_f_siren_sad.png",
           "file": "public/images/cast/char_f_siren_sad.png",
           "w": 160,
           "h": 714,
@@ -488,7 +488,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_f_siren_surprised.png",
+          "src": "images/cast/char_f_siren_surprised.png",
           "file": "public/images/cast/char_f_siren_surprised.png",
           "w": 216,
           "h": 715,
@@ -503,7 +503,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_f_siren_angry.png",
+          "src": "images/cast/char_f_siren_angry.png",
           "file": "public/images/cast/char_f_siren_angry.png",
           "w": 198,
           "h": 716,
@@ -518,7 +518,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_f_siren_in_love.png",
+          "src": "images/cast/char_f_siren_in_love.png",
           "file": "public/images/cast/char_f_siren_in_love.png",
           "w": 168,
           "h": 715,
@@ -539,7 +539,7 @@
       "heightCm": 186,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_m_charmer_figure.png",
+        "src": "images/cast/char_m_charmer_figure.png",
         "file": "public/images/cast/char_m_charmer_figure.png",
         "w": 410,
         "h": 1365,
@@ -548,7 +548,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_m_charmer_neutral.png",
+          "src": "images/cast/char_m_charmer_neutral.png",
           "file": "public/images/cast/char_m_charmer_neutral.png",
           "w": 229,
           "h": 765,
@@ -563,7 +563,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_m_charmer_happy.png",
+          "src": "images/cast/char_m_charmer_happy.png",
           "file": "public/images/cast/char_m_charmer_happy.png",
           "w": 242,
           "h": 766,
@@ -578,7 +578,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_m_charmer_sad.png",
+          "src": "images/cast/char_m_charmer_sad.png",
           "file": "public/images/cast/char_m_charmer_sad.png",
           "w": 199,
           "h": 764,
@@ -593,7 +593,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_m_charmer_surprised.png",
+          "src": "images/cast/char_m_charmer_surprised.png",
           "file": "public/images/cast/char_m_charmer_surprised.png",
           "w": 251,
           "h": 763,
@@ -608,7 +608,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_m_charmer_angry.png",
+          "src": "images/cast/char_m_charmer_angry.png",
           "file": "public/images/cast/char_m_charmer_angry.png",
           "w": 246,
           "h": 766,
@@ -623,7 +623,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_m_charmer_in_love.png",
+          "src": "images/cast/char_m_charmer_in_love.png",
           "file": "public/images/cast/char_m_charmer_in_love.png",
           "w": 207,
           "h": 764,
@@ -644,7 +644,7 @@
       "heightCm": 172,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_f_runner_figure.png",
+        "src": "images/cast/char_f_runner_figure.png",
         "file": "public/images/cast/char_f_runner_figure.png",
         "w": 633,
         "h": 1703,
@@ -653,7 +653,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_f_runner_neutral.png",
+          "src": "images/cast/char_f_runner_neutral.png",
           "file": "public/images/cast/char_f_runner_neutral.png",
           "w": 206,
           "h": 714,
@@ -668,7 +668,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_f_runner_happy.png",
+          "src": "images/cast/char_f_runner_happy.png",
           "file": "public/images/cast/char_f_runner_happy.png",
           "w": 232,
           "h": 711,
@@ -683,7 +683,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_f_runner_sad.png",
+          "src": "images/cast/char_f_runner_sad.png",
           "file": "public/images/cast/char_f_runner_sad.png",
           "w": 181,
           "h": 710,
@@ -698,7 +698,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_f_runner_surprised.png",
+          "src": "images/cast/char_f_runner_surprised.png",
           "file": "public/images/cast/char_f_runner_surprised.png",
           "w": 234,
           "h": 710,
@@ -713,7 +713,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_f_runner_angry.png",
+          "src": "images/cast/char_f_runner_angry.png",
           "file": "public/images/cast/char_f_runner_angry.png",
           "w": 199,
           "h": 712,
@@ -728,7 +728,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_f_runner_in_love.png",
+          "src": "images/cast/char_f_runner_in_love.png",
           "file": "public/images/cast/char_f_runner_in_love.png",
           "w": 188,
           "h": 710,
@@ -749,7 +749,7 @@
       "heightCm": 181,
       "totalCharacterImages": 7,
       "original": {
-        "src": "/images/cast/char_m_climber_figure.png",
+        "src": "images/cast/char_m_climber_figure.png",
         "file": "public/images/cast/char_m_climber_figure.png",
         "w": 374,
         "h": 1182,
@@ -758,7 +758,7 @@
       },
       "poses": {
         "neutral": {
-          "src": "/images/cast/char_m_climber_neutral.png",
+          "src": "images/cast/char_m_climber_neutral.png",
           "file": "public/images/cast/char_m_climber_neutral.png",
           "w": 218,
           "h": 748,
@@ -773,7 +773,7 @@
           }
         },
         "happy": {
-          "src": "/images/cast/char_m_climber_happy.png",
+          "src": "images/cast/char_m_climber_happy.png",
           "file": "public/images/cast/char_m_climber_happy.png",
           "w": 242,
           "h": 749,
@@ -788,7 +788,7 @@
           }
         },
         "sad": {
-          "src": "/images/cast/char_m_climber_sad.png",
+          "src": "images/cast/char_m_climber_sad.png",
           "file": "public/images/cast/char_m_climber_sad.png",
           "w": 198,
           "h": 752,
@@ -803,7 +803,7 @@
           }
         },
         "surprised": {
-          "src": "/images/cast/char_m_climber_surprised.png",
+          "src": "images/cast/char_m_climber_surprised.png",
           "file": "public/images/cast/char_m_climber_surprised.png",
           "w": 253,
           "h": 747,
@@ -818,7 +818,7 @@
           }
         },
         "angry": {
-          "src": "/images/cast/char_m_climber_angry.png",
+          "src": "images/cast/char_m_climber_angry.png",
           "file": "public/images/cast/char_m_climber_angry.png",
           "w": 271,
           "h": 751,
@@ -833,7 +833,7 @@
           }
         },
         "in_love": {
-          "src": "/images/cast/char_m_climber_in_love.png",
+          "src": "images/cast/char_m_climber_in_love.png",
           "file": "public/images/cast/char_m_climber_in_love.png",
           "w": 195,
           "h": 753,

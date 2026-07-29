@@ -1,0 +1,14 @@
+import { chromium } from "playwright";
+const browser = await chromium.launch();
+const page = await browser.newPage();
+const hits = [];
+page.on("response", (r) => { if (r.url().includes("/images/")) hits.push(`${r.status()} ${r.url().slice(0, 110)}`); });
+page.on("requestfailed", (r) => { if (r.url().includes("/images/")) hits.push(`FAIL ${r.url().slice(0, 110)}`); });
+await page.goto("https://run.world/games/EDRcsnLKamaA4YL5yfKH", { waitUntil: "domcontentloaded", timeout: 30000 });
+await page.waitForTimeout(12000);
+console.log("title:", await page.title());
+const frames = page.frames().map((f) => f.url());
+console.log("frames:", JSON.stringify(frames.slice(0, 5), null, 1));
+console.log("image hits:", hits.length ? hits.slice(0, 10).join("\n") : "none");
+await page.screenshot({ path: "/tmp/koi-probe.png" });
+await browser.close();

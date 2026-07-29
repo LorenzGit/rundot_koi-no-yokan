@@ -97,7 +97,7 @@ export default function PostcardScreen() {
                     <>
                         <img
                             className="koi-postcard-art"
-                            src={`/images/postcards/${you.id}.png`}
+                            src={`images/postcards/${you.id}.png`}
                             alt={`Your postcard: ${you.name}`}
                         />
                         <span className="koi-postcard-stamp" aria-hidden="true">
@@ -137,7 +137,7 @@ export default function PostcardScreen() {
                             className="koi-book-row"
                             style={{ "--koi-char": def?.color } as React.CSSProperties}
                         >
-                            <img src={`/images/cast/${person.id}_figure.png`} alt="" />
+                            <img src={`images/cast/${person.id}_figure.png`} alt="" />
                             <div className="koi-book-body">
                                 <div className="koi-book-head">
                                     <strong>{def?.name ?? person.id}</strong>
@@ -169,7 +169,7 @@ export default function PostcardScreen() {
                         {/* What is being sent is YOUR postcard, so that is the
                             art on the confirm, not their cutout. */}
                         {you && (
-                            <img className="koi-modal-postcard-art" src={`/images/postcards/${you.id}.png`} alt="" />
+                            <img className="koi-modal-postcard-art" src={`images/postcards/${you.id}.png`} alt="" />
                         )}
                         <h2 className="koi-modal-title" id="koi-postcard-title">
                             Send a postcard to {sendName}?

@@ -37,7 +37,7 @@ export default function ResultScreen() {
 
     return (
         <main className="koi-screen koi-result" style={{ "--koi-char": def?.color } as React.CSSProperties}>
-            <img className="koi-result-portrait" src={`/images/cast/${result.personId}_figure.png`} alt="" />
+            <img className="koi-result-portrait" src={`images/cast/${result.personId}_figure.png`} alt="" />
             <h1 className="koi-title-sm">{def?.name}</h1>
 
             {result.confessed && (

@@ -69,7 +69,7 @@ export default function AvatarSelect() {
                 </button>
 
                 <div className="koi-hero-card" key={chosen.id}>
-                    <img className="koi-hero-portrait" src={`/images/cast/${chosen.id}_figure.png`} alt="" />
+                    <img className="koi-hero-portrait" src={`images/cast/${chosen.id}_figure.png`} alt="" />
                     {/* `display: contents` in portrait, so this wrapper changes
                         nothing there; in landscape it becomes the second column
                         beside the portrait. */}
@@ -114,7 +114,7 @@ export default function AvatarSelect() {
                         style={{ "--koi-char": member.color } as React.CSSProperties}
                         onClick={() => setIndex(i)}
                     >
-                        <img src={`/images/cast/${member.id}_figure.png`} alt="" />
+                        <img src={`images/cast/${member.id}_figure.png`} alt="" />
                     </button>
                 ))}
             </div>

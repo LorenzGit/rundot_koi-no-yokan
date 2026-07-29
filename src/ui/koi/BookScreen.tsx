@@ -48,7 +48,7 @@ export default function BookScreen() {
                             className="koi-book-row"
                             style={{ "--koi-char": def?.color } as React.CSSProperties}
                         >
-                            <img src={`/images/cast/${person.id}_figure.png`} alt="" />
+                            <img src={`images/cast/${person.id}_figure.png`} alt="" />
                             <div className="koi-book-body">
                                 <div className="koi-book-head">
                                     <strong>{def?.name ?? person.id}</strong>

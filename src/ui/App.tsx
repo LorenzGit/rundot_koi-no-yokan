@@ -23,11 +23,16 @@ import SettingsScreen from "./SettingsScreen.tsx";
 import { applyRunSafeArea } from "../sdk/runSdk.ts";
 import { audioManager } from "../audio/audioManager.ts";
 import { CAST_BY_ID } from "../game/data/world.ts";
+import { MENU_BACKDROP_URL } from "../assets/manifest.ts";
 import { useProfile } from "./koi/useProfile.ts";
 import SettingsFab from "./koi/SettingsFab.tsx";
 import { useButtonFeedback } from "./useButtonFeedback.ts";
 
 const DevelopmentTools = import.meta.env.DEV ? lazy(() => import("../dev/DevelopmentTools.tsx")) : null;
+
+// The sakura backdrop URL is bundled, so only JS knows it: publish it for the
+// stylesheet's var(--scene-backdrop) consumers (page backdrop and menu art).
+document.documentElement.style.setProperty("--scene-backdrop", `url("${MENU_BACKDROP_URL}")`);
 
 /**
  * The Pixi stage draws in design units and scales to the viewport, so on a big

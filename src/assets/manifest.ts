@@ -12,6 +12,10 @@
  * Keep 'critical' small: every asset here delays first interaction.
  */
 import type { AssetsManifest, UnresolvedAsset } from "pixi.js";
+import menuSakuraUrl from "./art/menu_sakura.png";
+
+/** The sakura menu painting, bundled and fingerprinted by Vite. */
+export const MENU_BACKDROP_URL = menuSakuraUrl;
 
 /**
  * A narrowing of Pixi's AssetsManifest: Pixi also allows `assets` to be a
@@ -27,14 +31,14 @@ export const MANIFEST: Manifest = {
         {
             name: "critical",
             // The sakura menu painting: the first screen after the loader.
-            assets: [{ alias: "menu-backdrop", src: "/images/menu_sakura.png" }],
+            assets: [{ alias: "menu-backdrop", src: menuSakuraUrl }],
         },
         {
             name: "deferred",
             assets: [
-                { alias: "bg-sakura-plaza", src: "/images/bg_sakura_plaza.png" },
-                { alias: "bg-beach-terrace", src: "/images/bg_beach_terrace.png" },
-                { alias: "bg-trattoria", src: "/images/bg_trattoria.png" },
+                { alias: "bg-sakura-plaza", src: "images/bg_sakura_plaza.png" },
+                { alias: "bg-beach-terrace", src: "images/bg_beach_terrace.png" },
+                { alias: "bg-trattoria", src: "images/bg_trattoria.png" },
             ],
         },
     ],

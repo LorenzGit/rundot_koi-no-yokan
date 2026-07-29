@@ -50,10 +50,10 @@ input:focus-visible {
 :root {
     --game-w: 100vw;
     /* The sakura menu painting doubles as the page backdrop outside the
-       playable frame. Decorative art uses `cover`, so it may crop but never
-       distort. */
-    --scene-backdrop: url("/images/menu_sakura.png");
-    --page-backdrop: linear-gradient(rgba(32, 19, 83, 0.16), rgba(28, 15, 75, 0.42)), var(--scene-backdrop);
+       playable frame. Its URL is bundled and fingerprinted, so it cannot be
+       written into the stylesheet: App.tsx publishes it at boot. Decorative
+       art uses `cover`, so it may crop but never distort. */
+    --page-backdrop: linear-gradient(rgba(32, 19, 83, 0.16), rgba(28, 15, 75, 0.42)), var(--scene-backdrop, none);
     /* ViewDeck exposes oriented insets as custom properties because desktop
        WKWebView cannot reliably emulate rotating env() values. RUN replaces
        these variables inline with host-authoritative values when attached;
@@ -1949,7 +1949,7 @@ html[data-reduced-motion="true"] *::after {
     inset: 0;
     background:
         linear-gradient(180deg, rgba(27, 20, 32, 0.15) 0%, rgba(27, 20, 32, 0.55) 62%, rgba(27, 20, 32, 0.92) 100%),
-        url("/images/menu_sakura.png") center / cover no-repeat;
+        var(--scene-backdrop) center / cover no-repeat;
     z-index: 0;
 }
 

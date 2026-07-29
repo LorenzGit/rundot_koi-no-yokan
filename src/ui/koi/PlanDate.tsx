@@ -43,7 +43,7 @@ export default function PlanDate() {
                                 style={{ "--koi-char": c.color } as React.CSSProperties}
                                 onClick={() => setWho(c.id)}
                             >
-                                <img src={`/images/cast/${c.id}_figure.png`} alt="" />
+                                <img src={`images/cast/${c.id}_figure.png`} alt="" />
                                 <span className="koi-pick-name">{c.name}</span>
                                 <span className="koi-pick-meta">
                                     {person.dates > 0

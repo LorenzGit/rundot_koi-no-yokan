@@ -67,7 +67,7 @@ export default function HomeScreen() {
                     <>
                         <span className="koi-stage-art koi-art-you">
                             <img
-                                src={`/images/cast/${you.id}_figure.png`}
+                                src={`images/cast/${you.id}_figure.png`}
                                 alt={you.name}
                                 style={relativeScale(you.heightCm, tallest)}
                             />
@@ -101,7 +101,7 @@ export default function HomeScreen() {
                         <span className="koi-stage-art koi-art-them">
                             {them && (
                                 <img
-                                    src={`/images/cast/${them.id}_figure.png`}
+                                    src={`images/cast/${them.id}_figure.png`}
                                     alt={them.name}
                                     style={relativeScale(them.heightCm, tallest)}
                                 />

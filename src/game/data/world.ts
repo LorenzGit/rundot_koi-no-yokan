@@ -211,7 +211,7 @@ export const LOCATIONS: LocationDef[] = [
     {
         id: "sakura",
         name: "Sakura Plaza",
-        image: "/images/bg_sakura_plaza.png",
+        image: "images/bg_sakura_plaza.png",
         // An open waterfront square: benches and a railing, no service.
         features: ["walk", "seats", "water"],
         // Briefed at 80%; verify with scripts/scale-ruler.mjs after any regen.
@@ -225,7 +225,7 @@ export const LOCATIONS: LocationDef[] = [
     {
         id: "beach",
         name: "Beach Terrace",
-        image: "/images/bg_beach_terrace.png",
+        image: "images/bg_beach_terrace.png",
         features: ["walk", "seats", "water", "drinks"],
         groundAsPainted: 0.8,
         unlockAt: 40,
@@ -237,7 +237,7 @@ export const LOCATIONS: LocationDef[] = [
     {
         id: "trattoria",
         name: "La Dolce Vita",
-        image: "/images/bg_trattoria.png",
+        image: "images/bg_trattoria.png",
         features: ["table", "drinks", "music", "seats", "walk"],
         groundAsPainted: 0.8,
         unlockAt: 110,
@@ -249,24 +249,24 @@ export const LOCATIONS: LocationDef[] = [
 ];
 
 export const GIFTS: GiftDef[] = [
-    { id: "bouquet", name: "Roses", image: "/images/gifts/bouquet.png", price: 40, topic: "heart" },
-    { id: "plushie", name: "Cat Plushie", image: "/images/gifts/plushie.png", price: 30, topic: "cat" },
-    { id: "bubbletea", name: "Bubble Tea", image: "/images/gifts/bubbletea.png", price: 15, topic: "food" },
-    { id: "cake", name: "Shortcake", image: "/images/gifts/cake.png", price: 25, topic: "food" },
-    { id: "letter", name: "Letter", image: "/images/gifts/letter.png", price: 20, topic: "heart" },
-    { id: "ringbox", name: "Ring", image: "/images/gifts/ringbox.png", price: 150, topic: "heart" },
+    { id: "bouquet", name: "Roses", image: "images/gifts/bouquet.png", price: 40, topic: "heart" },
+    { id: "plushie", name: "Cat Plushie", image: "images/gifts/plushie.png", price: 30, topic: "cat" },
+    { id: "bubbletea", name: "Bubble Tea", image: "images/gifts/bubbletea.png", price: 15, topic: "food" },
+    { id: "cake", name: "Shortcake", image: "images/gifts/cake.png", price: 25, topic: "food" },
+    { id: "letter", name: "Letter", image: "images/gifts/letter.png", price: 20, topic: "heart" },
+    { id: "ringbox", name: "Ring", image: "images/gifts/ringbox.png", price: 150, topic: "heart" },
 
     // One gift per conversation topic, so the bag is a way to MEET whatever is
     // live rather than three ways to say "I like you". A gift whose topic is on
     // the table is the biggest modifier in the game.
-    { id: "mixtape", name: "Mixtape", image: "/images/gifts/mixtape.png", price: 35, topic: "music" },
-    { id: "tickets", name: "Two Tickets", image: "/images/gifts/tickets.png", price: 60, topic: "travel" },
-    { id: "filmreel", name: "Film Reel", image: "/images/gifts/filmreel.png", price: 45, topic: "movie" },
-    { id: "coffee", name: "Coffee", image: "/images/gifts/coffee.png", price: 12, topic: "work" },
-    { id: "umbrella", name: "Umbrella", image: "/images/gifts/umbrella.png", price: 28, topic: "rain" },
-    { id: "telescope", name: "Telescope", image: "/images/gifts/telescope.png", price: 70, topic: "stars" },
-    { id: "sportsbottle", name: "Bottle", image: "/images/gifts/sportsbottle.png", price: 22, topic: "sport" },
-    { id: "sketchbook", name: "Sketchbook", image: "/images/gifts/sketchbook.png", price: 40, topic: "art" },
+    { id: "mixtape", name: "Mixtape", image: "images/gifts/mixtape.png", price: 35, topic: "music" },
+    { id: "tickets", name: "Two Tickets", image: "images/gifts/tickets.png", price: 60, topic: "travel" },
+    { id: "filmreel", name: "Film Reel", image: "images/gifts/filmreel.png", price: 45, topic: "movie" },
+    { id: "coffee", name: "Coffee", image: "images/gifts/coffee.png", price: 12, topic: "work" },
+    { id: "umbrella", name: "Umbrella", image: "images/gifts/umbrella.png", price: 28, topic: "rain" },
+    { id: "telescope", name: "Telescope", image: "images/gifts/telescope.png", price: 70, topic: "stars" },
+    { id: "sportsbottle", name: "Bottle", image: "images/gifts/sportsbottle.png", price: 22, topic: "sport" },
+    { id: "sketchbook", name: "Sketchbook", image: "images/gifts/sketchbook.png", price: 40, topic: "art" },
 ];
 
 export const GIFTS_BY_ID: Record<string, GiftDef> = Object.fromEntries(GIFTS.map((g) => [g.id, g]));
