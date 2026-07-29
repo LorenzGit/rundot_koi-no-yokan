@@ -1,8 +1,14 @@
 {
-  "gameId": "REPLACE_WITH_RUN_GAME_ID",
+  "gameId": "EDRcsnLKamaA4YL5yfKH",
   "relativePathToDistFolder": "dist",
   "usesPreloader": false,
-  "orientation": "Both",
-  "keywords": [],
+  "orientation": "both",
+  "keywords": [
+    "dating",
+    "romance",
+    "cozy",
+    "visual-novel",
+    "choices"
+  ],
   "kitId": null
 }
