@@ -1,33 +1,286 @@
 {
-  "$comment": [
-    "Koi no Yokan shop catalog. Registered with RUN at deploy; the ids here",
-    "are the ones src/config/platform.ts must reference. Until this is",
-    "deployed and those PLATFORM_IDS placeholders are replaced with the real",
-    "ids, every purchase surface in the game hides itself rather than",
-    "offering a button that cannot complete.",
-    "",
-    "Prices are in RB (RUN Bits, the platform hard currency, ~100 RB = $1).",
-    "The six heart tiers follow RUN's pricing template: a flat base rate with",
-    "a growing bonus that pushes toward the larger packs."
-  ],
-  "items": [
-    { "id": "koi_hearts_400", "name": "250 Hearts", "priceRb": 400, "type": "consumable" },
-    { "id": "koi_hearts_800", "name": "600 Hearts", "priceRb": 800, "type": "consumable" },
-    { "id": "koi_hearts_1600", "name": "1,500 Hearts", "priceRb": 1600, "type": "consumable" },
-    { "id": "koi_hearts_2400", "name": "2,500 Hearts", "priceRb": 2400, "type": "consumable" },
-    { "id": "koi_hearts_4000", "name": "5,000 Hearts", "priceRb": 4000, "type": "consumable" },
-    { "id": "koi_hearts_8000", "name": "12,500 Hearts", "priceRb": 8000, "type": "consumable" },
-
-    { "id": "koi_first_date_kit", "name": "First Date Kit", "priceRb": 100, "type": "consumable", "oneTime": true },
-    { "id": "koi_postcard", "name": "Postcard", "priceRb": 50, "type": "consumable" },
-    { "id": "koi_romantic_bundle", "name": "Hopeless Romantic", "priceRb": 1200, "type": "consumable" },
-    {
-      "id": "koi_confidant",
-      "name": "Confidant",
-      "priceRb": 2400,
-      "type": "entitlement",
-      "entitlementId": "koi_entitlement_confidant",
-      "oneTime": true
-    }
-  ]
+    "items": [
+        {
+            "itemId": "koi_postcard",
+            "name": "Postcard",
+            "description": "A little card for someone you have met, worth +3 hearts with them.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "50"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_postcard",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 1
+        },
+        {
+            "itemId": "koi_first_date_kit",
+            "name": "First Date Kit",
+            "description": "Three gifts and a pocket of hearts, so your first evening is not empty-handed.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "100"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_150",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_bouquet",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_bubbletea",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_mixtape",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "unique": true,
+            "active": true,
+            "sortOrder": 2
+        },
+        {
+            "itemId": "koi_hearts_400",
+            "name": "250 Hearts",
+            "description": "A pocket of hearts for the gift shop.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "400"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_250",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 3
+        },
+        {
+            "itemId": "koi_hearts_800",
+            "name": "600 Hearts",
+            "description": "More hearts, plus a 20% bonus over the base rate.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "800"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_600",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 4
+        },
+        {
+            "itemId": "koi_hearts_1600",
+            "name": "1,500 Hearts",
+            "description": "The value pick: a 50% bonus over the base rate.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "1600"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_1500",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 5
+        },
+        {
+            "itemId": "koi_hearts_2400",
+            "name": "2,500 Hearts",
+            "description": "A 67% bonus over the base rate.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "2400"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_2500",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 6
+        },
+        {
+            "itemId": "koi_hearts_4000",
+            "name": "5,000 Hearts",
+            "description": "Twice the hearts of the base rate.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "4000"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_5000",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 7
+        },
+        {
+            "itemId": "koi_hearts_8000",
+            "name": "12,500 Hearts",
+            "description": "The biggest bundle: 2.5x the hearts of the base rate.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "8000"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_12500",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 8
+        },
+        {
+            "itemId": "koi_romantic_bundle",
+            "name": "Hopeless Romantic",
+            "description": "Every gift in the shop, once, plus 900 hearts to keep going.",
+            "category": "consumable",
+            "price": {
+                "type": "bucks",
+                "value": "1200"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_hearts_900",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_bouquet",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_plushie",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_bubbletea",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_cake",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_letter",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_mixtape",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_tickets",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_filmreel",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_coffee",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_umbrella",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_telescope",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_sportsbottle",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_sketchbook",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "active": true,
+            "sortOrder": 9
+        },
+        {
+            "itemId": "koi_confidant",
+            "name": "Confidant",
+            "description": "Two extra moves on every date, for good, plus 500 hearts and the Ring.",
+            "category": "non_consumable",
+            "price": {
+                "type": "bucks",
+                "value": "2400"
+            },
+            "entitlements": [
+                {
+                    "entitlementId": "koi_entitlement_confidant",
+                    "quantity": 1,
+                    "consumable": false
+                },
+                {
+                    "entitlementId": "koi_hearts_500",
+                    "quantity": 1,
+                    "consumable": true
+                },
+                {
+                    "entitlementId": "koi_gift_ringbox",
+                    "quantity": 1,
+                    "consumable": true
+                }
+            ],
+            "unique": true,
+            "active": true,
+            "sortOrder": 10
+        }
+    ]
 }
