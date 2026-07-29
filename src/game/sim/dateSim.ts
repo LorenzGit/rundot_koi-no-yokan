@@ -57,11 +57,11 @@ export interface DateSimOptions {
     moves?: number;
     seed?: number;
     /**
-     * The gift id tonight's company secretly hopes for. Gifting it is always a
-     * strong match (DESIRED_GIFT_MULTIPLIER floor, on top of the usual topic
-     * logic); anything else scores by the normal rules.
+     * Tonight's company's gift wishes, weighted by taste. The sim draws ONE at
+     * construction (seeded, so the evening replays exactly); granting it pays
+     * DESIRED_GIFT_MULTIPLIER, once.
      */
-    desiredGiftId?: string;
+    wishlist?: { gift: string; weight: number }[];
 }
 
 /**
@@ -210,13 +210,15 @@ export class DateSim {
     private readonly cooldowns = new Map<string, number>();
     /** Recent action ids, newest last — drives repetition decay. */
     private readonly recent: string[] = [];
-    private readonly desiredGiftId: string | undefined;
+    /** Tonight's wish, drawn from their wishlist at construction. */
+    readonly wishGiftId: string | undefined;
+    /** Set once the wish has been granted: the pill hides and the bonus ends. */
+    wishGranted = false;
 
     constructor(opts: DateSimOptions) {
         this.archetype = opts.archetype;
         this.location = opts.location;
         this.affection = opts.affection;
-        this.desiredGiftId = opts.desiredGiftId;
         this.moves = opts.moves ?? movesForAffection(opts.affection);
         this.movesLeft = this.moves;
         this.rng = makeRng(opts.seed ?? 1);
@@ -226,6 +228,21 @@ export class DateSim {
         this.topic = this.pickTopic();
         this.activeTopics = this.pickActiveTopics();
         this.topicTimer = this.topicInterval();
+        this.wishGiftId = this.pickWish(opts.wishlist);
+    }
+
+    /** Weighted draw from their wishlist, on the seeded stream. */
+    private pickWish(wishlist: { gift: string; weight: number }[] | undefined): string | undefined {
+        if (!wishlist || wishlist.length === 0) return undefined;
+        let total = 0;
+        for (const entry of wishlist) total += Math.max(0, entry.weight);
+        if (total <= 0) return undefined;
+        let roll = this.rng() * total;
+        for (const entry of wishlist) {
+            roll -= Math.max(0, entry.weight);
+            if (roll <= 0) return entry.gift;
+        }
+        return wishlist[0]?.gift;
     }
 
     // --- topics -------------------------------------------------------------
@@ -367,8 +384,9 @@ export class DateSim {
         // it is worth the most — that is the skill the topic row is teaching.
         const giftTopic = action.needsGift && gift ? gift.topic : null;
         const topic = giftTopic ?? (action.topicSensitive ? this.topic : null);
-        // Their wish reads as a wish, whatever the topic math says.
-        if (action.needsGift && gift && gift.id === this.desiredGiftId) {
+        // Their wish reads as a wish, whatever the topic math says — but only
+        // until it is granted.
+        if (action.needsGift && gift && gift.id === this.wishGiftId && !this.wishGranted) {
             reasons.push({ delta: 2, text: "Exactly what they wished for" });
         }
         if (topic) {
@@ -554,10 +572,12 @@ export class DateSim {
                 topicMultiplier = 0.7;
             }
             // Their wish, granted: always a strong gift even when tonight's
-            // subject is something else entirely. It lifts, never overrides.
-            if (gift.id === this.desiredGiftId) {
+            // subject is something else entirely. Once granted, the wish is
+            // spent and the gift scores by the normal rules again.
+            if (gift.id === this.wishGiftId && !this.wishGranted) {
                 topicMultiplier = Math.max(topicMultiplier, DESIRED_GIFT_MULTIPLIER);
                 topicMatched = true;
+                this.wishGranted = true;
             }
         } else if (action.topicSensitive) {
             if (archetype.likes.includes(this.topic)) {

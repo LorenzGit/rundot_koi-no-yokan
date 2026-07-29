@@ -138,8 +138,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 169,
         gender: "f",
         blurb: "Paints until sunrise. Says more with a look than a sentence.",
-        // Mizuki paints; a fresh sketchbook is the one thing she never has enough of.
-        desiredGift: "sketchbook",
+        // Art first, then the sky and the rain she paints.
+        wishlist: [
+            { gift: "sketchbook", weight: 5 },
+            { gift: "telescope", weight: 2 },
+            { gift: "umbrella", weight: 2 },
+            { gift: "mixtape", weight: 1 },
+        ],
         color: "#3fa3a0", // her teal hair
     },
     {
@@ -149,8 +154,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 171,
         gender: "f",
         blurb: "Arms crossed on principle. Warmer than she is willing to admit.",
-        // Rin pretends not to care; the cat plushie is how you find out she does.
-        desiredGift: "plushie",
+        // The cat plushie melts her; dessert and a film are a close second.
+        wishlist: [
+            { gift: "plushie", weight: 5 },
+            { gift: "cake", weight: 3 },
+            { gift: "filmreel", weight: 2 },
+            { gift: "bubbletea", weight: 1 },
+        ],
         color: "#e8607d", // her red top and ribbon
     },
     {
@@ -160,8 +170,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 184,
         gender: "m",
         blurb: "Unhurried, unbothered. Takes a lot to impress, worth the trouble.",
-        // Haruto is unhurried about everything except a good mixtape.
-        desiredGift: "mixtape",
+        // Unhurried about everything except music and getting away.
+        wishlist: [
+            { gift: "mixtape", weight: 5 },
+            { gift: "tickets", weight: 3 },
+            { gift: "coffee", weight: 2 },
+            { gift: "telescope", weight: 1 },
+        ],
         color: "#5b8ac9", // his denim jacket
     },
     {
@@ -171,8 +186,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 179,
         gender: "m",
         blurb: "Runs everywhere. Laughs at everything. Genuinely means it.",
-        // Sora runs everywhere; the bottle is the one thing he forgets.
-        desiredGift: "sportsbottle",
+        // Sport kit first; he runs everywhere and forgets his bottle.
+        wishlist: [
+            { gift: "sportsbottle", weight: 5 },
+            { gift: "tickets", weight: 3 },
+            { gift: "bubbletea", weight: 2 },
+            { gift: "bouquet", weight: 1 },
+        ],
         color: "#f0a03c", // his sunny warmth
     },
     {
@@ -182,8 +202,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 174,
         gender: "f",
         blurb: "Sings last set at midnight. Entirely aware of what she is doing.",
-        // Reina sings last set; a film reel for the hours after midnight.
-        desiredGift: "filmreel",
+        // Midnight cinema, music, and being adored, in that order.
+        wishlist: [
+            { gift: "filmreel", weight: 4 },
+            { gift: "mixtape", weight: 3 },
+            { gift: "bouquet", weight: 2 },
+            { gift: "telescope", weight: 2 },
+        ],
         color: "#c02a52", // her satin dress
     },
     {
@@ -193,8 +218,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 186,
         gender: "m",
         blurb: "Pours the drinks, remembers your order, and your name, and your birthday.",
-        // Kaito remembers your order; shortcake is his.
-        desiredGift: "cake",
+        // He remembers your order; shortcake is his.
+        wishlist: [
+            { gift: "cake", weight: 4 },
+            { gift: "bouquet", weight: 3 },
+            { gift: "tickets", weight: 2 },
+            { gift: "mixtape", weight: 1 },
+        ],
         color: "#8a6bc4", // his after-dark violet
     },
     {
@@ -204,8 +234,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 172,
         gender: "f",
         blurb: "Ran here. Will race you home. Keeps a personal best for everything.",
-        // Kaede keeps a personal best for everything, including getting there first.
-        desiredGift: "tickets",
+        // A race to somewhere beats gear, barely.
+        wishlist: [
+            { gift: "tickets", weight: 4 },
+            { gift: "sportsbottle", weight: 4 },
+            { gift: "bubbletea", weight: 2 },
+            { gift: "letter", weight: 1 },
+        ],
         color: "#26b391", // her teal athletic top
     },
     {
@@ -215,8 +250,13 @@ export const CAST: CastMemberDef[] = [
         heightCm: 181,
         gender: "m",
         blurb: "Climbs on weekends, stretches on weekdays, never once seems in a hurry.",
-        // Ren climbs for the view; the telescope is for what is beyond it.
-        desiredGift: "telescope",
+        // He climbs for the view; the telescope is for what is past it.
+        wishlist: [
+            { gift: "telescope", weight: 4 },
+            { gift: "umbrella", weight: 3 },
+            { gift: "sketchbook", weight: 2 },
+            { gift: "sportsbottle", weight: 1 },
+        ],
         color: "#7a9a4e", // his olive joggers
     },
 ];

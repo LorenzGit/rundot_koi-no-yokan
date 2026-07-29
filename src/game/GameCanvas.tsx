@@ -68,7 +68,7 @@ async function initializeGameRenderer(scope: RendererLifecycleScope, host: HTMLE
         archetype: ARCHETYPES[partner.archetype],
         location,
         affection,
-        desiredGiftId: partner.desiredGift,
+        wishlist: partner.wishlist,
         // The Confidant unlock buys two more moves on every date, for good.
         moves:
             movesForAffection(affection) +

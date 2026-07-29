@@ -3679,6 +3679,17 @@ button.koi-stage-plate:active {
     vertical-align: 1px;
 }
 
+/* The wish, spent: muted, and the card is disabled on top of it. */
+.koi-wish-badge.is-granted {
+    background: rgba(253, 246, 236, 0.12);
+    color: rgba(253, 246, 236, 0.55);
+}
+
+.koi-card-gift:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
 /* Portrait shows the wish in the header pill; the deck copy is for landscape. */
 .koi-deck > .koi-wish {
     display: none;

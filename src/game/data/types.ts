@@ -110,12 +110,12 @@ export interface CastMemberDef {
     /** One-line description shown in the Little Black Book. */
     blurb: string;
     /**
-     * The gift they secretly hope for, as a gift id. Always a strong match
-     * (see DESIRED_GIFT_MULTIPLIER in dateSim), and if it also meets tonight's
-     * live topic it lands at the full topic rate. The date HUD advertises it;
-     * gifting anything else is never a penalty.
+     * The gifts this person hopes for, weighted by taste: the date sim draws
+     * ONE wish per evening from this list, so tonight's wish is a surprise
+     * that still always makes sense for who they are. Granting it pays a
+     * strong match (DESIRED_GIFT_MULTIPLIER), once.
      */
-    desiredGift: string;
+    wishlist: { gift: string; weight: number }[];
     /**
      * The character's signature colour, used wherever they are represented —
      * their ring on the picker, their button, their affection meter. Pulled

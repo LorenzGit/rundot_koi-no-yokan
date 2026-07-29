@@ -22,7 +22,7 @@ import {
     HAND_SIZE,
     TICK_SECONDS,
 } from "../../game/data/actions.ts";
-import { CAST_BY_ID, GIFTS_BY_ID, TOPIC_GLYPH } from "../../game/data/world.ts";
+import { GIFTS_BY_ID, TOPIC_GLYPH } from "../../game/data/world.ts";
 import { consumeGift } from "../../state/profile.ts";
 import { audioManager } from "../../audio/audioManager.ts";
 import { useProfile } from "./useProfile.ts";
@@ -136,7 +136,6 @@ function Delta({ value }: { value: number | undefined }) {
 export default function DateHud() {
     const gauges = useStore((s) => s.gauges);
     const selectedGift = useStore((s) => s.selectedGift);
-    const dateWith = useStore((s) => s.dateWith);
     const profile = useProfile();
     const [, forceTick] = useState(0);
     // "gift" is a pseudo-family: it lists what is in your bag rather than a
@@ -161,10 +160,10 @@ export default function DateHud() {
     const sim = dateControls.sim;
     const affection = sim?.affection ?? 0;
     const ownedGifts = Object.entries(profile.inventory).filter(([, n]) => n > 0);
-    // Tonight's wish: the one gift they secretly hope for. Advertised here so
-    // packing for the date is a decision, and marked in the bag so finding it
-    // mid-evening takes one glance.
-    const wishGift = GIFTS_BY_ID[CAST_BY_ID[dateWith ?? ""]?.desiredGift ?? ""];
+    // Tonight's wish, drawn by the sim at date start. Once granted, the pill
+    // hides and the card locks: one wish per evening.
+    const wishGift = GIFTS_BY_ID[sim?.wishGiftId ?? ""];
+    const wishGranted = sim?.wishGranted ?? false;
     const sortedGifts = [...ownedGifts].sort(([a], [b]) => Number(b === wishGift?.id) - Number(a === wishGift?.id));
 
     /**
@@ -431,8 +430,9 @@ export default function DateHud() {
                     </div>
                 )}
 
-                {/* Their wish, out in the open from the first second. */}
-                {wishGift && (
+                {/* Their wish, out in the open from the first second, gone the
+                    moment it is granted. */}
+                {wishGift && !wishGranted && (
                     <div className="koi-wish" title={`${wishGift.name} is always a strong gift tonight`}>
                         <span className="koi-wish-label">Wishes for</span>
                         <img className="koi-wish-art" src={wishGift.image} alt="" />
@@ -483,7 +483,7 @@ export default function DateHud() {
                 {/* Landscape gets the wish here instead: the header row there is
                     at capacity beside the balloons, and this column has room.
                     Portrait keeps the header pill; CSS shows exactly one. */}
-                {wishGift && (
+                {wishGift && !wishGranted && (
                     <div className="koi-wish koi-wish-deck" title={`${wishGift.name} is always a strong gift tonight`}>
                         <span className="koi-wish-label">Wishes for</span>
                         <img className="koi-wish-art" src={wishGift.image} alt="" />
@@ -579,12 +579,14 @@ export default function DateHud() {
                                 sortedGifts.map(([id, count]) => {
                                     const gift = GIFTS_BY_ID[id];
                                     if (!gift) return null;
-                                    const isWish = id === wishGift?.id;
+                                    const isWish = !wishGranted && id === wishGift?.id;
+                                    const isGrantedWish = wishGranted && id === wishGift?.id;
                                     return (
                                         <button
                                             type="button"
                                             key={id}
                                             className={`koi-card koi-card-gift ${isWish ? "is-wish" : ""}`}
+                                            disabled={isGrantedWish}
                                             onClick={() => playGift(id)}
                                         >
                                             <img className="koi-card-giftart" src={gift.image} alt="" />
@@ -592,6 +594,9 @@ export default function DateHud() {
                                                 <span className="koi-card-label">
                                                     {gift.name}
                                                     {isWish && <span className="koi-wish-badge">their wish</span>}
+                                                    {isGrantedWish && (
+                                                        <span className="koi-wish-badge is-granted">wish granted</span>
+                                                    )}
                                                 </span>
                                                 <span className="koi-card-hint">
                                                     ×{count} · {isWish ? "always lands" : "4x on their topic"}
