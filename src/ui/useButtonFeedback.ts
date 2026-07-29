@@ -5,8 +5,9 @@
  * screens and the Pixi HUD, and any new one would silently ship without
  * feedback. A single capture-phase listener cannot be forgotten.
  *
- * Fires on pointerdown, not click: feedback that arrives on release feels
- * late, and a drag that starts on a card should still acknowledge the press.
+ * Fires on click, not pointerdown: the release is the moment the button
+ * actually commits, and press-and-drag-away no longer acknowledges an action
+ * that never happened.
  */
 import { useEffect } from "react";
 import { audioManager } from "../audio/audioManager.ts";
@@ -24,7 +25,7 @@ function feedbackFor(element: HTMLElement): { cue: "tap" | "charm" | "chime"; ha
 
 export function useButtonFeedback(): void {
     useEffect(() => {
-        const onPointerDown = (event: Event) => {
+        const onClick = (event: Event) => {
             const target = event.target;
             if (!(target instanceof HTMLElement)) return;
             const control = target.closest("button, input[type='checkbox'], select, [role='tab']");
@@ -40,7 +41,7 @@ export function useButtonFeedback(): void {
             void runtimeServices.haptic(haptic);
         };
 
-        window.addEventListener("pointerdown", onPointerDown, { capture: true });
-        return () => window.removeEventListener("pointerdown", onPointerDown, { capture: true });
+        window.addEventListener("click", onClick, { capture: true });
+        return () => window.removeEventListener("click", onClick, { capture: true });
     }, []);
 }

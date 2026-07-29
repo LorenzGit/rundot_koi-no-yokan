@@ -620,6 +620,24 @@ async function loadPoses(castId: string): Promise<Map<Expression, Texture>> {
     return new Map(loaded);
 }
 
+/**
+ * Start fetching tonight's textures the moment the player commits to the
+ * date, not after the canvas exists: by the time the scene builds, the
+ * backdrop and both cast sets are warm in the Pixi cache. Fire-and-forget —
+ * a failed warm is logged by Assets, never thrown into navigation.
+ */
+export function warmDateAssets(partnerId: string, playerId: string, location: LocationDef): void {
+    void Assets.load<Texture>(location.image).catch(() => undefined);
+    for (const castId of [partnerId, playerId]) {
+        const entries = POSES[castId];
+        if (!entries) continue;
+        for (const expression of EXPRESSIONS) {
+            const entry = entries[expression] as PoseEntry | undefined;
+            if (entry) void Assets.load<Texture>(entry.src).catch(() => undefined);
+        }
+    }
+}
+
 const VERDICT_TINT: Record<DateOutcome["verdict"], number> = {
     great: 0xffd76e,
     good: 0xa8ffb0,

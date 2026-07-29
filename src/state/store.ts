@@ -82,8 +82,8 @@ let state: AppState = {
     paused: false,
     menuScreen: "main",
 
-    // This game has no music, only SFX.
-    musicEnabled: false,
+    // One looping bed ("Cherry Promenade") plus SFX, on by default.
+    musicEnabled: true,
     musicVolume: 0.42,
     sfxEnabled: true,
     sfxVolume: 0.7,

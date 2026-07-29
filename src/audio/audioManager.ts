@@ -1,6 +1,13 @@
 import { store } from "../state/store.ts";
+import musicUrl from "../assets/audio/cherry-promenade.mp3";
 
 export type SfxCue = "tap" | "start" | "bounce" | "reward" | "error" | "charm" | "fumble" | "chime";
+
+/**
+ * The background bed sits this far under its own slider, so 100% on the
+ * slider is still under the interface cues.
+ */
+const MUSIC_BED = 0.75;
 
 export interface AudioDebugSnapshot {
     contextState: AudioContextState | "locked";
@@ -13,16 +20,19 @@ export interface AudioDebugSnapshot {
 }
 
 /**
- * Koi no Yokan ships with sound effects only. The template's music sequencer
- * has been removed rather than merely muted: a silent bus still scheduled
- * oscillators, and leaving dead code that can be re-enabled by a stale saved
- * setting is how "I do not want music" turns back into music.
+ * Sound effects plus one looping music bed ("Cherry Promenade"). The bed is a
+ * media element routed through the same graph as the cues, so the limiter,
+ * the player's music volume, lifecycle pauses and ad interruptions all apply
+ * to it the same way. It starts only after a real user gesture has unlocked
+ * the context.
  */
 class AudioManager {
     private context: AudioContext | null = null;
     private master: GainNode | null = null;
     private musicBus: GainNode | null = null;
     private sfxBus: GainNode | null = null;
+    private musicElement: HTMLAudioElement | null = null;
+    private musicNode: MediaElementAudioSourceNode | null = null;
     private musicTimer = 0;
     private musicStep = 0;
     private musicVoices = new Set<OscillatorNode>();
@@ -153,7 +163,10 @@ class AudioManager {
     debugSnapshot(): AudioDebugSnapshot {
         return {
             contextState: this.context?.state ?? "locked",
-            musicRunning: this.musicTimer !== 0,
+            // The element keeps running while muted: the toggle is a gain, so
+            // re-enabling is instant rather than a restart pop.
+            musicRunning:
+                this.musicElement !== null && !this.musicElement.paused && store.get().musicEnabled && !this.paused,
             musicStep: this.musicStep,
             scheduledMusicNotes: this.scheduledMusicNotes,
             activeMusicVoices: this.musicVoices.size,
@@ -185,16 +198,33 @@ class AudioManager {
         if (!this.context || !this.master || !this.musicBus || !this.sfxBus) return;
         const state = store.get();
         const now = this.context.currentTime;
-        // This game ships without music, so the music bus stays shut and the
-        // sequencer never starts. The engine is left intact rather than ripped
-        // out so the template's audio contract still holds.
-        this.musicBus.gain.setTargetAtTime(0, now, 0.12);
+        this.musicBus.gain.setTargetAtTime(state.musicEnabled ? state.musicVolume * MUSIC_BED : 0, now, 0.12);
         this.sfxBus.gain.setTargetAtTime(state.sfxEnabled ? state.sfxVolume : 0, now, 0.03);
         // 0.58 was headroom for a music bed that no longer exists. With cues
         // alone at the template's peaks the loudest sound in the game measured
         // about -35 dB, which is what "I can't hear any of them" sounds like.
         this.master.gain.setTargetAtTime(this.paused ? 0 : 0.9, now, 0.08);
-        this.stopMusic();
+        if (this.paused) this.stopMusic();
+        else this.startMusic();
+    }
+
+    /**
+     * The bed loops from the element; WebAudio just owns its gain. Playing is
+     * idempotent — sync() runs on every store change.
+     */
+    private startMusic(): void {
+        if (!this.context || !this.musicBus) return;
+        if (!this.musicElement) {
+            this.musicElement = new Audio(musicUrl);
+            this.musicElement.loop = true;
+            this.musicElement.preload = "auto";
+            this.musicNode = this.context.createMediaElementSource(this.musicElement);
+            this.musicNode.connect(this.musicBus);
+        }
+        if (this.context.state !== "running") return;
+        void this.musicElement.play().catch(() => {
+            /* the next gesture's unlock() retries */
+        });
     }
 
     private trackVoice(
@@ -219,6 +249,7 @@ class AudioManager {
     private stopMusic(): void {
         if (this.musicTimer) window.clearInterval(this.musicTimer);
         this.musicTimer = 0;
+        this.musicElement?.pause();
         if (!this.context) return;
         const stopAt = this.context.currentTime + 0.08;
         for (const oscillator of this.musicVoices) {

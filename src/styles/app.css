@@ -1570,6 +1570,21 @@ html[data-reduced-motion="true"] *::after {
     height: calc(100% / var(--ui-scale, 1));
 }
 
+/* Covers the transparent canvas while the date's textures stream in, then
+   fades: the menu backdrop used to ghost through for the first few frames. */
+.koi-date-veil {
+    position: absolute;
+    inset: 0;
+    background: #16101b;
+    opacity: 1;
+    transition: opacity 0.35s ease-out;
+    pointer-events: none;
+}
+
+.koi-date-veil.is-lifted {
+    opacity: 0;
+}
+
 /* The plan screen scrolls its middle, not its chrome: Back and Meet up are how
    you leave, and selecting someone adds the brief, which pushed both of them
    below the fold. */

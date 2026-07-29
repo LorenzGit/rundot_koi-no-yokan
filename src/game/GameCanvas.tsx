@@ -6,7 +6,7 @@
  * StrictMode-safe: the realm-wide renderer lifecycle queue serializes the
  * mount/cleanup/mount sequence, including initialization itself.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Application } from "pixi.js";
 import { createPixiApp } from "./pixiApp.ts";
 import { createStage, type Stage } from "./stage.ts";
@@ -178,6 +178,10 @@ export default function GameCanvas() {
     const hostRef = useRef<HTMLDivElement | null>(null);
     const appRef = useRef<Application | null>(null);
     const paused = useStore((s) => s.paused);
+    // Opaque until the scene has real pixels: while Pixi initializes and the
+    // textures stream in, the canvas is transparent and the menu backdrop
+    // ghosted through it for a few frames.
+    const [sceneReady, setSceneReady] = useState(false);
 
     useEffect(() => {
         const host = hostRef.current;
@@ -189,6 +193,7 @@ export default function GameCanvas() {
             .then((nextLease) => {
                 lease = nextLease;
                 appRef.current = nextLease.value.app;
+                setSceneReady(true);
             })
             .catch((error: unknown) => {
                 if (abortController.signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
@@ -205,6 +210,7 @@ export default function GameCanvas() {
         return () => {
             abortController.abort();
             appRef.current = null;
+            setSceneReady(false);
             void lease?.release();
         };
     }, []);
@@ -231,5 +237,10 @@ export default function GameCanvas() {
         return () => document.removeEventListener("visibilitychange", syncVisibility);
     }, []);
 
-    return <div ref={hostRef} className="absolute inset-0" />;
+    return (
+        <div className="absolute inset-0">
+            <div ref={hostRef} className="absolute inset-0" />
+            <div className={`koi-date-veil ${sceneReady ? "is-lifted" : ""}`} aria-hidden="true" />
+        </div>
+    );
 }

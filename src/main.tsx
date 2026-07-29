@@ -35,9 +35,7 @@ async function boot() {
     // The dating record lives in its own key so the two schemas can move
     // independently; it decides which screen the menu phase opens on.
     const profile = await loadProfile();
-    // Saved settings from before the music was dropped can still carry
-    // musicEnabled: true, so force it off rather than trusting the default.
-    store.patch({ musicEnabled: false, koiScreen: profile.avatar ? "home" : "avatar" });
+    store.patch({ koiScreen: profile.avatar ? "home" : "avatar" });
     document.documentElement.dataset.reducedMotion = String(store.get().reducedMotion);
     document.documentElement.dataset.quality = store.get().quality;
     restoreLocale();

@@ -3,7 +3,8 @@ import { useState } from "react";
 import { store } from "../../state/store.ts";
 import { CAST, CAST_BY_ID, LOCATIONS, TOPIC_GLYPH, affectionTier, traitsFor } from "../../game/data/world.ts";
 import type { TopicId } from "../../game/data/types.ts";
-import { personFor, totalAffection } from "../../state/profile.ts";
+import { getProfile, personFor, totalAffection } from "../../state/profile.ts";
+import { warmDateAssets } from "../../game/dateScene.ts";
 import { useProfile } from "./useProfile.ts";
 
 export default function PlanDate() {
@@ -114,7 +115,14 @@ export default function PlanDate() {
                 type="button"
                 className="koi-cta koi-cta-sticky"
                 disabled={!who || !where}
-                onClick={() => store.patch({ phase: "playing", dateWith: who, dateAt: where, selectedGift: null })}
+                onClick={() => {
+                    // Textures start fetching NOW, ahead of the canvas, so the
+                    // veil over the first frames lifts as fast as the network
+                    // allows rather than only once the scene asks for them.
+                    const location = LOCATIONS.find((loc) => loc.id === where);
+                    if (location && who) warmDateAssets(who, getProfile().avatar ?? "char_f_artist", location);
+                    store.patch({ phase: "playing", dateWith: who, dateAt: where, selectedGift: null });
+                }}
             >
                 Meet up
             </button>

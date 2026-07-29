@@ -102,10 +102,22 @@ export default function SettingsScreen() {
 
             <div className="koi-set-scroll">
                 <section className="koi-set-group">
-                    {/* Sound effects only. The game has no music, so a music
-                        toggle and a music slider were two controls that did
-                        nothing. */}
+                    {/* One bed, one set of cues: a toggle and a level each. */}
                     <h2 className="koi-section">Sound</h2>
+                    <Row label={t("SettingsMusic")}>
+                        <Switch
+                            label={t("SettingsMusic")}
+                            checked={state.musicEnabled}
+                            onChange={(value) => persist({ musicEnabled: value })}
+                        />
+                    </Row>
+                    <Row label={t("SettingsMusicVolume")}>
+                        <Slider
+                            label={t("SettingsMusicVolume")}
+                            value={state.musicVolume}
+                            onChange={(value) => persist({ musicVolume: value })}
+                        />
+                    </Row>
                     <Row label={t("SettingsSfx")}>
                         <Switch
                             label={t("SettingsSfx")}
