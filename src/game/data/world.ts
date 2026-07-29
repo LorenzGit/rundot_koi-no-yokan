@@ -138,6 +138,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 169,
         gender: "f",
         blurb: "Paints until sunrise. Says more with a look than a sentence.",
+        // Mizuki paints; a fresh sketchbook is the one thing she never has enough of.
+        desiredGift: "sketchbook",
         color: "#3fa3a0", // her teal hair
     },
     {
@@ -147,6 +149,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 171,
         gender: "f",
         blurb: "Arms crossed on principle. Warmer than she is willing to admit.",
+        // Rin pretends not to care; the cat plushie is how you find out she does.
+        desiredGift: "plushie",
         color: "#e8607d", // her red top and ribbon
     },
     {
@@ -156,6 +160,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 184,
         gender: "m",
         blurb: "Unhurried, unbothered. Takes a lot to impress, worth the trouble.",
+        // Haruto is unhurried about everything except a good mixtape.
+        desiredGift: "mixtape",
         color: "#5b8ac9", // his denim jacket
     },
     {
@@ -165,6 +171,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 179,
         gender: "m",
         blurb: "Runs everywhere. Laughs at everything. Genuinely means it.",
+        // Sora runs everywhere; the bottle is the one thing he forgets.
+        desiredGift: "sportsbottle",
         color: "#f0a03c", // his sunny warmth
     },
     {
@@ -174,6 +182,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 174,
         gender: "f",
         blurb: "Sings last set at midnight. Entirely aware of what she is doing.",
+        // Reina sings last set; a film reel for the hours after midnight.
+        desiredGift: "filmreel",
         color: "#c02a52", // her satin dress
     },
     {
@@ -183,6 +193,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 186,
         gender: "m",
         blurb: "Pours the drinks, remembers your order, and your name, and your birthday.",
+        // Kaito remembers your order; shortcake is his.
+        desiredGift: "cake",
         color: "#8a6bc4", // his after-dark violet
     },
     {
@@ -192,6 +204,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 172,
         gender: "f",
         blurb: "Ran here. Will race you home. Keeps a personal best for everything.",
+        // Kaede keeps a personal best for everything, including getting there first.
+        desiredGift: "tickets",
         color: "#26b391", // her teal athletic top
     },
     {
@@ -201,6 +215,8 @@ export const CAST: CastMemberDef[] = [
         heightCm: 181,
         gender: "m",
         blurb: "Climbs on weekends, stretches on weekdays, never once seems in a hurry.",
+        // Ren climbs for the view; the telescope is for what is beyond it.
+        desiredGift: "telescope",
         color: "#7a9a4e", // his olive joggers
     },
 ];

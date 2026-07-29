@@ -28,17 +28,18 @@ export const PLATFORM_IDS = Object.freeze({
     // registers the catalog at deploy. They stay REPLACE_WITH_ until that
     // deploy has happened: every surface that reads them fails closed, so the
     // shop simply does not show purchase rows until the catalog is real.
-    // Kept so the shop catalog has a stable anchor id for the LiveOps gate.
-    heartsSmall: "REPLACE_WITH_RUN_SHOP_HEARTS_400",
-    heartsMedium: "REPLACE_WITH_RUN_SHOP_HEARTS_800",
-    heartsLarge: "REPLACE_WITH_RUN_SHOP_HEARTS_1600",
-    heartsHuge: "REPLACE_WITH_RUN_SHOP_HEARTS_2400",
-    heartsMega: "REPLACE_WITH_RUN_SHOP_HEARTS_4000",
-    heartsUltra: "REPLACE_WITH_RUN_SHOP_HEARTS_8000",
-    firstDateKit: "REPLACE_WITH_RUN_SHOP_FIRST_DATE_KIT",
-    romanticBundle: "REPLACE_WITH_RUN_SHOP_ROMANTIC_BUNDLE",
-    confidantPass: "REPLACE_WITH_RUN_SHOP_CONFIDANT",
-    confidantEntitlement: "REPLACE_WITH_RUN_ENTITLEMENT_CONFIDANT",
+    // Shop items and entitlements must match rundot/shop.config.json, which
+    // registers the catalog at deploy.
+    heartsSmall: "koi_hearts_400",
+    heartsMedium: "koi_hearts_800",
+    heartsLarge: "koi_hearts_1600",
+    heartsHuge: "koi_hearts_2400",
+    heartsMega: "koi_hearts_4000",
+    heartsUltra: "koi_hearts_8000",
+    firstDateKit: "koi_first_date_kit",
+    romanticBundle: "koi_romantic_bundle",
+    confidantPass: "koi_confidant",
+    confidantEntitlement: "koi_entitlement_confidant",
     // Matches rundot/shop.config.json. Live as written — the surface still
     // gates on runtimeServices.shopEnabled (LiveOps + catalog), so it only
     // lights up once the shop is genuinely reachable.

@@ -56,7 +56,20 @@ export interface DateSimOptions {
     /** How many actions the evening is worth. */
     moves?: number;
     seed?: number;
+    /**
+     * The gift id tonight's company secretly hopes for. Gifting it is always a
+     * strong match (DESIRED_GIFT_MULTIPLIER floor, on top of the usual topic
+     * logic); anything else scores by the normal rules.
+     */
+    desiredGiftId?: string;
 }
+
+/**
+ * What granting their wish is worth, at minimum: better than a like (1.8x),
+ * short of meeting tonight's live topic (4x), so the live subject still wins
+ * when the two coincide.
+ */
+export const DESIRED_GIFT_MULTIPLIER = 2.5;
 
 /**
  * How long an evening runs, in decisions.
@@ -197,11 +210,13 @@ export class DateSim {
     private readonly cooldowns = new Map<string, number>();
     /** Recent action ids, newest last — drives repetition decay. */
     private readonly recent: string[] = [];
+    private readonly desiredGiftId: string | undefined;
 
     constructor(opts: DateSimOptions) {
         this.archetype = opts.archetype;
         this.location = opts.location;
         this.affection = opts.affection;
+        this.desiredGiftId = opts.desiredGiftId;
         this.moves = opts.moves ?? movesForAffection(opts.affection);
         this.movesLeft = this.moves;
         this.rng = makeRng(opts.seed ?? 1);
@@ -352,6 +367,10 @@ export class DateSim {
         // it is worth the most — that is the skill the topic row is teaching.
         const giftTopic = action.needsGift && gift ? gift.topic : null;
         const topic = giftTopic ?? (action.topicSensitive ? this.topic : null);
+        // Their wish reads as a wish, whatever the topic math says.
+        if (action.needsGift && gift && gift.id === this.desiredGiftId) {
+            reasons.push({ delta: 2, text: "Exactly what they wished for" });
+        }
         if (topic) {
             const live = this.isActiveTopic(topic);
             const loved = this.archetype.likes.includes(topic);
@@ -533,6 +552,12 @@ export class DateSim {
                 topicMatched = true;
             } else {
                 topicMultiplier = 0.7;
+            }
+            // Their wish, granted: always a strong gift even when tonight's
+            // subject is something else entirely. It lifts, never overrides.
+            if (gift.id === this.desiredGiftId) {
+                topicMultiplier = Math.max(topicMultiplier, DESIRED_GIFT_MULTIPLIER);
+                topicMatched = true;
             }
         } else if (action.topicSensitive) {
             if (archetype.likes.includes(this.topic)) {

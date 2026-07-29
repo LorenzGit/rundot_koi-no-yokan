@@ -22,7 +22,7 @@ import {
     HAND_SIZE,
     TICK_SECONDS,
 } from "../../game/data/actions.ts";
-import { GIFTS_BY_ID, TOPIC_GLYPH } from "../../game/data/world.ts";
+import { CAST_BY_ID, GIFTS_BY_ID, TOPIC_GLYPH } from "../../game/data/world.ts";
 import { consumeGift } from "../../state/profile.ts";
 import { audioManager } from "../../audio/audioManager.ts";
 import { useProfile } from "./useProfile.ts";
@@ -136,6 +136,7 @@ function Delta({ value }: { value: number | undefined }) {
 export default function DateHud() {
     const gauges = useStore((s) => s.gauges);
     const selectedGift = useStore((s) => s.selectedGift);
+    const dateWith = useStore((s) => s.dateWith);
     const profile = useProfile();
     const [, forceTick] = useState(0);
     // "gift" is a pseudo-family: it lists what is in your bag rather than a
@@ -160,6 +161,11 @@ export default function DateHud() {
     const sim = dateControls.sim;
     const affection = sim?.affection ?? 0;
     const ownedGifts = Object.entries(profile.inventory).filter(([, n]) => n > 0);
+    // Tonight's wish: the one gift they secretly hope for. Advertised here so
+    // packing for the date is a decision, and marked in the bag so finding it
+    // mid-evening takes one glance.
+    const wishGift = GIFTS_BY_ID[CAST_BY_ID[dateWith ?? ""]?.desiredGift ?? ""];
+    const sortedGifts = [...ownedGifts].sort(([a], [b]) => Number(b === wishGift?.id) - Number(a === wishGift?.id));
 
     /**
      * Deal `count` playable moves from a family, preferring ones not already in
@@ -425,6 +431,15 @@ export default function DateHud() {
                     </div>
                 )}
 
+                {/* Their wish, out in the open from the first second. */}
+                {wishGift && (
+                    <div className="koi-wish" title={`${wishGift.name} is always a strong gift tonight`}>
+                        <span className="koi-wish-label">Wishes for</span>
+                        <img className="koi-wish-art" src={wishGift.image} alt="" />
+                        <span className="koi-wish-name">{wishGift.name}</span>
+                    </div>
+                )}
+
                 <div className={`koi-coach koi-coach-${coach.tone}`}>
                     <span className="koi-coach-icon" aria-hidden="true">
                         {coach.icon}
@@ -552,20 +567,26 @@ export default function DateHud() {
 
                         <div className={`koi-cards koi-family-${openFamily}`}>
                             {openFamily === "gift" &&
-                                ownedGifts.map(([id, count]) => {
+                                sortedGifts.map(([id, count]) => {
                                     const gift = GIFTS_BY_ID[id];
                                     if (!gift) return null;
+                                    const isWish = id === wishGift?.id;
                                     return (
                                         <button
                                             type="button"
                                             key={id}
-                                            className="koi-card koi-card-gift"
+                                            className={`koi-card koi-card-gift ${isWish ? "is-wish" : ""}`}
                                             onClick={() => playGift(id)}
                                         >
                                             <img className="koi-card-giftart" src={gift.image} alt="" />
                                             <span className="koi-card-body">
-                                                <span className="koi-card-label">{gift.name}</span>
-                                                <span className="koi-card-hint">×{count} · 4x on their topic</span>
+                                                <span className="koi-card-label">
+                                                    {gift.name}
+                                                    {isWish && <span className="koi-wish-badge">their wish</span>}
+                                                </span>
+                                                <span className="koi-card-hint">
+                                                    ×{count} · {isWish ? "always lands" : "4x on their topic"}
+                                                </span>
                                             </span>
                                         </button>
                                     );

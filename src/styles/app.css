@@ -3626,6 +3626,59 @@ button.koi-stage-plate:active {
     line-height: 1;
 }
 
+/* Their wish, worn openly: a small pill beside the topics, gold like a gift. */
+.koi-wish {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 4px 10px 4px 6px;
+    border-radius: 99px;
+    align-self: flex-start;
+    background: rgba(24, 17, 29, 0.78);
+    border: 1px solid color-mix(in srgb, var(--koi-gold) 65%, transparent);
+    backdrop-filter: blur(6px);
+}
+
+.koi-wish-label {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--koi-gold);
+    white-space: nowrap;
+}
+
+.koi-wish-art {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.koi-wish-name {
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* The bag's own marker on the wished-for card. */
+.koi-card-gift.is-wish {
+    border-color: color-mix(in srgb, var(--koi-gold) 70%, transparent);
+    background: color-mix(in srgb, var(--koi-gold) 12%, transparent);
+}
+
+.koi-wish-badge {
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--koi-gold) 30%, transparent);
+    color: var(--koi-gold);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    vertical-align: 1px;
+}
+
 /* The one line that says what to do next. */
 .koi-coach {
     display: flex;
@@ -4203,6 +4256,12 @@ button.koi-stage-plate:active {
    leaving the left two thirds as an unobstructed stage. */
 
 @media (orientation: landscape) {
+    /* The wish pill hides rotated: the header is at capacity beside the
+       balloons, and the bag still marks the wished-for card. */
+    .koi-hud-header > .koi-wish {
+        display: none;
+    }
+
     .koi-hud {
         display: grid;
         /* minmax(0, 1fr), NOT 1fr. A bare `1fr` is `minmax(auto, 1fr)`, and

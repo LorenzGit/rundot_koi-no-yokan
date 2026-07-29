@@ -162,6 +162,13 @@ function DevelopmentToolsSlot() {
 
 function Toast() {
     const toast = useStore((state) => state.toast);
+    // A toast you never tap still leaves: it is a note, not a roadblock.
+    // The timer re-arms per message, so a queue of toasts each gets read.
+    useEffect(() => {
+        if (!toast) return;
+        const id = window.setTimeout(() => store.patch({ toast: null }), 4000);
+        return () => window.clearTimeout(id);
+    }, [toast]);
     if (!toast) return null;
     return (
         <button type="button" className="toast" onClick={() => store.patch({ toast: null })}>
