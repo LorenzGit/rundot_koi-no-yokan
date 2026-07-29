@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./ui/App.tsx";
 import ErrorBoundary from "./ui/ErrorBoundary.tsx";
 import { store } from "./state/store.ts";
-import { applyRunSafeArea, initSdk, registerLifecycles, requestHostExit } from "./sdk/runSdk.ts";
+import { applyRunSafeArea, getRunCapabilities, initSdk, registerLifecycles, requestHostExit } from "./sdk/runSdk.ts";
 import { warmAssets } from "./assets/preload.ts";
 import { saveSystem } from "./systems/save.ts";
 import { loadProfile } from "./state/profile.ts";
@@ -22,6 +22,13 @@ async function boot() {
     //    Resolves even if init fails (local dev outside the RUN host).
     await initSdk();
     applyRunSafeArea();
+    // The RUN host reports webview-accurate insets, so its values are used
+    // exactly (see the data-run-host override in app.css). The 44px floor in
+    // the stylesheet only guesses for contexts that cannot report: browsers,
+    // the SDK mock, and the pre-init window.
+    if (getRunCapabilities().host && !getRunCapabilities().mock) {
+        document.documentElement.dataset.runHost = "";
+    }
 
     // 2. Restore versioned progress/settings before the first render.
     await saveSystem.load();

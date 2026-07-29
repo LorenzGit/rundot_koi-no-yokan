@@ -1538,6 +1538,15 @@ html[data-reduced-motion="true"] *::after {
     --koi-halo: 0 1px 2px rgba(12, 6, 16, 0.95), 0 2px 12px rgba(12, 6, 16, 0.8);
 }
 
+/* The RUN host publishes webview-accurate insets: its webview already sits
+   below the native header, so the host's own value (often 0) is the whole
+   clearance needed. The 44px floor above is only for contexts that cannot
+   report (plain browser, SDK mock); applied against the host it shoved every
+   screen down under an empty band. */
+:root[data-run-host] {
+    --koi-safe-top: calc(var(--safe-top, 0px) / var(--ui-scale, 1));
+}
+
 /* Anything sitting on the sakura art with no panel of its own. Panelled text
    (plates, menu buttons, settings groups, the hero card) already has a
    background to sit on and is deliberately left alone. */
@@ -2410,6 +2419,12 @@ button.koi-stage-plate:active {
 
 .koi-fab:active {
     background: rgba(20, 12, 26, 0.85);
+}
+
+/* Same rule as the screens: in the RUN host the reported inset is the whole
+   clearance, so the gear does not float 44px below an already-safe edge. */
+:root[data-run-host] .koi-fab {
+    top: calc(8px + var(--safe-top, 0px));
 }
 
 /* Room reserved on every header row and on the date HUD, so a balance or a
