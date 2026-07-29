@@ -3,13 +3,6 @@
   "relativePathToDistFolder": "dist",
   "usesPreloader": false,
   "orientation": "both",
-  "keywords": [
-    "dating",
-    "romance",
-    "cozy",
-    "visual-novel",
-    "choices",
-    "anime-week"
-  ],
+  "keywords": ["dating", "romance", "cozy", "visual-novel", "choices", "anime-week"],
   "kitId": null
 }

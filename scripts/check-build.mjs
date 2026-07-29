@@ -59,6 +59,8 @@ const compiledJavaScript = fs
     .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
     .map((entry) => fs.readFileSync(path.join(dist, "assets", entry.name), "utf8"))
     .join("\n");
+assert(compiledJavaScript.includes("koi-build-version"), "visible build-version label is absent");
+assert(compiledJavaScript.includes(packageJson.version), `visible build version does not match ${packageJson.version}`);
 for (const developmentMarker of [
     "Development diagnostics",
     "RESET SESSION TUNING",

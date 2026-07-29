@@ -27,6 +27,7 @@ import { MENU_BACKDROP_URL } from "../assets/manifest.ts";
 import { useProfile } from "./koi/useProfile.ts";
 import SettingsFab from "./koi/SettingsFab.tsx";
 import { useButtonFeedback } from "./useButtonFeedback.ts";
+import packageJson from "../../package.json";
 
 const DevelopmentTools = import.meta.env.DEV ? lazy(() => import("../dev/DevelopmentTools.tsx")) : null;
 
@@ -35,29 +36,48 @@ const DevelopmentTools = import.meta.env.DEV ? lazy(() => import("../dev/Develop
 document.documentElement.style.setProperty("--scene-backdrop", `url("${MENU_BACKDROP_URL}")`);
 
 /**
- * The Pixi stage draws in design units and scales to the viewport, so on a big
- * screen the art grows. The DOM UI was authored in raw pixels and did not, so
- * on anything wider than a phone the HUD text shrank to specks against a
- * scaled-up scene. This publishes the same factor Pixi uses; the stylesheet
- * lays the UI out in design units and scales the whole thing to match.
+ * The DOM UI was authored around the iPhone 16 Pro in both orientations.
+ * Larger viewports scale that proven layout up, but only while enough width
+ * and height remain for the complete design. Basing the factor on the short
+ * edge alone made desktop landscape 2.4x tall while leaving less than 720
+ * design pixels across, collapsing every horizontal layout into a clipped
+ * strip.
  *
- * 393 is the iPhone 16 Pro logical short edge — the size this UI was drawn
- * for — and the floor of 1 guarantees phone rendering is bit-for-bit what it
- * was before.
+ * The CSS layout box is published alongside the scale so percentage-based
+ * centring uses design pixels, not the unscaled physical viewport.
  */
-const DESIGN_SHORT_EDGE = 393;
+const PORTRAIT_DESIGN_WIDTH = 393;
+const PORTRAIT_MIN_HEIGHT = 667;
+const LANDSCAPE_DESIGN_WIDTH = 840;
+const LANDSCAPE_DESIGN_HEIGHT = 393;
+const MAX_UI_SCALE = 2.4;
+
+function uiScaleFor(width: number, height: number): number {
+    const portrait = width <= height;
+    const designWidth = portrait ? PORTRAIT_DESIGN_WIDTH : LANDSCAPE_DESIGN_WIDTH;
+    const designHeight = portrait ? PORTRAIT_MIN_HEIGHT : LANDSCAPE_DESIGN_HEIGHT;
+    return Math.min(MAX_UI_SCALE, Math.max(1, Math.min(width / designWidth, height / designHeight)));
+}
 
 function useUiScale(): void {
     useEffect(() => {
         const applyScale = () => {
-            const shortEdge = Math.min(window.innerWidth, window.innerHeight);
-            const scale = Math.min(2.4, Math.max(1, shortEdge / DESIGN_SHORT_EDGE));
+            const frame = document.getElementById("app-frame");
+            const width = frame?.clientWidth || window.innerWidth;
+            const height = frame?.clientHeight || window.innerHeight;
+            const scale = uiScaleFor(width, height);
             document.documentElement.style.setProperty("--ui-scale", scale.toFixed(4));
+            document.documentElement.style.setProperty("--ui-layout-width", `${width / scale}px`);
+            document.documentElement.style.setProperty("--ui-layout-height", `${height / scale}px`);
         };
+        const frame = document.getElementById("app-frame");
+        const observer = frame && typeof ResizeObserver !== "undefined" ? new ResizeObserver(applyScale) : null;
         applyScale();
         window.addEventListener("resize", applyScale);
         window.addEventListener("orientationchange", applyScale);
+        if (frame && observer) observer.observe(frame);
         return () => {
+            observer?.disconnect();
             window.removeEventListener("resize", applyScale);
             window.removeEventListener("orientationchange", applyScale);
         };
@@ -145,6 +165,7 @@ export default function App() {
                 the date survives the trip. */}
             {menuScreen === "settings" && <SettingsScreen />}
             <SettingsFab />
+            <span className="koi-build-version">v{packageJson.version}</span>
             <Toast />
             <DevelopmentToolsSlot />
         </div>

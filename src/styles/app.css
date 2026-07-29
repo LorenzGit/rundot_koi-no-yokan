@@ -1559,15 +1559,16 @@ html[data-reduced-motion="true"] *::after {
     text-shadow: var(--koi-halo);
 }
 
-/* Design-resolution DOM: lay out in a box of `100% / scale` design units, then
-   scale it back up to fill the frame. This is the same trick the Pixi stage
-   uses, which is the point — the HUD and the scene now grow together. */
+/* Design-resolution DOM: App.tsx publishes the exact unscaled layout box, then
+   this transform grows it into the playable frame. Keeping both values on the
+   same measurement prevents desktop centring from mixing physical viewport
+   percentages with design pixels. */
 .koi-screen,
 .koi-hud {
     transform: scale(var(--ui-scale, 1));
     transform-origin: top left;
-    width: calc(100% / var(--ui-scale, 1));
-    height: calc(100% / var(--ui-scale, 1));
+    width: var(--ui-layout-width, 100%);
+    height: var(--ui-layout-height, 100%);
 }
 
 /* Covers the transparent canvas while the date's textures stream in, then
@@ -2434,6 +2435,24 @@ button.koi-stage-plate:active {
 
 .koi-fab:active {
     background: rgba(20, 12, 26, 0.85);
+}
+
+/* One source-of-truth build identity, unobtrusive but always readable on the
+   first screen. It lives outside the scaled surface so 10px remains the
+   effective rendered floor on every supported viewport. */
+.koi-build-version {
+    position: fixed;
+    z-index: 44;
+    left: max(10px, var(--safe-left, 0px));
+    top: max(8px, var(--safe-top, 0px));
+    color: rgba(253, 246, 236, 0.72);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-shadow: var(--koi-halo);
+    pointer-events: none;
 }
 
 /* Same rule as the screens: in the RUN host the reported inset is the whole
@@ -4722,8 +4741,14 @@ button.koi-stage-plate:active {
            with the painted tree visible either side. */
         padding-top: calc(6px + max(var(--safe-top, 0px), 20px) / var(--ui-scale, 1));
         padding-bottom: calc(10px + var(--safe-bottom, 0px) / var(--ui-scale, 1));
-        padding-left: max(calc(max(60px, var(--safe-left, 0px)) / var(--ui-scale, 1)), calc((100% - 720px) / 2));
-        padding-right: max(calc(max(60px, var(--safe-right, 0px)) / var(--ui-scale, 1)), calc((100% - 720px) / 2));
+        padding-left: max(
+            calc(max(60px, var(--safe-left, 0px)) / var(--ui-scale, 1)),
+            calc((var(--ui-layout-width, 100vw) - 720px) / 2)
+        );
+        padding-right: max(
+            calc(max(60px, var(--safe-right, 0px)) / var(--ui-scale, 1)),
+            calc((var(--ui-layout-width, 100vw) - 720px) / 2)
+        );
     }
 
     .koi-avatar-head {
