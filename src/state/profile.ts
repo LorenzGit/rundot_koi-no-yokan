@@ -47,6 +47,8 @@ export interface Profile {
     people: Record<string, MetPerson>;
     /** Gift id -> how many are in the bag. */
     inventory: Record<string, number>;
+    /** Set once the How to play legend has been shown; Settings can re-open it. */
+    tutorialSeen: boolean;
     totalDates: number;
 }
 
@@ -63,6 +65,7 @@ const EMPTY: Profile = {
     datesSinceAd: 0,
     people: {},
     inventory: { bubbletea: 1 },
+    tutorialSeen: false,
     totalDates: 0,
 };
 
@@ -119,6 +122,7 @@ function coerce(raw: unknown): Profile {
         datesSinceAd: Math.max(0, Number(value.datesSinceAd) || 0),
         people,
         inventory,
+        tutorialSeen: value.tutorialSeen === true,
         totalDates: Math.max(0, Number(value.totalDates) || 0),
     };
 }
@@ -239,6 +243,13 @@ export function grantHearts(hearts: number): void {
 export function grantGift(giftId: string): void {
     mutate((p) => {
         p.inventory[giftId] = (p.inventory[giftId] ?? 0) + 1;
+    });
+}
+
+/** The How to play legend has been seen (it can always be re-opened). */
+export function markTutorialSeen(): void {
+    mutate((p) => {
+        p.tutorialSeen = true;
     });
 }
 

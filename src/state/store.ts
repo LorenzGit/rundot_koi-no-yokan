@@ -54,6 +54,8 @@ export interface AppState {
 
     /** One-time toasts surfaced from systems/purchases/tutorials */
     toast: string | null;
+    /** The How to play legend, re-openable from Settings. */
+    howToOpen: boolean;
 
     /** --- KOI NO YOKAN ---------------------------------------------------- */
     /** Which meta screen is showing while phase === 'menu'. */
@@ -95,6 +97,7 @@ let state: AppState = {
     quality: "high",
 
     toast: null,
+    howToOpen: false,
 
     koiScreen: "avatar",
     dateWith: null,

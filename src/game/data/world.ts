@@ -344,7 +344,7 @@ export interface Trait {
 }
 
 /** Topic ids read badly raw ("Loves cat", "Loves heart"). */
-const TOPIC_LABEL: Record<TopicId, string> = {
+export const TOPIC_LABEL: Record<TopicId, string> = {
     food: "good food",
     cat: "cats",
     music: "music",
@@ -357,6 +357,22 @@ const TOPIC_LABEL: Record<TopicId, string> = {
     art: "art",
     heart: "romance",
     awkward: "awkward silences",
+};
+
+/** One word per topic, for the HUD chips where "good food" will not fit. */
+export const TOPIC_SHORT: Record<TopicId, string> = {
+    food: "food",
+    cat: "cats",
+    music: "music",
+    travel: "travel",
+    movie: "films",
+    work: "work",
+    rain: "rain",
+    stars: "sky",
+    sport: "sports",
+    art: "art",
+    heart: "love",
+    awkward: "awkward",
 };
 
 /**

@@ -22,7 +22,7 @@ import {
     HAND_SIZE,
     TICK_SECONDS,
 } from "../../game/data/actions.ts";
-import { GIFTS_BY_ID, TOPIC_GLYPH } from "../../game/data/world.ts";
+import { GIFTS_BY_ID, TOPIC_GLYPH, TOPIC_LABEL, TOPIC_SHORT } from "../../game/data/world.ts";
 import { consumeGift } from "../../state/profile.ts";
 import { audioManager } from "../../audio/audioManager.ts";
 import { useProfile } from "./useProfile.ts";
@@ -423,8 +423,8 @@ export default function DateHud() {
                     <div className="koi-topics">
                         <span className="koi-topics-label">Wants to talk about</span>
                         {activeTopics.map((topic) => (
-                            <span key={topic} className="koi-topic-chip" title={topic}>
-                                {TOPIC_GLYPH[topic as TopicId] ?? "?"}
+                            <span key={topic} className="koi-topic-chip" title={TOPIC_LABEL[topic as TopicId] ?? topic}>
+                                {TOPIC_GLYPH[topic as TopicId] ?? "?"} <em>{TOPIC_SHORT[topic as TopicId]}</em>
                             </span>
                         ))}
                     </div>

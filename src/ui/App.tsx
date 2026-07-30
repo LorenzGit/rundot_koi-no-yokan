@@ -18,6 +18,7 @@ import PostcardScreen from "./koi/PostcardScreen.tsx";
 import GiftShop from "./koi/GiftShop.tsx";
 import ResultScreen from "./koi/ResultScreen.tsx";
 import DateHud from "./koi/DateHud.tsx";
+import HowToPlay from "./koi/HowToPlay.tsx";
 import GameCanvas from "../game/GameCanvas.tsx";
 import SettingsScreen from "./SettingsScreen.tsx";
 import { applyRunSafeArea } from "../sdk/runSdk.ts";
@@ -138,11 +139,16 @@ export default function App() {
     useButtonFeedback();
     const phase = useStore((s) => s.phase);
     const menuScreen = useStore((s) => s.menuScreen);
+    const howToOpen = useStore((s) => s.howToOpen);
+    const tutorialSeen = useProfile((p) => p.tutorialSeen);
     // The character you chose to be owns the accent colour for the whole app.
     // Anything showing a *different* person overrides --koi-char locally; the
     // rest of the chrome inherits yours from here. See :root in app.css.
     const avatar = useProfile((p) => p.avatar);
     const accent = avatar ? CAST_BY_ID[avatar]?.color : undefined;
+    // The legend opens itself exactly once: at the first date, over the veil
+    // that hides the scene loading. After that it is Settings-only.
+    const showHowTo = howToOpen || (phase === "playing" && !tutorialSeen);
     return (
         <div
             id="app-frame"
@@ -164,6 +170,7 @@ export default function App() {
                 with no way back. Overlaying also keeps the canvas mounted, so
                 the date survives the trip. */}
             {menuScreen === "settings" && <SettingsScreen />}
+            {showHowTo && <HowToPlay />}
             <SettingsFab />
             <span className="koi-build-version">v{packageJson.version}</span>
             <Toast />

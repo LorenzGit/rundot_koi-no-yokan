@@ -3651,6 +3651,15 @@ button.koi-stage-plate:active {
     line-height: 1;
 }
 
+/* The word beside the glyph, so nobody has to guess the vocabulary. */
+.koi-topic-chip em {
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 800;
+    color: rgba(253, 246, 236, 0.85);
+    vertical-align: 2px;
+}
+
 /* Their wish, worn openly: a small pill beside the topics, gold like a gift. */
 .koi-wish {
     display: flex;
@@ -3702,6 +3711,96 @@ button.koi-stage-plate:active {
     letter-spacing: 0.06em;
     text-transform: uppercase;
     vertical-align: 1px;
+}
+
+/* --- how to play -------------------------------------------------------- */
+
+.koi-howto-backdrop {
+    z-index: 60;
+    display: flex;
+    background: rgba(12, 6, 16, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.koi-howto {
+    position: relative;
+    inset: auto;
+    margin: auto;
+    width: min(420px, 100%);
+    max-height: 100%;
+    gap: 10px;
+    padding: 18px 20px calc(16px + var(--koi-safe-bottom));
+    border-radius: 18px;
+    background: radial-gradient(120% 80% at 50% 0%, #47304f 0%, #2b1f2e 55%, #1b1420 100%);
+    overflow-y: auto;
+    box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.8);
+    /* .koi-screen scales from top-left; a centred dialog grows from its middle. */
+    transform-origin: center;
+}
+
+.koi-howto .koi-title-sm {
+    text-align: center;
+}
+
+.koi-howto-block p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(253, 246, 236, 0.75);
+}
+
+.koi-howto-legend {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    display: grid;
+    /* Two columns: a legend entry that ellipsises "the night sky" teaches
+       nothing. */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.koi-howto-legend li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 8px;
+    border-radius: 10px;
+    background: rgba(253, 246, 236, 0.07);
+    min-width: 0;
+}
+
+.koi-howto-glyph {
+    font-size: 18px;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.koi-howto-legend li > span:last-child {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.koi-howto-legend strong {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.koi-howto-legend em {
+    font-size: 9px;
+    font-style: normal;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.koi-howto-foot {
+    margin: 0;
+    text-align: center;
+    font-size: 10px;
+    color: rgba(253, 246, 236, 0.5);
 }
 
 /* The wish, spent: muted, and the card is disabled on top of it. */

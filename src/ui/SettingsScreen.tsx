@@ -213,6 +213,17 @@ export default function SettingsScreen() {
                             </button>
                         </div>
                     </Row>
+                    {/* The legend can always be re-read here: skipping it once
+                        is a choice, not a life sentence. */}
+                    <Row label="How to play">
+                        <button
+                            type="button"
+                            className="koi-btn koi-btn-sm"
+                            onClick={() => store.patch({ howToOpen: true })}
+                        >
+                            Open
+                        </button>
+                    </Row>
                 </section>
 
                 <p className="koi-set-note">
