@@ -6,7 +6,7 @@
  * StrictMode-safe: the realm-wide renderer lifecycle queue serializes the
  * mount/cleanup/mount sequence, including initialization itself.
  */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Application } from "pixi.js";
 import { createPixiApp } from "./pixiApp.ts";
 import { createStage, type Stage } from "./stage.ts";
@@ -185,6 +185,17 @@ export default function GameCanvas() {
     // ghosted through it for a few frames.
     const [sceneReady, setSceneReady] = useState(false);
 
+    /**
+     * A capture surface (ViewDeck's offscreen webview) reports document.hidden
+     * from the very first frame — there is no real background transition to
+     * honor, and pausing there froze the scene before it ever drew: QA
+     * screenshots came out black with the gauges stuck at their initial
+     * values. Only an actual visible → hidden transition counts as
+     * backgrounded; the host lifecycle still owns the real pause.
+     */
+    const everVisible = useRef(document.visibilityState === "visible");
+    const isBackgrounded = useCallback(() => document.hidden && everVisible.current, []);
+
     useEffect(() => {
         const host = hostRef.current;
         if (!host) return;
@@ -223,18 +234,7 @@ export default function GameCanvas() {
         if (!app) return;
         if (paused || isBackgrounded()) app.ticker.stop();
         else app.ticker.start();
-    }, [paused]);
-
-    /**
-     * A capture surface (ViewDeck's offscreen webview) reports document.hidden
-     * from the very first frame — there is no real background transition to
-     * honor, and pausing there froze the scene before it ever drew: QA
-     * screenshots came out black with the gauges stuck at their initial
-     * values. Only an actual visible → hidden transition counts as
-     * backgrounded; the host lifecycle still owns the real pause.
-     */
-    let everVisible = document.visibilityState === "visible";
-    const isBackgrounded = () => document.hidden && everVisible;
+    }, [paused, isBackgrounded]);
 
     // Browser visibility is a second lifecycle source outside the RUN host.
     // Keep it independent from `paused` so a visibility event cannot clear a
@@ -243,14 +243,14 @@ export default function GameCanvas() {
         const syncVisibility = () => {
             const app = appRef.current;
             if (!app) return;
-            if (document.visibilityState === "visible") everVisible = true;
+            if (document.visibilityState === "visible") everVisible.current = true;
             if (isBackgrounded() || store.get().paused) app.ticker.stop();
             else app.ticker.start();
         };
         syncVisibility();
         document.addEventListener("visibilitychange", syncVisibility);
         return () => document.removeEventListener("visibilitychange", syncVisibility);
-    }, []);
+    }, [isBackgrounded]);
 
     /**
      * The rAF-stall watchdog. Some webviews suspend requestAnimationFrame with
@@ -272,7 +272,7 @@ export default function GameCanvas() {
             }
         }, 300);
         return () => window.clearInterval(id);
-    }, []);
+    }, [isBackgrounded]);
 
     return (
         <div className="absolute inset-0">
