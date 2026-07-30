@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Application } from "pixi.js";
 import { createPixiApp } from "./pixiApp.ts";
 import { createStage, type Stage } from "./stage.ts";
-import { createDateScene } from "./dateScene.ts";
+import { createDateScene, sceneHeartbeat } from "./dateScene.ts";
 import { DateSim, movesForAffection, type DateOutcome } from "./sim/dateSim.ts";
 import { CONFIDANT_BONUS_MOVES, AD_INTERSTITIAL_EVERY } from "./data/monetization.ts";
 import { PLATFORM_IDS } from "../config/platform.ts";
@@ -170,8 +170,9 @@ async function initializeGameRenderer(scope: RendererLifecycleScope, host: HTMLE
         dateControls.sim = null;
     });
 
-    // Respect a pause that landed while the canvas was initializing.
-    if (store.get().paused || document.hidden) app.ticker.stop();
+    // Respect a pause that landed while the canvas was initializing. An
+    // always-hidden capture surface is not a pause: see isBackgrounded below.
+    if (store.get().paused) app.ticker.stop();
     return { app };
 }
 
@@ -220,9 +221,20 @@ export default function GameCanvas() {
     useEffect(() => {
         const app = appRef.current;
         if (!app) return;
-        if (paused || document.hidden) app.ticker.stop();
+        if (paused || isBackgrounded()) app.ticker.stop();
         else app.ticker.start();
     }, [paused]);
+
+    /**
+     * A capture surface (ViewDeck's offscreen webview) reports document.hidden
+     * from the very first frame — there is no real background transition to
+     * honor, and pausing there froze the scene before it ever drew: QA
+     * screenshots came out black with the gauges stuck at their initial
+     * values. Only an actual visible → hidden transition counts as
+     * backgrounded; the host lifecycle still owns the real pause.
+     */
+    let everVisible = document.visibilityState === "visible";
+    const isBackgrounded = () => document.hidden && everVisible;
 
     // Browser visibility is a second lifecycle source outside the RUN host.
     // Keep it independent from `paused` so a visibility event cannot clear a
@@ -231,11 +243,35 @@ export default function GameCanvas() {
         const syncVisibility = () => {
             const app = appRef.current;
             if (!app) return;
-            if (document.hidden || store.get().paused) app.ticker.stop();
+            if (document.visibilityState === "visible") everVisible = true;
+            if (isBackgrounded() || store.get().paused) app.ticker.stop();
             else app.ticker.start();
         };
+        syncVisibility();
         document.addEventListener("visibilitychange", syncVisibility);
         return () => document.removeEventListener("visibilitychange", syncVisibility);
+    }, []);
+
+    /**
+     * The rAF-stall watchdog. Some webviews suspend requestAnimationFrame with
+     * no lifecycle signal at all — capture surfaces (ViewDeck's hidden panel)
+     * are the known case, and a Pixi ticker left that way never ticks: the sim
+     * froze with the gauges stuck at their initial values. When the heartbeat
+     * goes quiet WITHOUT a real background reason (host pause, or a genuine
+     * visible → hidden transition), drive the ticker manually. On any normal
+     * display this interval never fires, because the heartbeat is always fresh.
+     */
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            const app = appRef.current;
+            if (!app) return;
+            if (store.get().paused || isBackgrounded()) return;
+            if (sceneHeartbeat.lastTickAt === 0) return; // scene not up yet
+            if (performance.now() - sceneHeartbeat.lastTickAt > 300) {
+                app.ticker.update();
+            }
+        }, 300);
+        return () => window.clearInterval(id);
     }, []);
 
     return (

@@ -490,6 +490,19 @@ export default function DateHud() {
                         <span className="koi-wish-name">{wishGift.name}</span>
                     </div>
                 )}
+                {/* Topics ride the same strip in landscape: tonight's subjects
+                    stay readable beside the wish instead of vanishing with the
+                    header pill. */}
+                {activeTopics.length > 0 && (
+                    <div className="koi-topics koi-topics-deck">
+                        <span className="koi-topics-label">Talks about</span>
+                        {activeTopics.map((topic) => (
+                            <span key={topic} className="koi-topic-chip" title={TOPIC_LABEL[topic as TopicId] ?? topic}>
+                                {TOPIC_GLYPH[topic as TopicId] ?? "?"} <em>{TOPIC_SHORT[topic as TopicId]}</em>
+                            </span>
+                        ))}
+                    </div>
+                )}
                 {performing ? (
                     <button
                         type="button"

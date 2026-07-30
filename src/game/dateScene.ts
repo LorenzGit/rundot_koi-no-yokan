@@ -18,7 +18,11 @@ import { EXPRESSIONS } from "./data/types.ts";
 import castPoses from "./data/cast-poses.json";
 import { placeBackdrop, REFERENCE_CM } from "./data/backdrop.ts";
 import { TAIL_SECONDS } from "./data/actions.ts";
+import { store } from "../state/store.ts";
 import { NoiseRandom } from "./noiseRandom.ts";
+
+/** Last time the scene ticked, read by the rAF-stall watchdog in GameCanvas. */
+export const sceneHeartbeat = { lastTickAt: 0 };
 
 export interface Scene {
     destroy(): void;
@@ -745,10 +749,38 @@ export async function createDateScene(
 
     layout();
     const offResize = stage.onResize(layout);
+    // Arm the watchdog from the moment the scene exists: a webview that
+    // suspends rAF from the start would otherwise leave this at 0 forever and
+    // the watchdog would wait forever for the scene to be "up".
+    sceneHeartbeat.lastTickAt = performance.now();
+
+    // Dev-only QA probe: proves the ticker is alive in capture webviews.
+    if (import.meta.env.DEV) {
+        const w = window as unknown as {
+            __koiProbe?: { ticks: number; paused(): boolean; started(): boolean; fps(): number };
+        };
+        if (!w.__koiProbe) {
+            w.__koiProbe = {
+                ticks: 0,
+                paused: () => store.get().paused,
+                started: () => app.ticker.started,
+                fps: () => Math.round(app.ticker.FPS),
+            };
+        }
+    }
 
     const tick = () => {
         const dt = Math.min(0.05, app.ticker.deltaMS / 1000);
         sim.update(dt);
+        sceneHeartbeat.lastTickAt = performance.now();
+        if (import.meta.env.DEV) {
+            const w = window as unknown as { __koiProbe?: { ticks: number; paused(): boolean } };
+            if (w.__koiProbe) w.__koiProbe.ticks += 1;
+        }
+        if (import.meta.env.DEV) {
+            const w = window as unknown as { __koiProbe?: { ticks: number; paused(): boolean } };
+            if (w.__koiProbe) w.__koiProbe.ticks += 1;
+        }
 
         // Posture reads the gauges: they lean in when it is going well and pull
         // back when the air is too charged for them.
