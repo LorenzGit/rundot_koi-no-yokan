@@ -6,12 +6,11 @@
  * of a starting balance) is exactly the kind of thing a player cannot undo,
  * and any future sink should go through the same gate.
  *
- * It renders `position: fixed`, which inside a `.koi-screen` resolves against
- * the screen itself rather than the viewport — a transformed element is the
- * containing block for its fixed descendants — so the dialog inherits the
- * design-resolution scale and does not scroll with the list behind it.
+ * ModalLayer portals the dialog out of the transform-scaled screen so it stays
+ * centred on the visible game frame even when the shop list is scrolled.
  */
 import { useEffect, useRef } from "react";
+import ModalLayer from "./ModalLayer.tsx";
 
 interface ConfirmSpendProps {
     /** What you are buying, e.g. "Roses". */
@@ -53,7 +52,7 @@ export default function ConfirmSpend({
         // static element, which is unreachable by keyboard and is the sort of
         // thing that dismisses a dialog on a mis-tap. Escape and "Not now" are
         // the two ways out, and both work with or without a pointer.
-        <div className="koi-modal-backdrop">
+        <ModalLayer>
             <div className="koi-modal" role="dialog" aria-modal="true" aria-labelledby="koi-modal-title">
                 {image && <img className="koi-modal-art" src={image} alt="" />}
 
@@ -83,6 +82,6 @@ export default function ConfirmSpend({
                     </button>
                 </div>
             </div>
-        </div>
+        </ModalLayer>
     );
 }

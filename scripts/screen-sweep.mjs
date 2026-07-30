@@ -23,6 +23,16 @@ const LANDSCAPE = { width: 852, height: 393 };
 const PORTRAIT_SHORT = { width: 375, height: 667 };
 const LANDSCAPE_SHORT = { width: 667, height: 375 };
 
+async function openPostcard(page) {
+    await page.click(".koi-hero-cta");
+    await page.evaluate(async () => {
+        const profile = await import("/src/state/profile.ts");
+        profile.recordDate("char_f_tsundere", 60, 180, ["art"]);
+        const state = await import("/src/state/store.ts");
+        state.store.patch({ koiScreen: "postcard" });
+    });
+}
+
 /** Each screen, and how to get there from a booted game. */
 const SCREENS = [
     { name: "avatar-first", setup: async () => {}, wait: ".koi-hero-card" },
@@ -114,6 +124,24 @@ const SCREENS = [
             });
             await page.waitForSelector(".koi-gift .koi-btn-sm");
             await page.click(".koi-gift .koi-btn-sm:not([disabled])");
+        },
+    },
+    {
+        name: "postcard",
+        wait: ".koi-postcard-send",
+        setup: openPostcard,
+    },
+    {
+        name: "postcard-confirm-scrolled",
+        wait: ".koi-modal",
+        setup: async (page) => {
+            await openPostcard(page);
+            await page.waitForSelector(".koi-postcard-send:not([disabled])");
+            await page.evaluate(() => {
+                const screen = document.querySelector(".koi-postcard");
+                if (screen) screen.scrollTop = screen.scrollHeight;
+            });
+            await page.click(".koi-postcard-send:not([disabled])");
         },
     },
     {

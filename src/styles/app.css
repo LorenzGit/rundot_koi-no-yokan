@@ -1872,6 +1872,8 @@ html[data-reduced-motion="true"] *::after {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    width: min(100%, calc(720px / var(--ui-scale, 1)));
+    align-self: center;
     transform: rotate(-1deg);
 }
 
@@ -1928,7 +1930,11 @@ html[data-reduced-motion="true"] *::after {
 }
 
 .koi-modal-postcard-art {
-    width: 100%;
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: min(200px, 32dvh);
+    object-fit: contain;
     border-radius: 8px;
 }
 
@@ -2657,11 +2663,11 @@ button.koi-stage-plate:active {
 
 /* --- confirm dialog ----------------------------------------- */
 
-/* `fixed`, not `absolute`: the screen it sits in is transform-scaled, which
-   makes it the containing block for fixed descendants — so this covers the
-   whole screen at the right scale and does not scroll away with the list. */
+/* ModalLayer portals this directly beneath #app-frame. Anchoring to that
+   non-scrolling frame keeps the dialog centred on the visible game while a
+   screen or list scrolls behind it. */
 .koi-modal-backdrop {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 40;
     display: flex;
@@ -4678,6 +4684,50 @@ button.koi-stage-plate:active {
 
     .koi-book .koi-book-row img {
         height: 132px;
+    }
+
+    /* Postcards use the wide axis instead of scaling one 3:2 card across the
+       whole desktop. The card and recipient list sit side by side; only a long
+       recipient list scrolls, while the header and postcard stay composed. */
+    .koi-postcard {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto minmax(0, 1fr);
+        column-gap: 18px;
+        row-gap: 10px;
+        overflow: hidden;
+    }
+
+    .koi-postcard .koi-header {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    .koi-postcard-card {
+        grid-column: 1;
+        grid-row: 2 / 4;
+        align-self: center;
+    }
+
+    .koi-postcard-lead {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .koi-postcard .koi-empty-state,
+    .koi-postcard .koi-book-list {
+        grid-column: 2;
+        grid-row: 3;
+        min-height: 0;
+    }
+
+    .koi-postcard .koi-book-list {
+        display: flex;
+        overflow-y: auto;
+    }
+
+    .koi-postcard .koi-book-row img {
+        height: min(132px, calc(220px / var(--ui-scale, 1)));
     }
 
     /* More gifts per row rather than a tall scroll. */

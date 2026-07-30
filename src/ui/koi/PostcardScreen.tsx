@@ -16,6 +16,7 @@ import { isConfiguredPlatformId } from "../../config/platform.ts";
 import { runtimeServices } from "../../systems/runtimeServices.ts";
 import { useProfile } from "./useProfile.ts";
 import Icon from "./icons.tsx";
+import ModalLayer from "./ModalLayer.tsx";
 
 /** Makes a retry after a dropped connection the same order, never a new one. */
 let sendSequence = 0;
@@ -164,7 +165,7 @@ export default function PostcardScreen() {
             {sendingTo && (
                 // Same contract as the gift shop's confirm: a price and two
                 // clear ways out. Escape and "Not now" both cancel.
-                <div className="koi-modal-backdrop">
+                <ModalLayer>
                     <div className="koi-modal" role="dialog" aria-modal="true" aria-labelledby="koi-postcard-title">
                         {/* What is being sent is YOUR postcard, so that is the
                             art on the confirm, not their cutout. */}
@@ -200,7 +201,7 @@ export default function PostcardScreen() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </ModalLayer>
             )}
         </main>
     );
