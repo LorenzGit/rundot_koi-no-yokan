@@ -8,6 +8,7 @@
  * runs on, so the picker cannot promise something the game will not deliver.
  */
 import { useState } from "react";
+import { analytics, FIRST_PLAY_FUNNEL } from "../../systems/analytics/analyticsConfig.ts";
 import { store } from "../../state/store.ts";
 import { setAvatar } from "../../state/profile.ts";
 import { CAST, traitsFor } from "../../game/data/world.ts";
@@ -124,6 +125,7 @@ export default function AvatarSelect() {
                 className="koi-cta koi-hero-cta"
                 onClick={() => {
                     setAvatar(chosen.id);
+                    analytics.funnelStep(FIRST_PLAY_FUNNEL, 2, { avatar: chosen.id });
                     store.patch({ koiScreen: "home" });
                 }}
             >

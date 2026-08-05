@@ -11,15 +11,12 @@ import { useEffect, useRef, useState } from "react";
 import { store } from "../../state/store.ts";
 import { CAST_BY_ID, affectionTier } from "../../game/data/world.ts";
 import { POSTCARD } from "../../game/data/monetization.ts";
-import { bankExtraAffection, type MetPerson } from "../../state/profile.ts";
-import { isConfiguredPlatformId } from "../../config/platform.ts";
+import { bankExtraAffection, getProfile, spendHearts, type MetPerson } from "../../state/profile.ts";
 import { runtimeServices } from "../../systems/runtimeServices.ts";
 import { useProfile } from "./useProfile.ts";
 import Icon from "./icons.tsx";
 import ModalLayer from "./ModalLayer.tsx";
-
-/** Makes a retry after a dropped connection the same order, never a new one. */
-let sendSequence = 0;
+import { analytics } from "../../systems/analytics/analyticsConfig.ts";
 
 export default function PostcardScreen() {
     const profile = useProfile();
@@ -30,13 +27,11 @@ export default function PostcardScreen() {
     const [busy, setBusy] = useState(false);
     const confirmRef = useRef<HTMLButtonElement>(null);
 
-    // Production fails closed, same as the gift shop's purchase rows: until
-    // the shop catalog is real the send button is disabled, never a charge
-    // that cannot complete. Plain dev has no LiveOps and no real catalog, so
-    // there the button stays tappable and the purchase attempt runs the real
-    // path to its honest end (the SDK mock only stocks its own fixtures).
-    const purchasable =
-        (runtimeServices.config.shopEnabled && isConfiguredPlatformId(POSTCARD.itemId)) || import.meta.env.DEV;
+    // Hearts are earned in-game, so the only gate is whether the player has
+    // enough — no shop catalog, no fail-closed path, nothing that can be
+    // "not connected". Read live so the button re-enables the moment a date
+    // pays out.
+    const affordable = profile.coins >= POSTCARD.priceHearts;
 
     // Escape backs out of the confirm dialog; confirm takes focus on open.
     useEffect(() => {
@@ -53,24 +48,26 @@ export default function PostcardScreen() {
         const person = sendingTo;
         if (!person || busy) return;
         setBusy(true);
-        const result = await runtimeServices.purchaseShopItem(
-            POSTCARD.itemId,
-            `postcard-${person.id}-${profile.totalDates}-${sendSequence++}`,
-        );
+        // spendHearts is the single check-and-charge, so a double tap cannot
+        // spend twice off a stale balance read.
+        const paid = spendHearts(POSTCARD.priceHearts);
         setBusy(false);
-        if (result !== "verified") {
-            store.patch({
-                toast:
-                    result === "cancelled"
-                        ? "No charge made."
-                        : result === "unavailable"
-                          ? "The shop is not reachable from here. Nothing was charged."
-                          : "That did not go through. Nothing was charged.",
-            });
+        if (!paid) {
+            store.patch({ toast: `You need ${POSTCARD.priceHearts}♡ to send a postcard.` });
             return;
         }
         bankExtraAffection(person.id, POSTCARD.affection);
-        runtimeServices.track("postcard_sent", { to: person.id });
+        // A soft-currency sink, not a purchase: one schema across every spend
+        // so the economy reads off a single event.
+        analytics.event("currency_spend", {
+            currency: "hearts",
+            amount: POSTCARD.priceHearts,
+            sink: "postcard",
+            // getProfile(), not the `profile` snapshot this render closed over:
+            // that one predates the spend and would report the old balance.
+            balance_after: getProfile().coins,
+        });
+        runtimeServices.track("postcard_sent", { to: person.id, hearts: POSTCARD.priceHearts });
         const name = CAST_BY_ID[person.id]?.name ?? person.id;
         store.patch({ toast: `Postcard on its way to ${name}. +${POSTCARD.affection}♥.` });
         setSendingTo(null);
@@ -109,7 +106,7 @@ export default function PostcardScreen() {
                 <span className="koi-postcard-writing">
                     <strong className="koi-postcard-from">From {you?.name ?? "you"}, with love</strong>
                     <span className="koi-postcard-note">
-                        +{POSTCARD.affection}♥ with whoever gets it · {POSTCARD.priceRb} RB each
+                        +{POSTCARD.affection}♥ with whoever gets it · {POSTCARD.priceHearts}♡ each
                     </span>
                 </span>
             </section>
@@ -150,11 +147,11 @@ export default function PostcardScreen() {
                                 <button
                                     type="button"
                                     className="koi-cta koi-cta-sm koi-postcard-send"
-                                    disabled={!purchasable || busy}
+                                    disabled={!affordable || busy}
                                     onClick={() => setSendingTo(person)}
                                 >
                                     <Icon name="postcard" className="koi-menu-icon" />
-                                    {purchasable ? `Send · ${POSTCARD.priceRb} RB` : "Shop not connected"}
+                                    {affordable ? `Send · ${POSTCARD.priceHearts}♡` : `Need ${POSTCARD.priceHearts}♡`}
                                 </button>
                             </div>
                         </li>
@@ -176,7 +173,7 @@ export default function PostcardScreen() {
                             Send a postcard to {sendName}?
                         </h2>
                         <p className="koi-modal-cost">
-                            <span className="koi-modal-price">{POSTCARD.priceRb} RB</span>
+                            <span className="koi-modal-price">{POSTCARD.priceHearts}♡</span>
                             <span className="koi-modal-after">
                                 +{POSTCARD.affection}♥ with {sendName}
                             </span>

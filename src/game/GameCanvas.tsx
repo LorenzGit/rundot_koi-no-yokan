@@ -7,6 +7,7 @@
  * mount/cleanup/mount sequence, including initialization itself.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { analytics, FIRST_PLAY_FUNNEL } from "../systems/analytics/analyticsConfig.ts";
 import type { Application } from "pixi.js";
 import { createPixiApp } from "./pixiApp.ts";
 import { createStage, type Stage } from "./stage.ts";
@@ -80,6 +81,8 @@ async function initializeGameRenderer(scope: RendererLifecycleScope, host: HTMLE
     const seenTopics = new Set<string>();
     let confessed = false;
 
+    analytics.funnelStep(FIRST_PLAY_FUNNEL, 4, { person_id: partner.id, location_id: location.id });
+
     const scene = await createDateScene(app, stage, {
         sim,
         partner,
@@ -113,6 +116,8 @@ async function initializeGameRenderer(scope: RendererLifecycleScope, host: HTMLE
         // if it did not.
         audioManager.play(gained > 0 ? "reward" : "fumble");
         recordDate(partner.id, gained, live.spark, [...seenTopics]);
+        analytics.funnelStep(FIRST_PLAY_FUNNEL, 5, { person_id: partner.id, gained, spark: live.spark });
+        analytics.funnelStep("engagement", getProfile().totalDates, { gained });
         // A confession only lands if the evening actually earned it.
         const accepted = confessed && personFor(partner.id).affection >= 90;
         store.patch({

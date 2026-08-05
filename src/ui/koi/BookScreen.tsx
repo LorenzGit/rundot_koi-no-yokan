@@ -9,6 +9,7 @@ import { setPartner } from "../../state/profile.ts";
 import { useProfile } from "./useProfile.ts";
 import type { TopicId } from "../../game/data/types.ts";
 
+import { analytics } from "../../systems/analytics/analyticsConfig.ts";
 export default function BookScreen() {
     const profile = useProfile();
     const entries = Object.values(profile.people).sort((a, b) => b.affection - a.affection);
@@ -82,6 +83,15 @@ export default function BookScreen() {
                                         type="button"
                                         className="koi-cta koi-cta-sm"
                                         onClick={() => {
+                                            // This game's headline progression beat — worth its own row rather than
+                                            // being inferred from an affection threshold after the fact. Emitted here
+                                            // rather than inside setPartner(): state/profile.ts must not import the
+                                            // analytics config, which imports profile back.
+                                            analytics.event("milestone_reached", {
+                                                milestone: "partner_chosen",
+                                                value: 1,
+                                                person_id: person.id,
+                                            });
                                             const { jealous } = setPartner(person.id);
                                             store.patch({
                                                 toast: jealous.length

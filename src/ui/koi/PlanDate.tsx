@@ -1,5 +1,6 @@
 /** Pick who you're seeing and where. Locations unlock on total affection. */
 import { useState } from "react";
+import { analytics, FIRST_PLAY_FUNNEL } from "../../systems/analytics/analyticsConfig.ts";
 import { store } from "../../state/store.ts";
 import { CAST, CAST_BY_ID, LOCATIONS, TOPIC_GLYPH, affectionTier, traitsFor } from "../../game/data/world.ts";
 import type { TopicId } from "../../game/data/types.ts";
@@ -121,6 +122,13 @@ export default function PlanDate() {
                     // allows rather than only once the scene asks for them.
                     const location = LOCATIONS.find((loc) => loc.id === where);
                     if (location && who) warmDateAssets(who, getProfile().avatar ?? "char_f_artist", location);
+                    // Steps 3 and 7 share this call site; the once-ever marks
+                    // make a later plan register as "came back for another
+                    // evening" without extra bookkeeping.
+                    analytics.funnelStep(FIRST_PLAY_FUNNEL, getProfile().totalDates === 0 ? 3 : 7, {
+                        person_id: who ?? "",
+                        location_id: where ?? "",
+                    });
                     store.patch({ phase: "playing", dateWith: who, dateAt: where, selectedGift: null });
                 }}
             >

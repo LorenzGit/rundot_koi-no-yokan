@@ -117,17 +117,17 @@ export const OFFERS: OfferDef[] = [
 export const CONFIDANT_BONUS_MOVES = 2;
 
 /**
- * The postcard: the cheapest thing in the shop, priced to be an impulse.
+ * The postcard: a hearts sink, not an IAP.
  *
- * Bought AND sent in one tap — there is no postcard drawer to stockpile, so
- * nothing consumable has to be tracked locally and every send is one verified
- * purchase. What it buys is a small, immediate affection bump: a postcard
- * says you were thinking of them, but it never out-earns an actual date
- * (which banks several times this on a good night).
+ * Priced in the soft currency the game already pays out (a good date banks
+ * ~20-40), so it reads as spending what you earned rather than a real-money
+ * prompt in the middle of a quiet game. Sent in one tap with no drawer to
+ * stockpile, so nothing consumable is tracked. What it buys is a small,
+ * immediate affection bump: a postcard says you were thinking of them, but it
+ * never out-earns an actual date.
  */
 export const POSTCARD = {
-    itemId: PLATFORM_IDS.postcard,
-    priceRb: 50,
+    priceHearts: 500,
     affection: 3,
 } as const;
 

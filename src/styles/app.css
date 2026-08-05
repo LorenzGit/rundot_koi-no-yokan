@@ -1185,11 +1185,18 @@ button:disabled {
 }
 .pause-overlay {
     position: absolute;
+    z-index: 90;
     inset: 0;
+    width: auto;
+    border: 0;
+    padding: 0;
     display: grid;
     place-items: center;
     background: rgba(37, 24, 91, 0.72);
+    color: inherit;
     backdrop-filter: blur(5px);
+    cursor: pointer;
+    touch-action: manipulation;
 }
 .pause-overlay > div {
     min-width: 210px;
@@ -1205,6 +1212,13 @@ button:disabled {
     margin-top: 4px;
     color: #ffe36d;
     font-size: 34px;
+}
+.pause-overlay span {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
 }
 
 /* Development-only diagnostics. The component is removed from production
@@ -2091,7 +2105,13 @@ html[data-reduced-motion="true"] *::after {
 
 .koi-hero-arrow {
     text-shadow: 0 2px 8px rgba(20, 10, 24, 0.9);
-    flex: 0 0 34px;
+    /*
+     * 34px wide was under the touch minimum on the one axis that matters here
+     * — the strip is already full-height, so only the horizontal reach was
+     * short. 44px is the smallest value that clears it without stealing
+     * noticeable width from the portrait art between the two arrows.
+     */
+    flex: 0 0 44px;
     align-self: stretch;
     border: none;
     background: none;
@@ -2214,15 +2234,44 @@ html[data-reduced-motion="true"] *::after {
 .koi-hero-pager {
     display: flex;
     justify-content: center;
-    gap: 6px;
+    /*
+     * 4px, not 6: eight 44px targets plus gaps has to fit inside a 393px phone
+     * (8*44 + 7*4 = 380). At 6px the row overflowed and flex silently shrank
+     * every dot to 39px — the tap area was correct in the rule and wrong on the
+     * device, which no amount of reading the dot's own CSS would reveal.
+     */
+    gap: 4px;
+    /*
+     * Wrap, never scroll and never shrink. `overflow-x: auto` made this a
+     * scroll container, which clips on BOTH axes — it cut the top and bottom
+     * off the active dot (scaled 1.12) and swallowed its glow entirely. If the
+     * cast ever outgrows one row it drops to a second instead.
+     */
+    flex-wrap: wrap;
+    row-gap: 8px;
+    /* Room for the active dot's scale and glow to render outside the row. */
+    padding-block: 8px;
+}
+
+.koi-hero-pager > * {
+    flex: 0 0 auto;
 }
 
 .koi-pager-dot {
+    position: relative;
+    /*
+     * 36px circles sitting 4px apart are small AND crowded — the combination
+     * that produces a WRONG selection, not just a missed tap. The 44px hit area
+     * comes from ::after below; the art stays 36px so the row reads the same.
+     *
+     * The portrait is clipped by a radius on the <img> rather than
+     * `overflow: hidden` here, because that would also clip the ring, the glow
+     * and the ::after hit area right back off again.
+     */
     width: 36px;
     height: 36px;
     padding: 0;
     border-radius: 50%;
-    overflow: hidden;
     border: 2px solid rgba(253, 246, 236, 0.2);
     background: rgba(43, 31, 46, 0.6);
     opacity: 0.55;
@@ -2236,11 +2285,30 @@ html[data-reduced-motion="true"] *::after {
 /* Figures are trimmed with the head at the very top, so a square container
    with `cover` + top alignment lands on the face without needing head crops
    baked as separate assets. */
+/*
+ * 44px tap area projected past the 36px art. Only works because the button no
+ * longer sets `overflow: hidden` — that clips pseudo-elements out of
+ * hit-testing, which is exactly how the first attempt at this silently did
+ * nothing.
+ */
+.koi-pager-dot::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    translate: -50% -50%;
+    border-radius: 50%;
+}
+
 .koi-pager-dot img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: top center;
+    /* Clips the figure into the circle without an overflow rule on the button. */
+    border-radius: 50%;
 }
 
 .koi-pager-dot.is-active {
@@ -2248,10 +2316,18 @@ html[data-reduced-motion="true"] *::after {
     border-color: var(--koi-char, var(--koi-accent));
     /* A pale ring under the character-coloured one. The signature colours run
        from Sora's bright orange to Reina's deep crimson, and crimson alone on
-       this dark strip was almost impossible to pick out. */
+       this dark strip was almost impossible to pick out. Both sit OUTSIDE the
+       portrait so none of the face is covered. */
+    /*
+     * Three layers, not one: a crisp pale separator so the ring reads against
+     * any signature colour, then a tight bloom and a wide halo in that colour.
+     * A single 14px shadow just tinted the strip — on this dark backdrop the
+     * selection needs a falloff to look lit rather than outlined.
+     */
     box-shadow:
-        0 0 0 2px rgba(255, 250, 245, 0.85),
-        0 0 14px -1px var(--koi-char, var(--koi-accent));
+        0 0 0 2px rgba(255, 250, 245, 0.9),
+        0 0 12px 1px color-mix(in srgb, var(--koi-char, var(--koi-accent)) 75%, transparent),
+        0 0 28px 6px color-mix(in srgb, var(--koi-char, var(--koi-accent)) 40%, transparent);
     transform: scale(1.12);
 }
 
@@ -2437,6 +2513,18 @@ button.koi-stage-plate:active {
     line-height: 1;
     cursor: pointer;
     font-family: inherit;
+}
+
+/* Persistent settings target at 34px — expand the hit box, keep the art. */
+.koi-fab::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    translate: -50% -50%;
+    border-radius: 50%;
 }
 
 .koi-fab:active {
@@ -5126,4 +5214,37 @@ button.koi-stage-plate:active {
     .koi-hud-header .koi-gauge-state {
         font-size: 11px;
     }
+}
+
+/*
+ * Numeric readouts use tabular figures so digits share a fixed advance width.
+ * With proportional figures a score ticking 1109 -> 1110 visibly reflows and
+ * the whole counter jitters — the cheapest possible fix for a HUD that reads
+ * as unstable during play.
+ */
+.hud-score,
+.hud-combo,
+.results-score,
+.stats-grid,
+.player-level,
+.coin-glyph,
+[data-numeric] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+/*
+ * Hand cursor on anything clickable.
+ *
+ * A native <button> does NOT get a pointer cursor by default — browsers render
+ * the plain arrow — so it has to be asked for. Without this, desktop players
+ * get no hover affordance and the UI reads as inert. Element-selector
+ * specificity is the weakest there is, so any existing per-class `cursor` rule
+ * (including `default` or `not-allowed`) still wins.
+ */
+button:not(:disabled),
+summary,
+[role="button"]:not([aria-disabled="true"]),
+label[for] {
+    cursor: pointer;
 }

@@ -43,6 +43,11 @@ export const PLATFORM_IDS = Object.freeze({
     // Matches rundot/shop.config.json. Live as written — the surface still
     // gates on runtimeServices.shopEnabled (LiveOps + catalog), so it only
     // lights up once the shop is genuinely reachable.
+    /**
+     * Retired: the postcard is a hearts sink now, not an IAP. The SKU stays
+     * declared (and `active: false` in shop.config.json) rather than deleted so
+     * past orders and refunds still resolve against a known id.
+     */
     postcard: "koi_postcard",
 });
 

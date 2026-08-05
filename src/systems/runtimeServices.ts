@@ -137,7 +137,7 @@ export const runtimeServices = {
     /** One free gift a day, paid for by a rewarded ad the player chose to watch. */
     async watchFreeGiftAd(): Promise<VerifiedActionResult> {
         if (!config.adsEnabled || !isConfiguredPlatformId(PLATFORM_IDS.rewardedFreeGift)) return "unavailable";
-        return showVerifiedRewardedAd(PLATFORM_IDS.rewardedFreeGift, "Free Gift");
+        return trackRewarded(PLATFORM_IDS.rewardedFreeGift, "Free Gift", "free_gift");
     },
     /**
      * The only non-opt-in ad, and it runs strictly between dates. Nothing
@@ -145,7 +145,15 @@ export const runtimeServices = {
      */
     async showBetweenDatesAd(): Promise<VerifiedActionResult> {
         if (!config.adsEnabled || !isConfiguredPlatformId(PLATFORM_IDS.dateBreakInterstitial)) return "unavailable";
-        return showVerifiedInterstitialAd(PLATFORM_IDS.dateBreakInterstitial, "Between Dates");
+        // No forced ad in the first session, whatever the every-N-dates cadence
+        // says. A new player who has not yet decided they like the game is the
+        // worst possible audience for an interruption.
+        if (getProfile().totalDates < FIRST_SESSION_DATE_GRACE) return "unavailable";
+        const result = await showVerifiedInterstitialAd(PLATFORM_IDS.dateBreakInterstitial, "Between Dates");
+        if (result === "verified") {
+            this.track("interstitial_shown", { ad_display_id: PLATFORM_IDS.dateBreakInterstitial });
+        }
+        return result;
     },
     /** Buy anything in the shop catalog. */
     async purchaseShopItem(itemId: string, idempotencyKey: string): Promise<VerifiedActionResult> {
@@ -157,6 +165,34 @@ export const runtimeServices = {
         // result on screen to double.
         if (getProfile().totalDates < 1) return "unavailable";
         if (!config.adsEnabled || !isConfiguredPlatformId(PLATFORM_IDS.rewardedResultsBonus)) return "unavailable";
-        return showVerifiedRewardedAd(PLATFORM_IDS.rewardedResultsBonus, "Results Bonus");
+        return trackRewarded(PLATFORM_IDS.rewardedResultsBonus, "Results Bonus", "results_bonus");
     },
 };
+
+/**
+ * Interstitials stay off until the player has finished this many evenings.
+ * Independent of AD_INTERSTITIAL_EVERY, which only spaces them out afterwards.
+ */
+const FIRST_SESSION_DATE_GRACE = 2;
+
+/**
+ * Show a rewarded ad and record the offer→complete pair.
+ *
+ * Both halves matter: `rewarded_ad_offered` without `rewarded_ad_complete` is a
+ * placement players see and decline, which is a copy/reward problem, not an
+ * inventory one. Only a resolved `granied` counts as complete — the wrapper
+ * reports `cancelled` for a closed-early ad and `unavailable` for no inventory,
+ * and neither earned the reward.
+ */
+async function trackRewarded(
+    placementId: string,
+    displayName: string,
+    placement: string,
+): Promise<VerifiedActionResult> {
+    runtimeServices.track("rewarded_ad_offered", { ad_display_id: placementId, placement });
+    const result = await showVerifiedRewardedAd(placementId, displayName);
+    if (result === "verified") {
+        runtimeServices.track("rewarded_ad_complete", { ad_display_id: placementId, placement });
+    }
+    return result;
+}

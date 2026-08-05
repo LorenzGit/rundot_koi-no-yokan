@@ -1,5 +1,6 @@
 /** How the evening went, and what it bought you. */
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { analytics, FIRST_PLAY_FUNNEL } from "../../systems/analytics/analyticsConfig.ts";
 import { store, useStore } from "../../state/store.ts";
 import { CAST_BY_ID, affectionTier } from "../../game/data/world.ts";
 import { bankExtraAffection, personFor, setPartner } from "../../state/profile.ts";
@@ -11,6 +12,12 @@ export default function ResultScreen() {
     const result = useStore((s) => s.lastResult);
     const [doubling, setDoubling] = useState(false);
     const [doubled, setDoubled] = useState(false);
+    // In an effect, not the render body: a funnel step must mean "the player
+    // reached this screen", not "React re-rendered it".
+    useEffect(() => {
+        if (!result) return;
+        analytics.funnelStep(FIRST_PLAY_FUNNEL, 6, { person_id: result.personId, gained: result.gained });
+    }, [result]);
     if (!result) return null;
     const def = CAST_BY_ID[result.personId];
     const person = personFor(result.personId);
@@ -86,6 +93,15 @@ export default function ResultScreen() {
                     type="button"
                     className="koi-cta"
                     onClick={() => {
+                        // This game's headline progression beat — worth its own row rather than
+                        // being inferred from an affection threshold after the fact. Emitted here
+                        // rather than inside setPartner(): state/profile.ts must not import the
+                        // analytics config, which imports profile back.
+                        analytics.event("milestone_reached", {
+                            milestone: "partner_chosen",
+                            value: 1,
+                            person_id: result.personId,
+                        });
                         const { jealous } = setPartner(result.personId);
                         store.patch({
                             koiScreen: "home",

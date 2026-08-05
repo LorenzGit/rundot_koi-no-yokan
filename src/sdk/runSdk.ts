@@ -369,20 +369,33 @@ export async function rearmLocalNotification(input: {
 
 export type VerifiedActionResult = "verified" | "unavailable" | "cancelled" | "failed";
 
+let hostOverlayCount = 0;
+
+export function hostOverlayInFlight(): boolean {
+    return hostOverlayCount > 0;
+}
+
+export async function withHostOverlay<T>(operation: () => Promise<T>): Promise<T> {
+    hostOverlayCount += 1;
+    audioManager.setHostOverlayVisible(true);
+    try {
+        return await operation();
+    } finally {
+        hostOverlayCount = Math.max(0, hostOverlayCount - 1);
+        audioManager.setHostOverlayVisible(hostOverlayCount > 0);
+    }
+}
+
 export async function showVerifiedRewardedAd(id: string, name: string): Promise<VerifiedActionResult> {
     if (!capabilities.ads) return "unavailable";
     try {
         const ready = await withTimeout(RundotGameAPI.ads.isRewardedAdReadyAsync(), 2_000, "ads.ready");
         if (!ready) return "unavailable";
-        audioManager.setAdVisible(true);
-        let completed = false;
-        try {
-            // Do not timeout a user-mediated overlay: the audio interruption
-            // must last until the host tells us it has actually closed.
-            completed = await RundotGameAPI.ads.showRewardedAdAsync({ adDisplayId: id, adDisplayName: name });
-        } finally {
-            audioManager.setAdVisible(false);
-        }
+        // Do not timeout a user-mediated overlay: the audio interruption
+        // must last until the host tells us it has actually closed.
+        const completed = await withHostOverlay(() =>
+            RundotGameAPI.ads.showRewardedAdAsync({ adDisplayId: id, adDisplayName: name }),
+        );
         return completed === true ? "verified" : "cancelled";
     } catch {
         return "failed";
@@ -398,13 +411,9 @@ export async function showVerifiedInterstitialAd(id: string, name: string): Prom
             "ads.interstitial.ready",
         );
         if (!ready) return "unavailable";
-        audioManager.setAdVisible(true);
-        let displayed = false;
-        try {
-            displayed = await RundotGameAPI.ads.showInterstitialAd({ adDisplayId: id, adDisplayName: name });
-        } finally {
-            audioManager.setAdVisible(false);
-        }
+        const displayed = await withHostOverlay(() =>
+            RundotGameAPI.ads.showInterstitialAd({ adDisplayId: id, adDisplayName: name }),
+        );
         return displayed === true ? "verified" : "unavailable";
     } catch {
         return "failed";
@@ -414,7 +423,7 @@ export async function showVerifiedInterstitialAd(id: string, name: string): Prom
 export async function purchaseVerifiedShopItem(itemId: string, idempotencyKey: string): Promise<VerifiedActionResult> {
     if (!capabilities.purchases || !sdkNamespace("shop")) return "unavailable";
     try {
-        const result = await withTimeout(RundotGameAPI.shop.purchase(itemId, idempotencyKey), 90_000, "shop.purchase");
+        const result = await withHostOverlay(() => RundotGameAPI.shop.purchase(itemId, idempotencyKey));
         return result.success === true ? "verified" : "failed";
     } catch {
         return "failed";
@@ -506,4 +515,42 @@ export function registerLifecycles({
             subs.length = 0;
         },
     };
+}
+
+// ---------------------------------------------------------------------------
+// Return-reminder support. Kept beside the other notification calls so the
+// retention module never talks to RundotGameAPI directly.
+// ---------------------------------------------------------------------------
+
+/** True once the player has granted local-notification permission. */
+export async function notificationsEnabled(): Promise<boolean> {
+    try {
+        return (await RundotGameAPI.notifications.isLocalNotificationsEnabled()) === true;
+    } catch {
+        return false;
+    }
+}
+
+/** Cancel a scheduled reminder once the thing it promised has been done. */
+export async function cancelLocalNotification(id: string): Promise<void> {
+    try {
+        await RundotGameAPI.notifications.cancelNotification(id);
+    } catch {
+        // a reminder that will not cancel must not break the beat that
+        // completed the task it was promising
+    }
+}
+
+/**
+ * How this session was launched. `timed_out` is treated as unknown rather than
+ * organic, so notification attribution never over-counts cold starts.
+ */
+export async function resolveLaunchIntent(): Promise<{ kind: string; params: Record<string, string> } | null> {
+    try {
+        const intent = await RundotGameAPI.app.resolveLaunchIntent({ maxWaitMs: 800 });
+        if (!intent || intent.kind === "timed_out") return null;
+        return { kind: intent.kind, params: intent.params ?? {} };
+    } catch {
+        return null;
+    }
 }

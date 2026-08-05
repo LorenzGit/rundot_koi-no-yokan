@@ -42,7 +42,7 @@ class AudioManager {
     private suppressedSfx = 0;
     private paused = false;
     private hostPaused = false;
-    private adVisible = false;
+    private hostOverlayVisible = false;
     private pageHidden = document.visibilityState !== "visible";
     private bound = false;
 
@@ -61,7 +61,15 @@ class AudioManager {
             this.ensureGraph();
             if (!this.context) return false;
             if (this.paused) return false;
-            if (this.context.state === "suspended") await this.context.resume();
+            if (this.context.state === "suspended") {
+                // WebKit leaves resume() pending FOREVER when the call is not
+                // backed by recognized user activation. Never let that hang a
+                // caller — UI actions may await unlock before proceeding.
+                await Promise.race([
+                    this.context.resume(),
+                    new Promise<void>((resolve) => window.setTimeout(resolve, 300)),
+                ]);
+            }
             this.sync();
             return this.context.state === "running";
         } catch (error) {
@@ -75,15 +83,15 @@ class AudioManager {
         this.applyPauseState();
     }
 
-    /** Ads are not guaranteed to emit host lifecycle events. Keep this
+    /** Host-mediated surfaces are not guaranteed to emit lifecycle events. Keep this
      * interruption separate from persisted player volume/mute settings. */
-    setAdVisible(visible: boolean): void {
-        this.adVisible = visible;
+    setHostOverlayVisible(visible: boolean): void {
+        this.hostOverlayVisible = visible;
         this.applyPauseState();
     }
 
     private applyPauseState(): void {
-        this.paused = this.hostPaused || this.pageHidden || this.adVisible;
+        this.paused = this.hostPaused || this.pageHidden || this.hostOverlayVisible;
         if (!this.context) return;
         if (this.paused) {
             this.stopMusic();

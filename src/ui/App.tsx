@@ -28,6 +28,7 @@ import { MENU_BACKDROP_URL } from "../assets/manifest.ts";
 import { useProfile } from "./koi/useProfile.ts";
 import SettingsFab from "./koi/SettingsFab.tsx";
 import { useButtonFeedback } from "./useButtonFeedback.ts";
+import { runtimeServices } from "../systems/runtimeServices.ts";
 import packageJson from "../../package.json";
 
 const DevelopmentTools = import.meta.env.DEV ? lazy(() => import("../dev/DevelopmentTools.tsx")) : null;
@@ -138,6 +139,7 @@ export default function App() {
     useAudioUnlock();
     useButtonFeedback();
     const phase = useStore((s) => s.phase);
+    const paused = useStore((s) => s.paused);
     const menuScreen = useStore((s) => s.menuScreen);
     const howToOpen = useStore((s) => s.howToOpen);
     const tutorialSeen = useProfile((p) => p.tutorialSeen);
@@ -162,6 +164,23 @@ export default function App() {
                     <GameCanvas />
                     <DateHud />
                 </div>
+            )}
+            {phase === "playing" && paused && (
+                <button
+                    type="button"
+                    className="pause-overlay pointer-events-auto"
+                    onClick={() => {
+                        store.patch({ paused: false });
+                        audioManager.setPaused(false);
+                        runtimeServices.resume();
+                    }}
+                >
+                    <div>
+                        <span>THE DATE WAITS</span>
+                        <strong>PAUSED</strong>
+                        <span>TAP TO RESUME</span>
+                    </div>
+                </button>
             )}
             {/* Settings renders OVER whatever is running, including a date.
                 Routing to it only under the 'menu' phase meant tapping settings

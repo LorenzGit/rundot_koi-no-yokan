@@ -309,6 +309,19 @@ export function buyGift(giftId: string, price: number): boolean {
     return true;
 }
 
+/**
+ * Spend hearts on a postcard. Returns false (and charges nothing) when the
+ * player cannot afford it, so the caller never has to pre-check and then race
+ * against its own check.
+ */
+export function spendHearts(price: number): boolean {
+    if (profile.coins < price) return false;
+    mutate((p) => {
+        p.coins -= price;
+    });
+    return true;
+}
+
 export function consumeGift(giftId: string): boolean {
     if ((profile.inventory[giftId] ?? 0) <= 0) return false;
     mutate((p) => {

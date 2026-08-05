@@ -7,7 +7,7 @@
  * fresh checkout this component renders the ad row at most, and never a buy
  * button that cannot complete.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { store } from "../../state/store.ts";
 import { runtimeServices } from "../../systems/runtimeServices.ts";
 import { HEART_PACKS, OFFERS } from "../../game/data/monetization.ts";
@@ -17,6 +17,8 @@ import { claimFreeGiftDay, grantGift, grantHearts, grantOffer, hasPurchased, tod
 import { isConfiguredPlatformId } from "../../config/platform.ts";
 import { useProfile } from "./useProfile.ts";
 
+import { analytics } from "../../systems/analytics/analyticsConfig.ts";
+import { returnReminders } from "../../systems/retention/retentionConfig.ts";
 export default function ShopOffers() {
     const profile = useProfile();
     const [busy, setBusy] = useState<string | null>(null);
@@ -30,17 +32,34 @@ export default function ShopOffers() {
     );
     const freeGiftReady = profile.freeGiftClaimedOn !== today() && isConfiguredPlatformId(AD_PLACEMENTS.freeGift);
 
+    // The store surface was seen at all. Step 1 of the purchase funnel: without
+    // it the later steps have no denominator and conversion is unreadable.
+    useEffect(() => {
+        analytics.funnelStep("purchase", 1, { offers: offers.length });
+    }, [offers.length]);
+
     const buy = async (id: string, itemId: string, grant: () => void) => {
         setBusy(id);
+        analytics.funnelStep("purchase", 2, { item_id: itemId, offer_id: id });
+        analytics.funnelStep("purchase", 3, { item_id: itemId });
         // The key makes a retry after a dropped connection safe: the host
         // treats the second attempt as the same order rather than a new one.
         const result = await runtimeServices.purchaseShopItem(itemId, `${id}-${profile.totalDates}-${today()}`);
         setBusy(null);
         if (result === "verified") {
             grant();
+            analytics.funnelStep("purchase", 4, { item_id: itemId, offer_id: id });
             store.patch({ toast: "Thank you." });
             return;
         }
+        // A cancel and a failure are different problems — one is a pricing or
+        // copy question, the other is a broken pipeline — so they must not
+        // collapse into a single "did not convert" row.
+        analytics.event(result === "cancelled" ? "purchase_cancelled" : "purchase_failed", {
+            item_id: itemId,
+            offer_id: id,
+            reason: result,
+        });
         store.patch({
             toast: result === "cancelled" ? "No charge made." : "That did not go through. Nothing was charged.",
         });
@@ -60,6 +79,11 @@ export default function ShopOffers() {
         if (!pick) return;
         grantGift(pick.id);
         claimFreeGiftDay();
+        analytics.event("reward_granted", { amount: 1, currency: "gift", source: "rewarded_free_gift" });
+        // Kill switch: the 24h reminder promises this gift. Leaving it scheduled
+        // pings the player about something they just took, which is precisely
+        // how a useful notification becomes a muted one.
+        void returnReminders.cancel("d1");
         store.patch({ toast: `${pick.name} added to your bag.` });
     };
 

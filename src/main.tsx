@@ -1,4 +1,5 @@
 import React from "react";
+import { analytics, FIRST_PLAY_FUNNEL } from "./systems/analytics/analyticsConfig.ts";
 import { createRoot } from "react-dom/client";
 import App from "./ui/App.tsx";
 import ErrorBoundary from "./ui/ErrorBoundary.tsx";
@@ -6,12 +7,27 @@ import { store } from "./state/store.ts";
 import { applyRunSafeArea, getRunCapabilities, initSdk, registerLifecycles, requestHostExit } from "./sdk/runSdk.ts";
 import { warmAssets } from "./assets/preload.ts";
 import { saveSystem } from "./systems/save.ts";
-import { loadProfile } from "./state/profile.ts";
+import { getProfile, loadProfile } from "./state/profile.ts";
 import { restoreLocale } from "./systems/localization.ts";
 import { audioManager } from "./audio/audioManager.ts";
 import { runtimeServices } from "./systems/runtimeServices.ts";
 import "./styles/app.css";
 
+import {
+    refreshNotificationPermission,
+    resolveReturnLaunch,
+    returnReminders,
+} from "./systems/retention/retentionConfig";
+// Fired at module scope, before any await: this is the only row a player who
+// closes the tab mid-load will ever produce. Emissions here are buffered until
+// markTransportReady() below, once the SDK transport exists.
+analytics.installErrorCapture();
+// Retention: arm the 24/48/72h return cadence and attribute a
+// notification-driven launch. Both are fire-and-forget — a host without
+// notification support must not delay the first playable frame.
+void refreshNotificationPermission().then(() => returnReminders.refreshAll());
+void resolveReturnLaunch();
+analytics.funnelStep("load", 1);
 /**
  * Boot sequence. The ORDER here matters — it's the pattern from a shipped RUN
  * game. Keep the numbered steps in this order; add your own work at the
@@ -21,6 +37,10 @@ async function boot() {
     // 1. SDK first. Nothing may call RundotGameAPI before this resolves.
     //    Resolves even if init fails (local dev outside the RUN host).
     await initSdk();
+    // The transport exists now — flush everything boot recorded before this
+    // point, then keep emitting in real time.
+    analytics.markTransportReady();
+    analytics.funnelStep("load", 2);
     applyRunSafeArea();
     // The RUN host reports webview-accurate insets, so its values are used
     // exactly (see the data-run-host override in app.css). The 44px floor in
@@ -35,6 +55,7 @@ async function boot() {
     // The dating record lives in its own key so the two schemas can move
     // independently; it decides which screen the menu phase opens on.
     const profile = await loadProfile();
+    analytics.funnelStep("load", 3);
     store.patch({ koiScreen: profile.avatar ? "home" : "avatar" });
     document.documentElement.dataset.reducedMotion = String(store.get().reducedMotion);
     document.documentElement.dataset.quality = store.get().quality;
@@ -101,6 +122,10 @@ async function boot() {
             runtimeServices.resume();
         },
         onSleep: () => {
+            // Re-anchor the 24h nudge to now, so it lands a day after the player
+            // actually stopped rather than a day after install.
+            void returnReminders.refreshPrimary();
+            analytics.sessionPause();
             store.patch({ paused: true });
             audioManager.setPaused(true);
             void saveSystem.flush();
@@ -111,6 +136,10 @@ async function boot() {
             runtimeServices.resume();
         },
         onQuit: () => {
+            // Re-anchor the 24h nudge to now, so it lands a day after the player
+            // actually stopped rather than a day after install.
+            void returnReminders.refreshPrimary();
+            analytics.sessionEnd();
             void saveSystem.flush();
         },
         onIdentityChanged: (event) => {
@@ -137,7 +166,10 @@ async function boot() {
     //    boot event, subscription status refresh. None of it should block or
     //    throw into this function.
     runtimeServices.bootstrap();
-    runtimeServices.funnel(1, "game_loaded", "koi_first_play", 1);
+    // Boot reached a playable frame; everything after this is the first-run funnel.
+    analytics.funnelStep("load", 4);
+    analytics.funnelStep(FIRST_PLAY_FUNNEL, 1, { host: getRunCapabilities().host });
+    analytics.sessionStart(getProfile().totalDates === 0);
 }
 
 function preventBrowserChrome(event: Event): void {
