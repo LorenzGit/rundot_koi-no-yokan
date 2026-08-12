@@ -24,43 +24,83 @@ const PORTRAIT_SHORT = { width: 375, height: 667 };
 const LANDSCAPE_SHORT = { width: 667, height: 375 };
 
 async function openPostcard(page) {
-    await page.click(".koi-hero-cta");
     await page.evaluate(async () => {
         const profile = await import("/src/state/profile.ts");
         profile.recordDate("char_f_tsundere", 60, 180, ["art"]);
+        profile.grantHearts(500);
         const state = await import("/src/state/store.ts");
         state.store.patch({ koiScreen: "postcard" });
     });
 }
 
+async function openResult(page) {
+    await page.evaluate(async () => {
+        const profile = await import("/src/state/profile.ts");
+        profile.recordDate("char_f_siren", 22, 140, ["night"]);
+        const state = await import("/src/state/store.ts");
+        state.store.patch({
+            koiScreen: "result",
+            lastResult: {
+                personId: "char_f_siren",
+                gained: 22,
+                spark: 140,
+                confessed: false,
+                accepted: false,
+                romanceScore: 1022,
+                leaderboardRank: 7,
+                leaderboardAccepted: true,
+                leaderboardPending: false,
+            },
+        });
+    });
+}
+
 /** Each screen, and how to get there from a booted game. */
 const SCREENS = [
-    { name: "avatar-first", setup: async () => {}, wait: ".koi-hero-card" },
+    { name: "first-plan", setup: async () => {}, wait: ".koi-first-date-callout" },
     {
         name: "avatar-return",
         wait: ".koi-hero-card",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
-            await page.waitForSelector(".koi-home");
-            await page.click(".koi-plate-you");
+            await page.evaluate(async () => {
+                const m = await import("/src/state/store.ts");
+                m.store.patch({ koiScreen: "avatar" });
+            });
         },
     },
     {
         name: "home-empty",
         wait: ".koi-home",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
+            await page.evaluate(async () => {
+                const m = await import("/src/state/store.ts");
+                m.store.patch({ koiScreen: "home" });
+            });
         },
     },
     {
         name: "home-partner",
         wait: ".koi-plate-them",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/profile.ts");
                 m.recordDate("char_f_siren", 94, 210, ["night"]);
                 m.setPartner("char_f_siren");
+                const state = await import("/src/state/store.ts");
+                state.store.patch({ koiScreen: "home" });
+            });
+        },
+    },
+    {
+        name: "home-return",
+        wait: ".koi-return-reward",
+        setup: async (page) => {
+            await page.evaluate(async () => {
+                const profile = await import("/src/state/profile.ts");
+                profile.recordDate("char_f_siren", 22, 140, ["night"]);
+                profile.armReturnReward("2020-01-01");
+                const state = await import("/src/state/store.ts");
+                state.store.patch({ koiScreen: "home" });
             });
         },
     },
@@ -68,20 +108,16 @@ const SCREENS = [
         name: "plan",
         wait: ".koi-brief",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ koiScreen: "plan" });
             });
-            await page.waitForSelector(".koi-pick");
-            await page.click(".koi-pick");
         },
     },
     {
         name: "book-empty",
         wait: ".koi-empty-state",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ koiScreen: "book" });
@@ -92,7 +128,6 @@ const SCREENS = [
         name: "book-full",
         wait: ".koi-book-row",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const p = await import("/src/state/profile.ts");
                 p.recordDate("char_f_siren", 60, 180, ["night", "music"]);
@@ -106,7 +141,6 @@ const SCREENS = [
         name: "shop",
         wait: ".koi-gift",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ koiScreen: "shop" });
@@ -117,7 +151,6 @@ const SCREENS = [
         name: "shop-confirm",
         wait: ".koi-modal",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ koiScreen: "shop" });
@@ -148,7 +181,6 @@ const SCREENS = [
         name: "settings",
         wait: ".koi-set-group",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ menuScreen: "settings" });
@@ -158,17 +190,51 @@ const SCREENS = [
     {
         name: "result",
         wait: ".koi-result",
+        setup: openResult,
+    },
+    {
+        name: "result-share-card",
+        wait: ".koi-share-preview img",
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
-            await page.evaluate(async () => {
-                const p = await import("/src/state/profile.ts");
-                p.recordDate("char_f_siren", 22, 140, ["night"]);
-                const m = await import("/src/state/store.ts");
-                m.store.patch({
-                    koiScreen: "result",
-                    lastResult: { personId: "char_f_siren", gained: 22, spark: 140, confessed: false, accepted: false },
-                });
+            await openResult(page);
+            await page.waitForSelector('[data-testid="result-share-card"]');
+            await page.click('[data-testid="result-share-card"]');
+        },
+    },
+    {
+        name: "result-liked",
+        wait: '[data-testid="result-like"].is-complete',
+        setup: async (page) => {
+            await openResult(page);
+            await page.waitForSelector('[data-testid="result-like"]:not([disabled])');
+            await page.click('[data-testid="result-like"]');
+        },
+    },
+    {
+        name: "result-shared",
+        wait: '[data-testid="share-card-dialog"][data-share-state="shared"]',
+        setup: async (page) => {
+            await openResult(page);
+            await page.evaluate(() => {
+                window.open = () => null;
             });
+            await page.waitForSelector('[data-testid="result-share-card"]');
+            await page.click('[data-testid="result-share-card"]');
+            await page.waitForSelector(".koi-share-preview img");
+            await page.click(".koi-share-actions .koi-cta");
+        },
+    },
+    {
+        name: "result-exported",
+        wait: '[data-testid="share-card-dialog"][data-export-state="browser_download"]',
+        setup: async (page) => {
+            await openResult(page);
+            await page.waitForSelector('[data-testid="result-share-card"]');
+            await page.click('[data-testid="result-share-card"]');
+            await page.waitForSelector(".koi-share-preview img");
+            const download = page.waitForEvent("download");
+            await page.click('[data-testid="export-date-card"]');
+            await download;
         },
     },
     {
@@ -176,7 +242,6 @@ const SCREENS = [
         wait: ".koi-card",
         delay: 2500,
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ phase: "playing", dateWith: "char_f_siren", dateAt: "sakura", selectedGift: null });
@@ -188,7 +253,6 @@ const SCREENS = [
         wait: ".koi-perform",
         delay: 300,
         setup: async (page) => {
-            await page.click(".koi-hero-cta");
             await page.evaluate(async () => {
                 const m = await import("/src/state/store.ts");
                 m.store.patch({ phase: "playing", dateWith: "char_f_siren", dateAt: "sakura", selectedGift: null });
@@ -199,6 +263,22 @@ const SCREENS = [
         },
     },
 ];
+
+const requestedScreen = process.env.SWEEP_SCREEN;
+const screensToRun = requestedScreen ? SCREENS.filter((screen) => screen.name === requestedScreen) : SCREENS;
+if (screensToRun.length === 0) throw new Error(`Unknown SWEEP_SCREEN: ${requestedScreen}`);
+
+const ORIENTATIONS = [
+    { label: "portrait", viewport: PORTRAIT },
+    { label: "landscape", viewport: LANDSCAPE },
+    { label: "portrait-sm", viewport: PORTRAIT_SHORT },
+    { label: "landscape-sm", viewport: LANDSCAPE_SHORT },
+];
+const requestedOrientation = process.env.SWEEP_ORIENTATION;
+const orientationsToRun = requestedOrientation
+    ? ORIENTATIONS.filter((orientation) => orientation.label === requestedOrientation)
+    : ORIENTATIONS;
+if (orientationsToRun.length === 0) throw new Error(`Unknown SWEEP_ORIENTATION: ${requestedOrientation}`);
 
 /** Anything sticking out of the frame, or a control that cannot be reached. */
 async function audit(page) {
@@ -255,7 +335,11 @@ async function audit(page) {
             const canScroll = /(auto|scroll)/.test(style.overflowY);
             const replaced = ["IMG", "CANVAS", "VIDEO", "SVG", "SELECT", "INPUT"].includes(el.tagName);
             const clipped = el.scrollHeight > el.clientHeight + 4;
-            if (!replaced && clipped && (interactive || !canScroll)) {
+            // These controls deliberately project a 44px ::after hit target
+            // beyond smaller circular art. Pseudo-elements contribute to
+            // scrollHeight even though no visible content is clipped.
+            const expandedHitTarget = el.matches(".koi-fab, .koi-pager-dot");
+            if (!replaced && !expandedHitTarget && clipped && (interactive || !canScroll)) {
                 problems.push({
                     tag,
                     interactive,
@@ -272,20 +356,17 @@ const browser = await chromium.launch();
 mkdirSync(OUT, { recursive: true });
 let failures = 0;
 
-for (const orientation of [
-    { label: "portrait", viewport: PORTRAIT },
-    { label: "landscape", viewport: LANDSCAPE },
-    { label: "portrait-sm", viewport: PORTRAIT_SHORT },
-    { label: "landscape-sm", viewport: LANDSCAPE_SHORT },
-]) {
-    for (const screen of SCREENS) {
-        const context = await browser.newContext({ viewport: orientation.viewport });
+for (const orientation of orientationsToRun) {
+    for (const screen of screensToRun) {
+        const context = await browser.newContext({ viewport: orientation.viewport, acceptDownloads: true });
         const page = await context.newPage();
         const errors = [];
         page.on("pageerror", (e) => errors.push(String(e)));
         try {
             await page.goto(BASE);
-            await page.waitForSelector(".koi-hero-cta", { timeout: 25_000 });
+            // Durable zero-save readiness: unlike the generic .koi-screen,
+            // this cannot match the loader before profile restore finishes.
+            await page.waitForSelector(".koi-first-date-callout", { timeout: 25_000 });
             await screen.setup(page);
             await page.waitForSelector(screen.wait, { timeout: 20_000 });
             await page.waitForTimeout(screen.delay ?? 500);

@@ -1629,6 +1629,18 @@ html[data-reduced-motion="true"] *::after {
     margin-top: 8px;
 }
 
+.koi-first-date-callout {
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid color-mix(in srgb, var(--koi-gold) 55%, transparent);
+    border-radius: 12px;
+    background: rgba(24, 17, 29, 0.72);
+    color: rgba(253, 246, 236, 0.86);
+    font-size: 12px;
+    line-height: 1.35;
+    text-align: center;
+}
+
 .koi-screen {
     position: absolute;
     /* Not `inset: 0` — the scaled box sets its own width/height above. */
@@ -1868,6 +1880,44 @@ html[data-reduced-motion="true"] *::after {
     width: 20px;
     height: 20px;
     flex: 0 0 auto;
+}
+
+.koi-return-reward,
+.koi-next-goal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(24, 17, 29, 0.72);
+    border: 1px solid rgba(253, 246, 236, 0.14);
+    color: var(--koi-cream);
+    font-family: inherit;
+    font-size: 10px;
+}
+
+.koi-return-reward {
+    border-color: color-mix(in srgb, var(--koi-gold) 65%, transparent);
+    cursor: pointer;
+}
+
+.koi-return-reward strong,
+.koi-next-goal strong {
+    color: var(--koi-gold);
+    white-space: nowrap;
+}
+
+.koi-next-goal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    text-align: left;
+}
+
+.koi-next-goal meter {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 5px;
 }
 
 .koi-fab-icon {
@@ -2757,7 +2807,9 @@ button.koi-stage-plate:active {
 .koi-modal-backdrop {
     position: absolute;
     inset: 0;
-    z-index: 40;
+    /* Above the persistent settings/version chrome (44/45): modal actions are
+       the only interactive layer until the dialog closes. */
+    z-index: 46;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2819,6 +2871,138 @@ button.koi-stage-plate:active {
 
 .koi-modal-actions > * {
     flex: 1;
+}
+
+/* A result share is a real artifact, not a toast. The preview keeps the exact
+   4:5 social ratio and the adjacent copy explains what the platform action
+   will send before it opens any host UI. */
+.koi-share-modal {
+    width: min(360px, 100%);
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    overflow-y: auto;
+    padding: 16px;
+    border: 1px solid rgba(255, 228, 167, 0.32);
+    border-radius: 24px;
+    background: rgba(24, 17, 29, 0.98);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.82);
+    animation: koi-modal-rise 0.16s ease-out;
+}
+
+.koi-share-preview {
+    width: min(226px, 66vw);
+    aspect-ratio: 4 / 5;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 2px solid rgba(255, 250, 241, 0.2);
+    border-radius: 18px;
+    background: linear-gradient(145deg, #432746, #7e536e);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3);
+}
+
+.koi-share-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.koi-share-preview-loading {
+    padding: 20px;
+    color: rgba(253, 246, 236, 0.72);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.koi-share-copy {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    text-align: center;
+}
+
+.koi-share-kicker {
+    margin: 0;
+    color: var(--koi-gold);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.koi-share-copy h2 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.1;
+}
+
+.koi-share-copy > p:not(.koi-share-kicker, .koi-share-status) {
+    margin: 0;
+    color: rgba(253, 246, 236, 0.72);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.koi-share-status {
+    min-height: 30px;
+    margin: 2px 0 0;
+    color: rgba(253, 246, 236, 0.84);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.koi-share-status.is-error {
+    color: #ffaaaa;
+}
+
+.koi-share-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.koi-share-actions > *,
+.koi-share-close {
+    min-height: 44px;
+}
+
+.koi-share-close {
+    width: 100%;
+}
+
+@media (orientation: landscape) {
+    .koi-modal-backdrop {
+        padding: 12px max(16px, var(--safe-right)) 12px max(16px, var(--safe-left));
+    }
+
+    .koi-share-modal {
+        width: min(660px, 100%);
+        max-height: 100%;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 18px;
+        overflow: hidden;
+    }
+
+    .koi-share-preview {
+        width: min(230px, 34vw);
+        max-height: calc(100vh - 56px);
+        align-self: center;
+    }
+
+    .koi-share-copy {
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
+    }
 }
 
 /* Transform-only, like the hero card: an opacity keyframe stays pending in a
@@ -3435,6 +3619,115 @@ button.koi-stage-plate:active {
     margin: 0;
     font-size: 19px;
     font-weight: 800;
+}
+
+.koi-result-score {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 1px 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(24, 17, 29, 0.58);
+    border: 1px solid rgba(253, 246, 236, 0.12);
+    text-align: left;
+}
+
+.koi-result-score span,
+.koi-result-score em {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(253, 246, 236, 0.58);
+    font-style: normal;
+}
+
+.koi-result-score strong {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    color: var(--koi-gold);
+    font-size: 20px;
+}
+
+.koi-result-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.koi-result-actions > :only-child {
+    grid-column: 1 / -1;
+}
+
+.koi-result-nav {
+    width: 100%;
+    display: grid;
+    gap: 10px;
+}
+
+.koi-result-actions .koi-btn {
+    min-height: 68px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1px 8px;
+    align-content: center;
+    padding: 9px 10px;
+    text-align: left;
+}
+
+.koi-result-action-icon {
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 26px;
+    height: 26px;
+    color: var(--koi-gold);
+}
+
+.koi-result-action-title {
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.koi-result-action-detail {
+    color: rgba(253, 246, 236, 0.6);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.koi-result-action.is-complete {
+    border-color: color-mix(in srgb, var(--koi-accent) 54%, transparent);
+    background: color-mix(in srgb, var(--koi-accent) 15%, rgba(24, 17, 29, 0.74));
+}
+
+.koi-result-action.is-complete:disabled {
+    opacity: 0.82;
+    color: var(--koi-cream);
+}
+
+@media (orientation: portrait) and (max-height: 700px) {
+    .koi-result {
+        gap: 7px;
+    }
+
+    .koi-result-portrait {
+        min-height: 180px;
+        max-height: 34vh;
+    }
+
+    .koi-result-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .koi-result-nav .koi-btn {
+        min-height: 50px;
+        padding: 11px 8px;
+        font-size: 14px;
+    }
 }
 
 /* --- in-date HUD -------------------------------------------- */
@@ -4072,6 +4365,42 @@ button.koi-stage-plate:active {
     margin-bottom: 0;
     background: var(--koi-panel);
     backdrop-filter: blur(10px);
+}
+
+.koi-live-tutorial {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 3px 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--koi-accent) 22%, rgba(24, 17, 29, 0.92));
+    border: 1px solid color-mix(in srgb, var(--koi-accent) 65%, transparent);
+}
+
+.koi-live-tutorial-step {
+    grid-column: 1 / -1;
+    font-size: 8px;
+    letter-spacing: 0.13em;
+    color: rgba(253, 246, 236, 0.62);
+}
+
+.koi-live-tutorial strong {
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+.koi-live-tutorial button {
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--koi-accent);
+    color: #fff;
+    font:
+        700 11px / 1 system-ui,
+        sans-serif;
+    cursor: pointer;
 }
 
 /* Wraps rather than overflowing. `flex: 1` alone will not shrink a tab below
@@ -4839,20 +5168,27 @@ button.koi-stage-plate:active {
     .koi-plan-scroll {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto minmax(0, 1fr) auto;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
         column-gap: 18px;
         row-gap: 6px;
         align-content: stretch;
     }
 
+    .koi-plan-scroll .koi-first-date-callout {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+
     .koi-plan-scroll .koi-section:nth-of-type(1) {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 2;
     }
 
     .koi-plan-scroll .koi-pick-row {
         grid-column: 1;
-        grid-row: 2;
+        grid-row: 3;
         flex-wrap: wrap;
         overflow-y: auto;
         align-content: flex-start;
@@ -4872,20 +5208,20 @@ button.koi-stage-plate:active {
 
     .koi-plan-scroll .koi-section:nth-of-type(2) {
         grid-column: 2;
-        grid-row: 1;
+        grid-row: 2;
     }
 
     /* Spans both content rows so all three locations are visible at once. */
     .koi-plan-scroll .koi-loc-list {
         grid-column: 2;
-        grid-row: 2 / span 2;
+        grid-row: 3 / span 2;
         overflow-y: auto;
     }
 
     /* Under the faces, in the same column as the person it describes. */
     .koi-plan-scroll .koi-brief {
         grid-column: 1;
-        grid-row: 3;
+        grid-row: 4;
         gap: 4px;
         padding: 6px 10px;
     }
@@ -4987,6 +5323,7 @@ button.koi-stage-plate:active {
         display: grid;
         grid-template-columns: auto 1fr;
         column-gap: 20px;
+        row-gap: 6px;
         align-content: center;
         justify-items: center;
     }
@@ -5000,6 +5337,21 @@ button.koi-stage-plate:active {
         grid-column: 2;
         width: 100%;
         max-width: 460px;
+    }
+
+    .koi-result .koi-meter {
+        display: none;
+    }
+
+    .koi-result-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .koi-result-nav .koi-btn {
+        min-height: 46px;
+        padding: 9px 8px;
+        font-size: 14px;
     }
 
     /* Landscape. The card takes every spare pixel of height; the faces and the

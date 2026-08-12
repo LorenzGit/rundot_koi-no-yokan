@@ -7,6 +7,7 @@ import { useProfile } from "./useProfile.ts";
 import ConfirmSpend from "./ConfirmSpend.tsx";
 import ShopOffers from "./ShopOffers.tsx";
 import type { GiftDef } from "../../game/data/types.ts";
+import { analytics } from "../../systems/analytics/analyticsConfig.ts";
 
 export default function GiftShop() {
     const profile = useProfile();
@@ -85,6 +86,15 @@ export default function GiftShop() {
                     onCancel={() => setPending(null)}
                     onConfirm={() => {
                         const bought = buyGift(pending.id, pending.price);
+                        if (bought) {
+                            analytics.event("currency_spend", {
+                                currency: "hearts",
+                                amount: pending.price,
+                                sink: "gift",
+                                item_id: pending.id,
+                                balance_after: profile.coins - pending.price,
+                            });
+                        }
                         setPending(null);
                         store.patch({ toast: bought ? `${pending.name} is in your bag.` : "Not enough ♡" });
                     }}

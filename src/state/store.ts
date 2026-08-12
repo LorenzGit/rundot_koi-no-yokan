@@ -28,6 +28,10 @@ export interface DateResult {
     spark: number;
     confessed: boolean;
     accepted: boolean;
+    romanceScore: number;
+    leaderboardRank: number | null;
+    leaderboardAccepted: boolean | null;
+    leaderboardPending: boolean;
 }
 
 export interface AppState {
@@ -54,6 +58,13 @@ export interface AppState {
 
     /** One-time toasts surfaced from systems/purchases/tutorials */
     toast: string | null;
+    /**
+     * Bumped on every toast set so a REPEATED identical message still restarts
+     * the auto-dismiss timer. Keying the Toast component's effect off the text
+     * alone breaks when the same message fires twice: the snapshot compares
+     * equal, React skips the re-render, and the first timer kills the second.
+     */
+    toastSeq: number;
     /** The How to play legend, re-openable from Settings. */
     howToOpen: boolean;
 
@@ -97,6 +108,7 @@ let state: AppState = {
     quality: "high",
 
     toast: null,
+    toastSeq: 0,
     howToOpen: false,
 
     koiScreen: "avatar",
@@ -117,7 +129,12 @@ export const store = {
     },
 
     patch(partial: Partial<AppState>): void {
-        state = { ...state, ...partial };
+        // Stamp toastSeq whenever a toast is set so every producer gets the
+        // repeat-safe behavior without changing its call site.
+        state =
+            typeof partial.toast === "string"
+                ? { ...state, ...partial, toastSeq: state.toastSeq + 1 }
+                : { ...state, ...partial };
         for (const l of listeners) l();
     },
 

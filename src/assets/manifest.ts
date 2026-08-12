@@ -6,8 +6,9 @@
  * Two tiers (pattern from a shipped RUN game):
  *   - 'critical'  — awaited during the loading screen. Everything the first
  *                   interactive screen needs: the menu painting.
- *   - 'deferred'  — fire-and-forget background load after boot: the date
- *                   backdrops, so the first evening starts without a fetch.
+ * Date backdrops are loaded on demand by warmDateAssets(). Preloading all
+ * three kept roughly 42 MB of decoded pixels alive before the first date and
+ * made memory-constrained webviews much more likely to be killed.
  *
  * Keep 'critical' small: every asset here delays first interaction.
  */
@@ -32,14 +33,6 @@ export const MANIFEST: Manifest = {
             name: "critical",
             // The sakura menu painting: the first screen after the loader.
             assets: [{ alias: "menu-backdrop", src: menuSakuraUrl }],
-        },
-        {
-            name: "deferred",
-            assets: [
-                { alias: "bg-sakura-plaza", src: "images/bg_sakura_plaza.png" },
-                { alias: "bg-beach-terrace", src: "images/bg_beach_terrace.png" },
-                { alias: "bg-trattoria", src: "images/bg_trattoria.png" },
-            ],
         },
     ],
 };

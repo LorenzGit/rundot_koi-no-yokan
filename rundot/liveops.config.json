@@ -5,8 +5,7 @@
         "monetization": {
           "adsEnabled": true,
           "shopEnabled": true
-        },
-        "notificationDelaySeconds": 86400
+        }
       }
     },
     "overrides": []

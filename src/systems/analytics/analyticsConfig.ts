@@ -1,4 +1,4 @@
-import { getProfile } from "../../state/profile.ts";
+import { addAnalyticsMark, getProfile, hasAnalyticsMark, removeAnalyticsMark } from "../../state/profile.ts";
 import { recordAnalytics, recordFunnelStep } from "../../sdk/runSdk.ts";
 import packageJson from "../../../package.json";
 import { countedSteps, createAnalytics } from "./analytics.ts";
@@ -20,9 +20,9 @@ export const analytics = createAnalytics({
     emitEvent: (name, payload) => {
         void recordAnalytics(name, { ...payload, build_version: packageJson.version });
     },
-    emitFunnelStep: (step, name, funnel, order) => {
-        void recordFunnelStep(step, name, funnel, order);
-    },
+    // Return the promise so once-ever marks persist only on confirmed
+    // delivery — recordFunnelStep resolves false on timeout or RPC failure.
+    emitFunnelStep: (step, name, funnel, order) => recordFunnelStep(step, name, funnel, order),
     funnels: {
         /**
          * The loading phase itself, ahead of the first-run funnel (order 0).
@@ -38,7 +38,6 @@ export const analytics = createAnalytics({
          */
         load: {
             order: 0,
-            onceEver: true,
             steps: [
                 "load_started", // first line of script execution
                 "load_sdk_ready", // host handshake resolved
@@ -59,14 +58,20 @@ export const analytics = createAnalytics({
                 "second_date_planned", // came back for another evening
             ],
         },
+        /** Just-in-time first-date coaching, separate from the frozen shipped funnel. */
+        date_tutorial: {
+            order: 2,
+            onceEver: true,
+            steps: ["first_move_played", "tension_tip_completed", "topic_tip_completed"],
+        },
         // Repeatable: how deep players get across their first 12 dates.
-        engagement: { order: 2, steps: countedSteps("date_finished_", 12) },
+        engagement: { order: 3, steps: countedSteps("date_finished_", 12) },
         /**
          * Store conversion. Repeatable (not onceEver): a player can buy more
          * than once, and each pass through the shop should count.
          */
         purchase: {
-            order: 3,
+            order: 4,
             steps: [
                 "shop_item_viewed", // the offer list was actually seen
                 "shop_item_click_purchase", // a specific offer was chosen
@@ -74,6 +79,11 @@ export const analytics = createAnalytics({
                 "purchase_complete", // the host confirmed and the grant landed
             ],
         },
+    },
+    onceMarks: {
+        has: hasAnalyticsMark,
+        add: addAnalyticsMark,
+        remove: removeAnalyticsMark,
     },
     enrich: () => {
         const profile = getProfile();

@@ -267,6 +267,7 @@ export const LOCATIONS: LocationDef[] = [
     {
         id: "sakura",
         name: "Sakura Plaza",
+        thumbnail: "images/location-thumbs/sakura.png",
         image: "images/bg_sakura_plaza.png",
         // An open waterfront square: benches and a railing, no service.
         features: ["walk", "seats", "water"],
@@ -281,6 +282,7 @@ export const LOCATIONS: LocationDef[] = [
     {
         id: "beach",
         name: "Beach Terrace",
+        thumbnail: "images/location-thumbs/beach.png",
         image: "images/bg_beach_terrace.png",
         features: ["walk", "seats", "water", "drinks"],
         groundAsPainted: 0.8,
@@ -293,6 +295,7 @@ export const LOCATIONS: LocationDef[] = [
     {
         id: "trattoria",
         name: "La Dolce Vita",
+        thumbnail: "images/location-thumbs/trattoria.png",
         image: "images/bg_trattoria.png",
         features: ["table", "drinks", "music", "seats", "walk"],
         groundAsPainted: 0.8,

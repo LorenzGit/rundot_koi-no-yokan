@@ -5,7 +5,7 @@ import {
     fetchLiveOps,
     getRunCapabilities,
     purchaseVerifiedShopItem,
-    rearmLocalNotification,
+    cancelLocalNotification,
     recordAnalytics,
     recordFunnelStep,
     showVerifiedRewardedAd,
@@ -16,20 +16,22 @@ import {
 } from "../sdk/runSdk.ts";
 import { refreshServerTime } from "./serverTime.ts";
 import { store } from "../state/store.ts";
-import { t } from "./localization.ts";
+import { returnReminders } from "./retention/retentionConfig.ts";
 
 export interface RuntimeConfig {
     dailyRewardsEnabled: boolean;
     dailyQuestsEnabled: boolean;
-    notificationDelaySeconds: number;
     adsEnabled: boolean;
     shopEnabled: boolean;
 }
 
+// The return-reminder cadence is deliberately NOT remoteable: it is fixed at
+// 24/48/72h in returnReminders.ts. A notificationDelaySeconds knob sat here
+// and fed a second generic reminder on top of that cadence — two tracks, so
+// players could be pinged twice.
 const DEFAULTS: Readonly<RuntimeConfig> = Object.freeze({
     dailyRewardsEnabled: true,
     dailyQuestsEnabled: true,
-    notificationDelaySeconds: 86_400,
     adsEnabled: false,
     shopEnabled: false,
 });
@@ -53,11 +55,9 @@ function normalize(values: Record<string, unknown>): RuntimeConfig {
         root.monetization && typeof root.monetization === "object"
             ? (root.monetization as Record<string, unknown>)
             : {};
-    const delay = Number(root.notificationDelaySeconds);
     return {
         dailyRewardsEnabled: typeof root.dailyRewardsEnabled === "boolean" ? root.dailyRewardsEnabled : true,
         dailyQuestsEnabled: typeof root.dailyQuestsEnabled === "boolean" ? root.dailyQuestsEnabled : true,
-        notificationDelaySeconds: Number.isFinite(delay) ? Math.max(3_600, Math.min(delay, 604_800)) : 86_400,
         adsEnabled: monetization.adsEnabled === true && isConfiguredPlatformId(PLATFORM_IDS.rewardedResultsBonus),
         // Gated on THIS game's catalog, not the template's starter bundle: the
         // shop rows read koi ids, so keying the flag to an unrelated id would
@@ -70,8 +70,14 @@ async function refreshLiveOps(): Promise<void> {
     clearScheduledRefresh();
     const snapshot = await fetchLiveOps();
     if (!snapshot) {
-        config = { ...DEFAULTS };
-        store.patch({ runtimeReady: true, runtimeConfigVersion: null });
+        // KEEP the live config on a failed fetch: resetting to DEFAULTS here
+        // yanked an enabled shop/ads surface for the rest of the session on a
+        // single resume-time network blip. Retry only where a host could
+        // actually answer — without the capability this null is permanent.
+        store.patch({ runtimeReady: true });
+        if (getRunCapabilities().liveops) {
+            nextRefreshTimer = window.setTimeout(() => startRefreshCycle(), 60_000);
+        }
         return;
     }
     config = normalize(snapshot.values);
@@ -86,16 +92,23 @@ async function refreshTime(): Promise<void> {
     store.patch({ trustedTimeReady: await refreshServerTime() });
 }
 
+/**
+ * Re-anchor the whole 24/48/72h return cadence to now.
+ *
+ * This replaced a single 24h reminder. One ping gives a player exactly one
+ * chance to come back; a short cadence gives three without becoming spam, and
+ * stopping at 72h is deliberate — a fourth converts nobody and costs the
+ * notification permission the first three depend on.
+ */
 async function rearmNotifications(): Promise<void> {
     const state = store.get();
     if (!state.notificationsEnabled || state.notificationsConsent !== "granted") return;
-    await rearmLocalNotification({
-        id: RETURN_REMINDER_ID,
-        legacyIds: [LEGACY_RETURN_REMINDER_ID],
-        title: t("NotificationTitle"),
-        body: t("NotificationReEngagementBody"),
-        delaySeconds: config.notificationDelaySeconds,
-    });
+    // The pre-cadence reminder used its own id; leave it scheduled and the
+    // player gets the old generic ping alongside the new specific ones.
+    for (const legacy of [RETURN_REMINDER_ID, LEGACY_RETURN_REMINDER_ID]) {
+        await cancelLocalNotification(legacy);
+    }
+    await returnReminders.refreshAll();
 }
 
 async function refreshRuntime(): Promise<void> {

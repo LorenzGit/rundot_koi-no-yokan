@@ -8,7 +8,7 @@
  * One shared 24px grid, 1.8px strokes, round caps — consistent weight across
  * the set is what makes them read as a family rather than clip art.
  */
-export type IconName = "heart" | "book" | "gift" | "postcard" | "gear";
+export type IconName = "heart" | "book" | "gift" | "postcard" | "gear" | "share";
 
 const PATHS: Record<IconName, string[]> = {
     heart: [
@@ -27,6 +27,12 @@ const PATHS: Record<IconName, string[]> = {
         "M12 6.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z",
         "M12 10.2a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6Z",
         "M12 2v5M12 17v5M2 12h5M17 12h5M4.9 4.9l3.5 3.5M15.6 15.6l3.5 3.5M4.9 19.1l3.5-3.5M15.6 8.4l3.5-3.5",
+    ],
+    share: [
+        "M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+        "M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+        "M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+        "m8.6 10.5 6.8-4M8.6 13.5l6.8 4",
     ],
 };
 

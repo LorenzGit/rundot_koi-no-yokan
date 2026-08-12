@@ -11,7 +11,10 @@ import { useProfile } from "./useProfile.ts";
 export default function PlanDate() {
     const profile = useProfile();
     const unlockedBy = totalAffection();
-    const [who, setWho] = useState<string | null>(null);
+    // First play opens here. Preselect the first eligible person so the player
+    // reaches the date with one tap; every later visit stays an open choice.
+    const firstCandidate = CAST.find((candidate) => candidate.id !== profile.avatar)?.id ?? null;
+    const [who, setWho] = useState<string | null>(profile.totalDates === 0 ? firstCandidate : null);
     // The first location is always unlocked and is the obvious default, so
     // preselect it: nobody comes here to pick Sakura Plaza on purpose, they
     // come to pick a person, and an unselected Where left "Meet up" disabled
@@ -33,6 +36,9 @@ export default function PlanDate() {
             </header>
 
             <div className="koi-plan-scroll">
+                {profile.totalDates === 0 && (
+                    <p className="koi-first-date-callout">Your first evening is ready. Change anything, or meet now.</p>
+                )}
                 <h2 className="koi-section">Who</h2>
                 <div className="koi-pick-row">
                     {candidates.map((c) => {
@@ -101,7 +107,7 @@ export default function PlanDate() {
                                 disabled={locked}
                                 onClick={() => setWhere(loc.id)}
                             >
-                                <img src={loc.image} alt="" />
+                                <img src={loc.thumbnail} alt="" />
                                 <span className="koi-loc-body">
                                     <strong>{loc.name}</strong>
                                     <em>{locked ? `Unlocks at ${loc.unlockAt} total ♥` : loc.mood}</em>
@@ -124,15 +130,26 @@ export default function PlanDate() {
                     if (location && who) warmDateAssets(who, getProfile().avatar ?? "char_f_artist", location);
                     // Steps 3 and 7 share this call site; the once-ever marks
                     // make a later plan register as "came back for another
-                    // evening" without extra bookkeeping.
-                    analytics.funnelStep(FIRST_PLAY_FUNNEL, getProfile().totalDates === 0 ? 3 : 7, {
-                        person_id: who ?? "",
-                        location_id: where ?? "",
-                    });
+                    // evening" without extra bookkeeping. Step 7 is gated on
+                    // step 6 having fired — a finished-but-unviewed result
+                    // otherwise put more players at "second date" than at
+                    // "first result viewed", the exact non-monotonic shape
+                    // that reads as broken instrumentation.
+                    if (getProfile().totalDates === 0) {
+                        analytics.funnelStep(FIRST_PLAY_FUNNEL, 3, {
+                            person_id: who ?? "",
+                            location_id: where ?? "",
+                        });
+                    } else if (!analytics.isFirstTime(FIRST_PLAY_FUNNEL, 6)) {
+                        analytics.funnelStep(FIRST_PLAY_FUNNEL, 7, {
+                            person_id: who ?? "",
+                            location_id: where ?? "",
+                        });
+                    }
                     store.patch({ phase: "playing", dateWith: who, dateAt: where, selectedGift: null });
                 }}
             >
-                Meet up
+                {profile.totalDates === 0 && chosen ? `Meet ${chosen.name}` : "Meet up"}
             </button>
         </main>
     );

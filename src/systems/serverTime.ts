@@ -28,7 +28,8 @@ export function serverNow(): number {
 }
 
 export function canUseTimeGates(): boolean {
-    return !getRunCapabilities().host || hasServerTime();
+    const capabilities = getRunCapabilities();
+    return !capabilities.host || capabilities.mock || hasServerTime();
 }
 
 export function localDayKey(epochMs: number): string {

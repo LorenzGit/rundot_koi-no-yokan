@@ -127,6 +127,8 @@ export interface CastMemberDef {
 export interface LocationDef {
     id: string;
     name: string;
+    /** Small picker preview; never use the full scene texture in menu DOM. */
+    thumbnail: string;
     image: string;
     /** What is physically here. Gates moves that need props. */
     features: VenueFeature[];

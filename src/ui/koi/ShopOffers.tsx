@@ -2,10 +2,8 @@
  * Where real money enters the game: heart packs, offers, and one rewarded ad.
  *
  * Every row here is conditional on the host actually supporting it. Shop item
- * ids are `REPLACE_WITH_` until `rundot/shop.config.json` is deployed, and
- * `runtimeServices` reports "unavailable" for anything unconfigured — so on a
- * fresh checkout this component renders the ad row at most, and never a buy
- * button that cannot complete.
+ * `runtimeServices` reports "unavailable" for any undeployed catalog or ad
+ * placement, so the screen never presents a button that cannot complete.
  */
 import { useState, useEffect } from "react";
 import { store } from "../../state/store.ts";
@@ -38,17 +36,23 @@ export default function ShopOffers() {
         analytics.funnelStep("purchase", 1, { offers: offers.length });
     }, [offers.length]);
 
-    const buy = async (id: string, itemId: string, grant: () => void) => {
+    const buy = async (id: string, itemId: string, rewardHearts: number, grant: () => void) => {
         setBusy(id);
         analytics.funnelStep("purchase", 2, { item_id: itemId, offer_id: id });
         analytics.funnelStep("purchase", 3, { item_id: itemId });
-        // The key makes a retry after a dropped connection safe: the host
-        // treats the second attempt as the same order rather than a new one.
-        const result = await runtimeServices.purchaseShopItem(itemId, `${id}-${profile.totalDates}-${today()}`);
+        // One logical tap, one order. Reusing a date/day-derived key caused
+        // repeatable packs to replay an old fulfilled order and grant again.
+        const result = await runtimeServices.purchaseShopItem(itemId, crypto.randomUUID());
         setBusy(null);
         if (result === "verified") {
             grant();
             analytics.funnelStep("purchase", 4, { item_id: itemId, offer_id: id });
+            analytics.event("reward_granted", {
+                reward_type: "iap_hearts",
+                amount: rewardHearts,
+                offer_id: id,
+                item_id: itemId,
+            });
             store.patch({ toast: "Thank you." });
             return;
         }
@@ -117,7 +121,7 @@ export default function ShopOffers() {
                                 className="koi-offer"
                                 disabled={busy !== null}
                                 onClick={() =>
-                                    void buy(offer.id, offer.itemId, () =>
+                                    void buy(offer.id, offer.itemId, offer.hearts, () =>
                                         grantOffer(offer.id, offer.hearts, offer.gifts, offer.entitlement),
                                     )
                                 }
@@ -143,7 +147,9 @@ export default function ShopOffers() {
                                 key={pack.id}
                                 className={`koi-pack ${pack.featured ? "is-featured" : ""}`}
                                 disabled={busy !== null}
-                                onClick={() => void buy(pack.id, pack.itemId, () => grantHearts(pack.hearts))}
+                                onClick={() =>
+                                    void buy(pack.id, pack.itemId, pack.hearts, () => grantHearts(pack.hearts))
+                                }
                             >
                                 <strong>♡ {pack.hearts.toLocaleString()}</strong>
                                 {pack.bonusPct > 0 && <span className="koi-pack-bonus">+{pack.bonusPct}%</span>}

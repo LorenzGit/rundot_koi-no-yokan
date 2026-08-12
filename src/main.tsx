@@ -4,10 +4,17 @@ import { createRoot } from "react-dom/client";
 import App from "./ui/App.tsx";
 import ErrorBoundary from "./ui/ErrorBoundary.tsx";
 import { store } from "./state/store.ts";
-import { applyRunSafeArea, getRunCapabilities, initSdk, registerLifecycles, requestHostExit } from "./sdk/runSdk.ts";
+import {
+    applyRunSafeArea,
+    getRunCapabilities,
+    initSdk,
+    refreshRunCapabilities,
+    registerLifecycles,
+    requestHostExit,
+} from "./sdk/runSdk.ts";
 import { warmAssets } from "./assets/preload.ts";
 import { saveSystem } from "./systems/save.ts";
-import { getProfile, loadProfile } from "./state/profile.ts";
+import { flushProfile, getProfile, loadProfile, setAvatar } from "./state/profile.ts";
 import { restoreLocale } from "./systems/localization.ts";
 import { audioManager } from "./audio/audioManager.ts";
 import { runtimeServices } from "./systems/runtimeServices.ts";
@@ -22,11 +29,6 @@ import {
 // closes the tab mid-load will ever produce. Emissions here are buffered until
 // markTransportReady() below, once the SDK transport exists.
 analytics.installErrorCapture();
-// Retention: arm the 24/48/72h return cadence and attribute a
-// notification-driven launch. Both are fire-and-forget — a host without
-// notification support must not delay the first playable frame.
-void refreshNotificationPermission().then(() => returnReminders.refreshAll());
-void resolveReturnLaunch();
 analytics.funnelStep("load", 1);
 /**
  * Boot sequence. The ORDER here matters — it's the pattern from a shipped RUN
@@ -55,8 +57,17 @@ async function boot() {
     // The dating record lives in its own key so the two schemas can move
     // independently; it decides which screen the menu phase opens on.
     const profile = await loadProfile();
+    const quickStarted = !profile.avatar;
     analytics.funnelStep("load", 3);
-    store.patch({ koiScreen: profile.avatar ? "home" : "avatar" });
+    // The old avatar carousel lost 88% of loaded sessions before the core
+    // loop. Quick-start with Mizuki and let players change character from the
+    // hub later. New players now open on Tonight, one tap from the date.
+    if (quickStarted) {
+        setAvatar("char_f_artist");
+        store.patch({ koiScreen: "plan" });
+    } else {
+        store.patch({ koiScreen: "home" });
+    }
     document.documentElement.dataset.reducedMotion = String(store.get().reducedMotion);
     document.documentElement.dataset.quality = store.get().quality;
     restoreLocale();
@@ -99,6 +110,13 @@ async function boot() {
 
     // 6. Loading done — hand over to the menu.
     store.patch({ phase: "menu" });
+    analytics.funnelStep(FIRST_PLAY_FUNNEL, 1, { host: getRunCapabilities().host });
+    if (quickStarted) {
+        analytics.funnelStep(FIRST_PLAY_FUNNEL, 2, {
+            avatar: "char_f_artist",
+            selection_method: "quick_start",
+        });
+    }
     if (import.meta.env.DEV) {
         const { applyDevelopmentScreenPreview } = await import("./dev/preview.ts");
         applyDevelopmentScreenPreview();
@@ -115,6 +133,7 @@ async function boot() {
             store.patch({ paused: true });
             audioManager.setPaused(true);
             void saveSystem.flush();
+            void flushProfile();
         },
         onResume: () => {
             store.patch({ paused: false });
@@ -129,10 +148,14 @@ async function boot() {
             store.patch({ paused: true });
             audioManager.setPaused(true);
             void saveSystem.flush();
+            void flushProfile();
         },
         onAwake: () => {
             store.patch({ paused: false });
             audioManager.setPaused(false);
+            // onAwake is the SDK's "refresh stale data" hook; a long suspend
+            // can span a settings change or a delayed host attach.
+            refreshRunCapabilities();
             runtimeServices.resume();
         },
         onQuit: () => {
@@ -141,6 +164,7 @@ async function boot() {
             void returnReminders.refreshPrimary();
             analytics.sessionEnd();
             void saveSystem.flush();
+            void flushProfile();
         },
         onIdentityChanged: (event) => {
             // Never flush the old account's in-memory state after the host has
@@ -166,9 +190,15 @@ async function boot() {
     //    boot event, subscription status refresh. None of it should block or
     //    throw into this function.
     runtimeServices.bootstrap();
+    // SDK-dependent retention work starts only after init and save restore.
+    // Starting this at module scope previously raced the host handshake and
+    // read the default opt-out before settings loaded.
+    void refreshNotificationPermission().then(() => returnReminders.refreshAll());
+    void resolveReturnLaunch().then((reminderId) => {
+        if (reminderId === "d1" && store.get().phase === "menu") store.patch({ koiScreen: "shop" });
+    });
     // Boot reached a playable frame; everything after this is the first-run funnel.
     analytics.funnelStep("load", 4);
-    analytics.funnelStep(FIRST_PLAY_FUNNEL, 1, { host: getRunCapabilities().host });
     analytics.sessionStart(getProfile().totalDates === 0);
 }
 
@@ -188,9 +218,15 @@ window.addEventListener("unhandledrejection", (event) => {
     event.preventDefault();
 });
 
+// Native onQuit is best-effort and was producing zero session_end rows. The
+// browser's pagehide is the last reliable web/mobile-web lifecycle edge;
+// sessionEnd() is idempotent, so SDK onQuit cannot double-count it.
+window.addEventListener("pagehide", () => analytics.sessionEnd());
+
 function start(): void {
     void boot().catch((error) => {
         console.error("[boot] fatal startup failure", error);
+        analytics.trackError("boot_failure", error);
         const root = document.getElementById("root");
         if (!root) return;
         const message = document.createElement("main");

@@ -1,4 +1,5 @@
 import { store, type KoiScreen } from "../state/store.ts";
+import { personFor, recordDate } from "../state/profile.ts";
 
 const KOI_SCREENS = new Set<KoiScreen>(["avatar", "home", "plan", "book", "shop", "postcard", "result"]);
 
@@ -18,6 +19,30 @@ export function applyDevelopmentScreenPreview(): void {
     }
     if (requested === "settings") {
         store.patch({ phase: "menu", menuScreen: "settings", paused: false });
+        return;
+    }
+    if (requested === "result") {
+        // The result screen needs an actual local gameplay result to render.
+        // This fixture never claims a host-authoritative rank, purchase, ad,
+        // entitlement, or engagement outcome.
+        if (personFor("char_f_siren").dates === 0) recordDate("char_f_siren", 22, 140, ["night"]);
+        store.patch({
+            phase: "menu",
+            menuScreen: "main",
+            koiScreen: "result",
+            paused: false,
+            lastResult: {
+                personId: "char_f_siren",
+                gained: 22,
+                spark: 140,
+                confessed: false,
+                accepted: false,
+                romanceScore: 1022,
+                leaderboardRank: null,
+                leaderboardAccepted: null,
+                leaderboardPending: false,
+            },
+        });
         return;
     }
     if (KOI_SCREENS.has(requested as KoiScreen)) {

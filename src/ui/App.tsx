@@ -142,15 +142,11 @@ export default function App() {
     const paused = useStore((s) => s.paused);
     const menuScreen = useStore((s) => s.menuScreen);
     const howToOpen = useStore((s) => s.howToOpen);
-    const tutorialSeen = useProfile((p) => p.tutorialSeen);
     // The character you chose to be owns the accent colour for the whole app.
     // Anything showing a *different* person overrides --koi-char locally; the
     // rest of the chrome inherits yours from here. See :root in app.css.
     const avatar = useProfile((p) => p.avatar);
     const accent = avatar ? CAST_BY_ID[avatar]?.color : undefined;
-    // The legend opens itself exactly once: at the first date, over the veil
-    // that hides the scene loading. After that it is Settings-only.
-    const showHowTo = howToOpen || (phase === "playing" && !tutorialSeen);
     return (
         <div
             id="app-frame"
@@ -189,7 +185,10 @@ export default function App() {
                 with no way back. Overlaying also keeps the canvas mounted, so
                 the date survives the trip. */}
             {menuScreen === "settings" && <SettingsScreen />}
-            {showHowTo && <HowToPlay />}
+            {/* The full legend is optional reference material. First play is
+                taught in the HUD, one action at a time, so the core loop is
+                never hidden behind a text wall. */}
+            {howToOpen && <HowToPlay />}
             <SettingsFab />
             <span className="koi-build-version">v{packageJson.version}</span>
             <Toast />
@@ -209,13 +208,18 @@ function DevelopmentToolsSlot() {
 
 function Toast() {
     const toast = useStore((state) => state.toast);
+    // Seq, not just the text: a repeated identical message produces an equal
+    // snapshot, React skips the re-render, and the first timer would dismiss
+    // the second toast early. The stamped seq re-arms the timer per message.
+    const seq = useStore((state) => state.toastSeq);
     // A toast you never tap still leaves: it is a note, not a roadblock.
     // The timer re-arms per message, so a queue of toasts each gets read.
     useEffect(() => {
+        void seq;
         if (!toast) return;
         const id = window.setTimeout(() => store.patch({ toast: null }), 4000);
         return () => window.clearTimeout(id);
-    }, [toast]);
+    }, [toast, seq]);
     if (!toast) return null;
     return (
         <button type="button" className="toast" onClick={() => store.patch({ toast: null })}>

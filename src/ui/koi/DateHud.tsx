@@ -23,11 +23,12 @@ import {
     TICK_SECONDS,
 } from "../../game/data/actions.ts";
 import { GIFTS_BY_ID, TOPIC_GLYPH, TOPIC_LABEL, TOPIC_SHORT } from "../../game/data/world.ts";
-import { consumeGift } from "../../state/profile.ts";
+import { advanceTutorialStep, consumeGift, getProfile } from "../../state/profile.ts";
 import { audioManager } from "../../audio/audioManager.ts";
 import { useProfile } from "./useProfile.ts";
 import type { ActionDef, ActionFamily, SparkTick, TopicId } from "../../game/data/types.ts";
 import { NEUTRAL_MOOD, type ActionModifier, type Verdict } from "../../game/sim/dateSim.ts";
+import { analytics } from "../../systems/analytics/analyticsConfig.ts";
 
 const NEUTRAL_MODIFIER: ActionModifier = { value: 0, tone: "flat", reason: "Nothing either way" };
 
@@ -148,6 +149,12 @@ export default function DateHud() {
     // One hand per family, so switching tabs does not reshuffle what you were
     // already looking at.
     const [hands, setHands] = useState<Record<string, string[]>>({});
+
+    const advanceCoach = (from: number, to: number, funnelStep: number) => {
+        if (getProfile().tutorialStep !== from) return;
+        advanceTutorialStep(to);
+        analytics.funnelStep("date_tutorial", funnelStep);
+    };
 
     // Cooldown rings and the takeover countdown need to move, but nothing else
     // here does. One local timer is far cheaper than pushing the sim's clock
@@ -289,6 +296,7 @@ export default function DateHud() {
         }
         const modifier = dateControls.sim?.modifierFor(action, GIFTS_BY_ID[giftId]) ?? NEUTRAL_MODIFIER;
         if (!dateControls.begin(action.id, GIFTS_BY_ID[giftId])) return;
+        advanceCoach(0, 1, 1);
         setPerforming({
             action,
             verdict: "flat",
@@ -320,6 +328,7 @@ export default function DateHud() {
 
         const modifier = dateControls.sim?.modifierFor(action, gift) ?? NEUTRAL_MODIFIER;
         if (!dateControls.begin(action.id, gift)) return;
+        advanceCoach(0, 1, 1);
         setPerforming({
             action,
             verdict: "flat",
@@ -480,6 +489,30 @@ export default function DateHud() {
             </div>
 
             <div className="koi-deck">
+                {profile.tutorialStep < 3 && !performing && (
+                    <aside className="koi-live-tutorial" aria-live="polite">
+                        <span className="koi-live-tutorial-step">FIRST DATE · {profile.tutorialStep + 1}/3</span>
+                        {profile.tutorialStep === 0 && (
+                            <strong>Tap a move. ▲ means they like it; ▼ means they do not.</strong>
+                        )}
+                        {profile.tutorialStep === 1 && (
+                            <>
+                                <strong>Keep Tension's marker inside the green band.</strong>
+                                <button type="button" onClick={() => advanceCoach(1, 2, 2)}>
+                                    Next
+                                </button>
+                            </>
+                        )}
+                        {profile.tutorialStep === 2 && (
+                            <>
+                                <strong>Match a move to their subject chips for more Spark.</strong>
+                                <button type="button" onClick={() => advanceCoach(2, 3, 3)}>
+                                    Got it
+                                </button>
+                            </>
+                        )}
+                    </aside>
+                )}
                 {/* Landscape gets the wish here instead: the header row there is
                     at capacity beside the balloons, and this column has room.
                     Portrait keeps the header pill; CSS shows exactly one. */}

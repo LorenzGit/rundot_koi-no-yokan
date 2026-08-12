@@ -86,7 +86,6 @@ Only the following bounded client-visible values are consumed:
 
 - `runtime.dailyRewardsEnabled` boolean
 - `runtime.dailyQuestsEnabled` boolean
-- `runtime.notificationDelaySeconds` number clamped to 1 hour through 7 days
 - `runtime.monetization.adsEnabled` boolean, additionally blocked by host capability; ad placement IDs are self-authored and must be renamed per derived game
 - `runtime.monetization.shopEnabled` boolean, additionally blocked by Run Bits
   Shop item/entitlement placeholders and capability

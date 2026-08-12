@@ -27,6 +27,9 @@ export interface RunCapabilities {
     ads: boolean;
     purchases: boolean;
     subscriptions: boolean;
+    leaderboard: boolean;
+    engagement: boolean;
+    social: boolean;
 }
 
 const OFFLINE_CAPABILITIES: RunCapabilities = {
@@ -40,12 +43,33 @@ const OFFLINE_CAPABILITIES: RunCapabilities = {
     ads: false,
     purchases: false,
     subscriptions: false,
+    leaderboard: false,
+    engagement: false,
+    social: false,
 };
 
 let capabilities: RunCapabilities = OFFLINE_CAPABILITIES;
 
 function sdkNamespace(name: string): boolean {
     return typeof (RundotGameAPI as unknown as Record<string, unknown>)[name] === "object";
+}
+
+/**
+ * PITFALL: there is NO runtime RundotGameAPI.haptics namespace (the
+ * HapticsApi interface in the .d.ts is types-only). Support comes from
+ * DeviceInfo, and the trigger lives on the API root. Read LIVE at every call
+ * site that acts on it: `enabled` reflects the player's system setting, which
+ * can change mid-session, and a cached false at boot must never gate a later
+ * action.
+ */
+function hapticsAvailableNow(): boolean {
+    if (!_ready) return false;
+    try {
+        const device = RundotGameAPI.system.getDevice();
+        return device?.haptics?.supported === true && device?.haptics?.enabled === true;
+    } catch {
+        return false;
+    }
 }
 
 function snapshotCapabilities(): RunCapabilities {
@@ -58,24 +82,27 @@ function snapshotCapabilities(): RunCapabilities {
         analytics: sdkNamespace("analytics"),
         liveops: sdkNamespace("liveops"),
         notifications: sdkNamespace("notifications"),
-        // PITFALL: there is NO runtime RundotGameAPI.haptics namespace (the
-        // HapticsApi interface in the .d.ts is types-only). Support comes
-        // from DeviceInfo, and the trigger lives on the API root.
-        haptics: (() => {
-            try {
-                const device = RundotGameAPI.system.getDevice();
-                return device?.haptics?.supported === true && device?.haptics?.enabled === true;
-            } catch {
-                return false;
-            }
-        })(),
+        haptics: hapticsAvailableNow(),
         ads: environment?.ads === true,
         purchases: environment?.purchases === true,
         subscriptions: environment?.subscriptions === true,
+        leaderboard: sdkNamespace("leaderboard"),
+        engagement: sdkNamespace("popups"),
+        social: sdkNamespace("social"),
     };
 }
 
 export function getRunCapabilities(): Readonly<RunCapabilities> {
+    return capabilities;
+}
+
+/**
+ * Re-read host capabilities. Wired to onAwake (the SDK's "refresh stale data"
+ * hook) so a session that started before a grant or attach does not stay
+ * frozen on its boot snapshot.
+ */
+export function refreshRunCapabilities(): Readonly<RunCapabilities> {
+    capabilities = snapshotCapabilities();
     return capabilities;
 }
 
@@ -185,8 +212,32 @@ export async function initSdk(): Promise<boolean> {
     capabilities = snapshotCapabilities();
     if (!_ready) {
         console.info("[runSdk] RUN host unavailable; using local non-authoritative fallbacks");
+        // Inside an iframe the host is expected — a cold WebView can simply be
+        // slower than the bounded handshake. Keep watching so a late attach
+        // upgrades this session instead of stranding it offline until relaunch.
+        if (embedded) watchForLateHostAttach();
     }
     return _ready;
+}
+
+function watchForLateHostAttach(): void {
+    const deadline = performance.now() + 30_000;
+    const watcher = window.setInterval(() => {
+        try {
+            if (RundotGameAPI.isAvailable() || RundotGameAPI.isMock()) {
+                window.clearInterval(watcher);
+                _ready = true;
+                capabilities = snapshotCapabilities();
+                applyRunSafeArea();
+                console.info("[runSdk] RUN host attached after the boot handshake; capabilities refreshed");
+                return;
+            }
+        } catch {
+            window.clearInterval(watcher);
+            return;
+        }
+        if (performance.now() >= deadline) window.clearInterval(watcher);
+    }, 500);
 }
 
 export async function readAppStorage(key: string): Promise<{ ok: boolean; value: string | null }> {
@@ -248,7 +299,9 @@ export async function setNotificationPreference(enabled: boolean): Promise<Notif
 export type HapticStyle = "light" | "medium" | "heavy" | "success" | "warning" | "error";
 
 export async function triggerHaptic(style: HapticStyle): Promise<boolean> {
-    if (capabilities.haptics) {
+    // Live read, not the boot snapshot: the player can flip the system haptics
+    // setting mid-session and the next trigger must honor it.
+    if (hapticsAvailableNow()) {
         try {
             const map: Record<HapticStyle, HapticFeedbackStyle> = {
                 light: HapticFeedbackStyle.Light,
@@ -386,10 +439,22 @@ export async function withHostOverlay<T>(operation: () => Promise<T>): Promise<T
     }
 }
 
+/**
+ * Budget for an ad-readiness probe.
+ *
+ * On web the host answers this from the ad SDK, which on a cold first call
+ * waits out its consent manager (~5s) and then loads the ad script (~5s). The
+ * old 2s budget expired during that first probe and reported "no ad available"
+ * on a host that was merely still warming up — while every later probe, served
+ * from the host's cache, returned instantly. That is what made rewarded ads
+ * work only sometimes.
+ */
+const AD_READY_TIMEOUT_MS = 12_000;
+
 export async function showVerifiedRewardedAd(id: string, name: string): Promise<VerifiedActionResult> {
     if (!capabilities.ads) return "unavailable";
     try {
-        const ready = await withTimeout(RundotGameAPI.ads.isRewardedAdReadyAsync(), 2_000, "ads.ready");
+        const ready = await withTimeout(RundotGameAPI.ads.isRewardedAdReadyAsync(), AD_READY_TIMEOUT_MS, "ads.ready");
         if (!ready) return "unavailable";
         // Do not timeout a user-mediated overlay: the audio interruption
         // must last until the host tells us it has actually closed.
@@ -407,7 +472,7 @@ export async function showVerifiedInterstitialAd(id: string, name: string): Prom
     try {
         const ready = await withTimeout(
             RundotGameAPI.ads.isInterstitialAdReadyAsync(),
-            2_000,
+            AD_READY_TIMEOUT_MS,
             "ads.interstitial.ready",
         );
         if (!ready) return "unavailable";
@@ -424,8 +489,148 @@ export async function purchaseVerifiedShopItem(itemId: string, idempotencyKey: s
     if (!capabilities.purchases || !sdkNamespace("shop")) return "unavailable";
     try {
         const result = await withHostOverlay(() => RundotGameAPI.shop.purchase(itemId, idempotencyKey));
-        return result.success === true ? "verified" : "failed";
+        // `success` only reports that the host accepted the request. Replaying
+        // an idempotency key returns the ORIGINAL order verbatim, so an order
+        // still in "pending_payment" also arrives as "success: true" — granting
+        // on that would hand over an unpaid purchase.
+        return result.success === true && result.order?.status === "fulfilled" ? "verified" : "failed";
     } catch {
+        return "failed";
+    }
+}
+
+export interface LeaderboardSubmission {
+    accepted: boolean;
+    rank: number | null;
+    reason: string | null;
+}
+
+/** Submit only at completed-date milestones; rejected keep-best scores are not retried. */
+export async function submitLeaderboardScore(
+    score: number,
+    durationSeconds: number,
+    metadata: Record<string, string | number | boolean>,
+): Promise<LeaderboardSubmission | null> {
+    if (!capabilities.leaderboard) return null;
+    try {
+        const result = await withTimeout(
+            RundotGameAPI.leaderboard.submitScore({
+                score: Math.max(0, Math.floor(score)),
+                duration: Math.max(1, Math.floor(durationSeconds)),
+                metadata,
+            }),
+            4_000,
+            "leaderboard.submitScore",
+        );
+        return {
+            accepted: result.accepted === true,
+            rank: result.accepted && typeof result.rank === "number" ? result.rank : null,
+            reason: result.accepted ? null : (result.reason ?? null),
+        };
+    } catch (error) {
+        console.warn("[runSdk] leaderboard submit failed", error);
+        return null;
+    }
+}
+
+export type LikePromptResult = "liked" | "dismissed" | "already_liked" | "unavailable" | "failed";
+
+/** Contextual prompt only; callers invoke this from a deliberate result-screen tap. */
+export async function showLikePrompt(): Promise<LikePromptResult> {
+    if (!capabilities.engagement) return "unavailable";
+    try {
+        const state = await withTimeout(RundotGameAPI.popups.getLikeState(), 2_000, "popups.getLikeState");
+        if (state.isLiked) return "already_liked";
+        const available = await withTimeout(
+            RundotGameAPI.popups.canShowLikeDialog(),
+            2_000,
+            "popups.canShowLikeDialog",
+        );
+        if (!available.available) return "unavailable";
+        const result = await withHostOverlay(() => RundotGameAPI.popups.showLikeDialog());
+        if (!result.shown) return "unavailable";
+        return result.liked ? "liked" : "dismissed";
+    } catch (error) {
+        console.warn("[runSdk] Like prompt failed", error);
+        return "failed";
+    }
+}
+
+export type ShareResult = "shared" | "dismissed" | "unavailable" | "failed";
+export type DateCardExportResult = "native_opened" | "browser_download" | "cancelled" | "failed";
+
+/**
+ * Opens the platform file sheet when available. Callers own the direct browser
+ * download fallback so the UI can describe where the file is actually going.
+ */
+export async function exportDateCard(input: {
+    card: Blob;
+    filename: string;
+    title: string;
+    text: string;
+}): Promise<DateCardExportResult> {
+    if (!capabilities.social) return "browser_download";
+    try {
+        const support = await withTimeout(RundotGameAPI.social.canShareFileAsync(), 2_000, "social.canShareFileAsync");
+        if (!support.supported) return "browser_download";
+        const result = await withHostOverlay(() =>
+            RundotGameAPI.social.shareFileAsync({
+                data: input.card,
+                filename: input.filename,
+                mimeType: "image/png",
+                title: input.title,
+                text: input.text,
+            }),
+        );
+        return result.cancelled ? "cancelled" : "native_opened";
+    } catch (error) {
+        console.warn("[runSdk] date-card export failed", error);
+        return "failed";
+    }
+}
+
+/**
+ * Opens RUN's social composer with both the generated result card and a
+ * tracked deep link. This is deliberately one host operation: players choose
+ * the destination and review the post before anything leaves the game.
+ */
+export async function shareDateResult(input: {
+    personId: string;
+    personName: string;
+    affection: number;
+    spark: number;
+    romanceScore: number;
+    card: Blob;
+    filename: string;
+    caption: string;
+}): Promise<ShareResult> {
+    if (!capabilities.social) return "unavailable";
+    try {
+        const result = await withHostOverlay(() =>
+            RundotGameAPI.social.composeSocialPostAsync({
+                text: input.caption,
+                shareParams: {
+                    kind: "koi_date_result",
+                    person: input.personId,
+                    affection: String(Math.max(0, Math.floor(input.affection))),
+                    spark: String(Math.max(0, Math.floor(input.spark))),
+                    romance_score: String(Math.max(0, Math.floor(input.romanceScore))),
+                },
+                media: {
+                    data: input.card,
+                    filename: input.filename,
+                    mimeType: "image/png",
+                },
+                metadata: {
+                    title: `A date with ${input.personName} in Koi no Yokan`,
+                    description: input.caption,
+                },
+                title: `My date with ${input.personName} in Koi no Yokan`,
+            }),
+        );
+        return result.completed ? "shared" : "dismissed";
+    } catch (error) {
+        console.warn("[runSdk] result share failed", error);
         return "failed";
     }
 }

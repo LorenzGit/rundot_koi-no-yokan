@@ -20,8 +20,19 @@ import { ACTIONS_BY_ID } from "./data/actions.ts";
 import type { GiftDef, SparkTick } from "./data/types.ts";
 import { store, useStore } from "../state/store.ts";
 import { audioManager } from "../audio/audioManager.ts";
-import { getProfile, hasEntitlement, noteDateFinished, personFor, recordDate } from "../state/profile.ts";
+import {
+    armReturnReward,
+    flushProfile,
+    getProfile,
+    hasEntitlement,
+    noteDateFinished,
+    personFor,
+    recordDate,
+    romanceScore,
+} from "../state/profile.ts";
 import { runtimeServices } from "../systems/runtimeServices.ts";
+import { canUseTimeGates, localDayKey, serverNow } from "../systems/serverTime.ts";
+import { submitLeaderboardScore } from "../sdk/runSdk.ts";
 import {
     acquireRendererRuntime,
     type RendererLease,
@@ -76,6 +87,7 @@ async function initializeGameRenderer(scope: RendererLifecycleScope, host: HTMLE
             (hasEntitlement(PLATFORM_IDS.confidantEntitlement) ? CONFIDANT_BONUS_MOVES : 0),
         seed: Date.now() & 0xffff,
     });
+    const dateStartedAt = performance.now();
 
     // Topics the player actually saw them thinking about become Book entries.
     const seenTopics = new Set<string>();
@@ -116,15 +128,55 @@ async function initializeGameRenderer(scope: RendererLifecycleScope, host: HTMLE
         // if it did not.
         audioManager.play(gained > 0 ? "reward" : "fumble");
         recordDate(partner.id, gained, live.spark, [...seenTopics]);
+        if (canUseTimeGates()) armReturnReward(localDayKey(serverNow()));
         analytics.funnelStep(FIRST_PLAY_FUNNEL, 5, { person_id: partner.id, gained, spark: live.spark });
         analytics.funnelStep("engagement", getProfile().totalDates, { gained });
         // A confession only lands if the evening actually earned it.
         const accepted = confessed && personFor(partner.id).affection >= 90;
+        const score = romanceScore();
+        const durationSeconds = Math.max(1, Math.round((performance.now() - dateStartedAt) / 1_000));
         store.patch({
             phase: "menu",
             koiScreen: "result",
             selectedGift: null,
-            lastResult: { personId: partner.id, gained, spark: live.spark, confessed, accepted },
+            lastResult: {
+                personId: partner.id,
+                gained,
+                spark: live.spark,
+                confessed,
+                accepted,
+                romanceScore: score,
+                leaderboardRank: null,
+                leaderboardAccepted: null,
+                leaderboardPending: true,
+            },
+        });
+
+        // One monotonic score after each completed evening. Dates dominate the
+        // total, so losing affection through relationship choices can never
+        // make a later submission lower than an earlier one.
+        void flushProfile();
+        void submitLeaderboardScore(score, durationSeconds, {
+            dates: getProfile().totalDates,
+            total_affection: Object.values(getProfile().people).reduce((sum, person) => sum + person.affection, 0),
+            person_id: partner.id,
+        }).then((submission) => {
+            const current = store.get().lastResult;
+            if (!current || current.personId !== partner.id || current.romanceScore !== score) return;
+            store.patch({
+                lastResult: {
+                    ...current,
+                    leaderboardRank: submission?.accepted ? submission.rank : null,
+                    leaderboardAccepted: submission?.accepted ?? false,
+                    leaderboardPending: false,
+                },
+            });
+            analytics.event("leaderboard_score_submitted", {
+                score,
+                accepted: submission?.accepted === true,
+                rank: submission?.rank ?? null,
+                reason: submission?.reason ?? (submission ? "unknown" : "unavailable"),
+            });
         });
 
         // The only ad the player did not ask for, and it runs strictly between
