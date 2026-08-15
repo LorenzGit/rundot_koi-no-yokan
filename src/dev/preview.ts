@@ -1,5 +1,5 @@
 import { store, type KoiScreen } from "../state/store.ts";
-import { personFor, recordDate } from "../state/profile.ts";
+import { personFor, recordDate, setAvatar } from "../state/profile.ts";
 
 const KOI_SCREENS = new Set<KoiScreen>(["avatar", "home", "plan", "book", "shop", "postcard", "result"]);
 
@@ -42,6 +42,16 @@ export function applyDevelopmentScreenPreview(): void {
                 leaderboardAccepted: null,
                 leaderboardPending: false,
             },
+        });
+        return;
+    }
+    if (requested === "home-video") {
+        setAvatar("char_f_tsundere");
+        store.patch({
+            phase: "menu",
+            menuScreen: "main",
+            koiScreen: "home",
+            paused: false,
         });
         return;
     }

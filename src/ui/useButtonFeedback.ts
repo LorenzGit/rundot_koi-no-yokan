@@ -28,7 +28,7 @@ export function useButtonFeedback(): void {
         const onClick = (event: Event) => {
             const target = event.target;
             if (!(target instanceof HTMLElement)) return;
-            const control = target.closest("button, input[type='checkbox'], select, [role='tab']");
+            const control = target.closest("button, input[type='checkbox'], select, a[href], [role='tab']");
             if (!(control instanceof HTMLElement)) return;
             // A disabled control gives no feedback: pretending a dead button
             // responded is worse than silence.

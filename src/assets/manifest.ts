@@ -14,9 +14,13 @@
  */
 import type { AssetsManifest, UnresolvedAsset } from "pixi.js";
 import menuSakuraUrl from "./art/menu_sakura.png";
+import rinHarutoFirstDateUrl from "./art/rin-haruto-first-date.jpg";
 
 /** The sakura menu painting, bundled and fingerprinted by Vite. */
 export const MENU_BACKDROP_URL = menuSakuraUrl;
+
+/** Player-supplied key art for the Rin and Haruto first-date video. */
+export const RIN_HARUTO_FIRST_DATE_IMAGE_URL = rinHarutoFirstDateUrl;
 
 /**
  * A narrowing of Pixi's AssetsManifest: Pixi also allows `assets` to be a

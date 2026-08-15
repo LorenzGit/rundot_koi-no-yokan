@@ -193,6 +193,16 @@ const SCREENS = [
         setup: openResult,
     },
     {
+        name: "home-video",
+        wait: '[data-testid="rin-haruto-first-date-video"][href="https://w.run/s/9DkWLtA"][target="_blank"]',
+        setup: async (page) => {
+            await page.evaluate(async () => {
+                const state = await import("/src/state/store.ts");
+                state.store.patch({ koiScreen: "home" });
+            });
+        },
+    },
+    {
         name: "result-share-card",
         wait: ".koi-share-preview img",
         setup: async (page) => {

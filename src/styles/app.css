@@ -35,7 +35,8 @@ input {
 
 button:focus-visible,
 select:focus-visible,
-input:focus-visible {
+input:focus-visible,
+a:focus-visible {
     outline: 3px solid #fff4a7;
     outline-offset: 3px;
 }
@@ -1865,6 +1866,90 @@ html[data-reduced-motion="true"] *::after {
     flex-direction: column;
     gap: 10px;
     margin-top: auto;
+}
+
+.koi-menu-video {
+    display: grid;
+    min-height: 68px;
+    grid-template-columns: 54px minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--koi-gold) 58%, transparent);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(45, 32, 50, 0.94), rgba(23, 17, 30, 0.96));
+    padding: 6px 10px 6px 6px;
+    color: var(--koi-cream);
+    text-align: left;
+    text-decoration: none;
+    box-shadow: 0 9px 24px rgba(14, 8, 18, 0.3);
+    transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.koi-menu-video:hover,
+.koi-menu-video:focus-visible {
+    border-color: var(--koi-gold);
+    box-shadow: 0 11px 28px rgba(14, 8, 18, 0.42);
+}
+
+.koi-menu-video:active {
+    transform: scale(0.985);
+}
+
+.koi-menu-video > img {
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    object-fit: cover;
+    object-position: 50% 24%;
+}
+
+.koi-menu-video-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.koi-menu-video-copy small {
+    color: var(--koi-gold);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.koi-menu-video-copy strong {
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.koi-menu-video-copy > span {
+    color: rgba(253, 246, 236, 0.64);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.koi-menu-video-play {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--koi-accent) 74%, rgba(25, 12, 30, 0.92));
+}
+
+.koi-menu-video-play svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 2px;
 }
 
 /* Menu buttons carry a drawn icon beside their label. */
@@ -5109,6 +5194,51 @@ button.koi-stage-plate:active {
         grid-row: 2 / -1;
         margin-top: 0;
         align-self: center;
+        gap: 6px;
+    }
+
+    .koi-home .koi-menu-video {
+        min-height: 54px;
+        grid-template-columns: 44px minmax(0, 1fr) 30px;
+        gap: 8px;
+        margin-inline-end: 42px;
+        padding: 5px 8px 5px 5px;
+    }
+
+    .koi-home .koi-menu-video > img {
+        width: 44px;
+        height: 44px;
+        border-radius: 9px;
+    }
+
+    .koi-home .koi-menu-video-copy small {
+        display: none;
+    }
+
+    .koi-home .koi-menu-video-copy strong {
+        overflow: hidden;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .koi-home .koi-menu-video-copy > span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .koi-home .koi-menu-video-play {
+        width: 30px;
+        height: 30px;
+    }
+
+    .koi-home .koi-menu .koi-cta,
+    .koi-home .koi-menu .koi-btn {
+        min-height: 44px;
+        padding: 7px 9px;
+        font-size: 14px;
     }
 
     /* Settings: all three groups on screen at once. Placed explicitly rather
@@ -5565,6 +5695,72 @@ button.koi-stage-plate:active {
 
     .koi-hud-header .koi-gauge-state {
         font-size: 11px;
+    }
+}
+
+/* On a short portrait phone, five stacked navigation rows leave almost no
+   height for the character stage. The story stays full-width, while the four
+   familiar destinations use a compact two-by-two grid. Keep this override at
+   the end so equal-specificity base menu rules cannot silently undo it. */
+@media (orientation: portrait) and (max-height: 700px) {
+    .koi-home .koi-menu {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 0;
+    }
+
+    .koi-home .koi-menu-video,
+    .koi-home .koi-return-reward,
+    .koi-home .koi-next-goal {
+        grid-column: 1 / -1;
+    }
+
+    .koi-home .koi-menu-video {
+        min-height: 58px;
+        grid-template-columns: 46px minmax(0, 1fr) 32px;
+        gap: 8px;
+        padding: 5px 9px 5px 5px;
+    }
+
+    .koi-home .koi-menu-video > img {
+        width: 46px;
+        height: 46px;
+        border-radius: 9px;
+    }
+
+    .koi-home .koi-menu-video-play {
+        width: 32px;
+        height: 32px;
+    }
+
+    .koi-home .koi-menu .koi-cta,
+    .koi-home .koi-menu .koi-btn {
+        min-height: 50px;
+        gap: 6px;
+        padding: 9px 6px;
+        font-size: 13px;
+        line-height: 1.15;
+    }
+
+    .koi-home .koi-menu-icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (orientation: portrait) and (min-width: 700px) {
+    .koi-home .koi-menu {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 0;
+    }
+
+    .koi-home .koi-menu-video,
+    .koi-home .koi-return-reward,
+    .koi-home .koi-next-goal {
+        grid-column: 1 / -1;
     }
 }
 

@@ -28,6 +28,9 @@ import Icon from "./icons.tsx";
 import PetalFall from "./PetalFall.tsx";
 import { canUseTimeGates, localDayKey, serverNow } from "../../systems/serverTime.ts";
 import { analytics } from "../../systems/analytics/analyticsConfig.ts";
+import { RIN_HARUTO_FIRST_DATE_IMAGE_URL } from "../../assets/manifest.ts";
+
+const RIN_HARUTO_FIRST_DATE_URL = "https://w.run/s/9DkWLtA";
 
 /**
  * Both cutouts are trimmed crown-to-sole, so letting each fill the art box
@@ -168,6 +171,31 @@ export default function HomeScreen() {
             </section>
 
             <nav className="koi-menu">
+                <a
+                    className="koi-menu-video"
+                    data-testid="rin-haruto-first-date-video"
+                    href={RIN_HARUTO_FIRST_DATE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Watch Rin and Haruto's first date video on RUN"
+                    onClick={() => {
+                        analytics.event("story_video_opened", {
+                            story_id: "rin_haruto_first_date",
+                            source: "main_menu",
+                        });
+                    }}
+                >
+                    <img src={RIN_HARUTO_FIRST_DATE_IMAGE_URL} alt="" />
+                    <span className="koi-menu-video-copy">
+                        <small>Video story</small>
+                        <strong>Rin &amp; Haruto</strong>
+                        <span>First Date · RUN video</span>
+                    </span>
+                    <span className="koi-menu-video-play" aria-hidden="true">
+                        <Icon name="play" />
+                    </span>
+                </a>
+
                 {returnReward?.claimable && dayKey && (
                     <button
                         type="button"
