@@ -13,24 +13,30 @@
  * they keep the height difference the art was built for.
  */
 import { useEffect } from "react";
-import { store, useStore } from "../../state/store.ts";
-import { CAST_BY_ID, LOCATIONS, affectionTier } from "../../game/data/world.ts";
+import { RIN_HARUTO_FIRST_DATE_IMAGE_URL } from "../../assets/manifest.ts";
+import { affectionTier, CAST_BY_ID, LOCATIONS } from "../../game/data/world.ts";
+import { getRunCapabilities, navigateToRunGame } from "../../sdk/runSdk.ts";
 import {
     armReturnReward,
     breakUp,
     claimReturnReward,
     currentPartner,
+    flushProfile,
     returnRewardStatus,
     totalAffection,
 } from "../../state/profile.ts";
-import { useProfile } from "./useProfile.ts";
+import { store, useStore } from "../../state/store.ts";
+import { analytics } from "../../systems/analytics/analyticsConfig.ts";
+import { saveSystem } from "../../systems/save.ts";
+import { canUseTimeGates, localDayKey, serverNow } from "../../systems/serverTime.ts";
 import Icon from "./icons.tsx";
 import PetalFall from "./PetalFall.tsx";
-import { canUseTimeGates, localDayKey, serverNow } from "../../systems/serverTime.ts";
-import { analytics } from "../../systems/analytics/analyticsConfig.ts";
-import { RIN_HARUTO_FIRST_DATE_IMAGE_URL } from "../../assets/manifest.ts";
+import { useProfile } from "./useProfile.ts";
 
 const RIN_HARUTO_FIRST_DATE_URL = "https://w.run/s/9DkWLtA";
+const RUN_TV_GAME_ID = "5u4uBHrkmLc8bG0OOaS9";
+const RIN_HARUTO_STORY_ID = "koi-no-yokan-three-evenings";
+const RIN_HARUTO_EPISODE_ID = "ep1";
 
 /**
  * Both cutouts are trimmed crown-to-sole, so letting each fill the art box
@@ -56,6 +62,41 @@ export default function HomeScreen() {
     const nextLocation = LOCATIONS.find((location) => location.unlockAt > affection);
     const dayKey = trustedTimeReady || canUseTimeGates() ? localDayKey(serverNow()) : null;
     const returnReward = dayKey ? returnRewardStatus(dayKey) : null;
+
+    const openFirstDateVideo = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        const run = getRunCapabilities();
+        const useNativeNavigation = run.host && !run.mock;
+        analytics.event("story_video_opened", {
+            story_id: RIN_HARUTO_STORY_ID,
+            episode_id: RIN_HARUTO_EPISODE_ID,
+            source: "main_menu",
+            navigation: useNativeNavigation ? "run_g2g" : "browser_link",
+        });
+
+        // A same-frame href remains the reliable web fallback. In the native
+        // RUN host, keep the player inside the app and hand the story directly
+        // to RUN TV; iOS drops target=_blank requests from game WebViews.
+        if (!useNativeNavigation) return;
+        event.preventDefault();
+        store.patch({ toast: "Opening Rin & Haruto’s first date…" });
+        void (async () => {
+            await Promise.allSettled([saveSystem.flush(), flushProfile()]);
+            const result = await navigateToRunGame(RUN_TV_GAME_ID, {
+                storyId: RIN_HARUTO_STORY_ID,
+                episodeId: RIN_HARUTO_EPISODE_ID,
+                source: "koi-no-yokan",
+            });
+            if (result === "navigated") return;
+
+            analytics.event("story_video_open_failed", {
+                story_id: RIN_HARUTO_STORY_ID,
+                episode_id: RIN_HARUTO_EPISODE_ID,
+                result,
+            });
+            store.patch({ toast: "Opening the video in your browser…" });
+            window.location.assign(RIN_HARUTO_FIRST_DATE_URL);
+        })();
+    };
 
     // Normally armed at date completion. This second path covers a very fast
     // first date that finished before host server time became available.
@@ -175,15 +216,9 @@ export default function HomeScreen() {
                     className="koi-menu-video"
                     data-testid="rin-haruto-first-date-video"
                     href={RIN_HARUTO_FIRST_DATE_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    data-run-target-game-id={RUN_TV_GAME_ID}
                     aria-label="Watch Rin and Haruto's first date video on RUN"
-                    onClick={() => {
-                        analytics.event("story_video_opened", {
-                            story_id: "rin_haruto_first_date",
-                            source: "main_menu",
-                        });
-                    }}
+                    onClick={openFirstDateVideo}
                 >
                     <img src={RIN_HARUTO_FIRST_DATE_IMAGE_URL} alt="" />
                     <span className="koi-menu-video-copy">

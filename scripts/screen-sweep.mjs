@@ -11,8 +11,9 @@
  * Uses Playwright rather than ViewDeck because the date screen renders through
  * the Pixi ticker, which ViewDeck's capture surface does not run.
  */
-import { chromium } from "playwright";
+
 import { mkdirSync } from "node:fs";
+import { chromium } from "playwright";
 
 const OUT = process.argv[2] ?? "/tmp/koi-sweep";
 const BASE = process.env.SWEEP_URL ?? "http://127.0.0.1:5183";
@@ -194,7 +195,7 @@ const SCREENS = [
     },
     {
         name: "home-video",
-        wait: '[data-testid="rin-haruto-first-date-video"][href="https://w.run/s/9DkWLtA"][target="_blank"]',
+        wait: '[data-testid="rin-haruto-first-date-video"][href="https://w.run/s/9DkWLtA"][data-run-target-game-id="5u4uBHrkmLc8bG0OOaS9"]:not([target])',
         setup: async (page) => {
             await page.evaluate(async () => {
                 const state = await import("/src/state/store.ts");

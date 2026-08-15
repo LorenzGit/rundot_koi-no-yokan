@@ -7,12 +7,13 @@
  * try/catch'd, and outside the RUN host (plain `vite dev` in a browser) the
  * app must boot and run anyway.
  */
-import RundotGameAPI from "@series-inc/rundot-game-sdk/api";
-import { audioManager } from "../audio/audioManager.ts";
+
+import type { IdentityChangedEvent, Subscription } from "@series-inc/rundot-game-sdk";
 // Type-only import from the package root (the /api entry doesn't re-export it);
 // erased at build time, so no extra runtime code is pulled in.
 import { HapticFeedbackStyle } from "@series-inc/rundot-game-sdk";
-import type { IdentityChangedEvent, Subscription } from "@series-inc/rundot-game-sdk";
+import RundotGameAPI from "@series-inc/rundot-game-sdk/api";
+import { audioManager } from "../audio/audioManager.ts";
 
 let _ready = false;
 
@@ -558,6 +559,26 @@ export async function showLikePrompt(): Promise<LikePromptResult> {
 
 export type ShareResult = "shared" | "dismissed" | "unavailable" | "failed";
 export type DateCardExportResult = "native_opened" | "browser_download" | "cancelled" | "failed";
+export type RunGameNavigationResult = "navigated" | "unavailable" | "failed";
+
+/**
+ * Open another RUN title through the host navigation stack. A normal
+ * target=_blank link is ignored by the native iOS game WebView, while G2G
+ * navigation gives the destination its launch context and preserves Back.
+ */
+export async function navigateToRunGame(
+    targetGameId: string,
+    launchContext: Record<string, string>,
+): Promise<RunGameNavigationResult> {
+    if (!capabilities.host || capabilities.mock) return "unavailable";
+    try {
+        await withTimeout(RundotGameAPI.navigateToGame(targetGameId, { launchContext }), 4_000, "navigateToGame");
+        return "navigated";
+    } catch (error) {
+        console.warn("[runSdk] RUN game navigation failed", error);
+        return "failed";
+    }
+}
 
 /**
  * Opens the platform file sheet when available. Callers own the direct browser

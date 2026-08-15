@@ -1,6 +1,6 @@
 {
   "name": "koi-no-yokan",
-  "version": "1.16.4",
+  "version": "1.16.5",
   "description": "Koi no Yokan, a quiet dating game for RUN.world. PixiJS 8, WebGPU-first.",
   "private": true,
   "license": "SEE LICENSE IN LICENSE.md",
