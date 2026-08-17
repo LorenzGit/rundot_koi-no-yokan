@@ -1,0 +1,18 @@
+{
+  "dimensions": {
+    "maxWidth": 720,
+    "width": 720,
+    "height": 480
+  },
+  "format": "png",
+  "characters": {
+    "char_f_artist": "/images/postcards/char_f_artist.png",
+    "char_f_tsundere": "/images/postcards/char_f_tsundere.png",
+    "char_f_siren": "/images/postcards/char_f_siren.png",
+    "char_f_runner": "/images/postcards/char_f_runner.png",
+    "char_m_senpai": "/images/postcards/char_m_senpai.png",
+    "char_m_athlete": "/images/postcards/char_m_athlete.png",
+    "char_m_charmer": "/images/postcards/char_m_charmer.png",
+    "char_m_climber": "/images/postcards/char_m_climber.png"
+  }
+}

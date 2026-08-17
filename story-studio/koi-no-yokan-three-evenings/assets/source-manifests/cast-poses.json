@@ -1,0 +1,853 @@
+{
+  "generatedBy": "scripts/slice-expression-poses.mjs",
+  "backgroundRemoval": {
+    "skill": "rundot_template/.agents/skills/bg-removal-softshadows",
+    "engine": "Engine B",
+    "adapter": "scripts/chroma-key.mjs",
+    "reason": "green-dominance matte preserves near-black cel ink"
+  },
+  "expressions": ["neutral", "happy", "sad", "surprised", "angry", "in_love"],
+  "review": "art/expression_cutout_check.png",
+  "cast": {
+    "char_f_artist": {
+      "name": "Mizuki",
+      "heightCm": 169,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_f_artist_figure.png",
+        "file": "public/images/cast/char_f_artist_figure.png",
+        "w": 400,
+        "h": 1442,
+        "crownY": 20,
+        "bodyPx": 1422
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_f_artist_neutral.png",
+          "file": "public/images/cast/char_f_artist_neutral.png",
+          "w": 183,
+          "h": 698,
+          "crownY": 7,
+          "bodyPx": 691,
+          "extractedBodyPx": 690,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 70.09,
+            "opaquePct": 28.89,
+            "partialAlphaPixels": 2775
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_f_artist_happy.png",
+          "file": "public/images/cast/char_f_artist_happy.png",
+          "w": 225,
+          "h": 701,
+          "crownY": 10,
+          "bodyPx": 691,
+          "extractedBodyPx": 691,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.26,
+            "opaquePct": 31.53,
+            "partialAlphaPixels": 3279
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_f_artist_sad.png",
+          "file": "public/images/cast/char_f_artist_sad.png",
+          "w": 172,
+          "h": 699,
+          "crownY": 8,
+          "bodyPx": 691,
+          "extractedBodyPx": 691,
+          "strippedPixels": 9,
+          "sourceAlpha": {
+            "transparentPct": 70.46,
+            "opaquePct": 28.47,
+            "partialAlphaPixels": 2886
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_f_artist_surprised.png",
+          "file": "public/images/cast/char_f_artist_surprised.png",
+          "w": 206,
+          "h": 701,
+          "crownY": 10,
+          "bodyPx": 691,
+          "extractedBodyPx": 691,
+          "strippedPixels": 6,
+          "sourceAlpha": {
+            "transparentPct": 68.1,
+            "opaquePct": 30.71,
+            "partialAlphaPixels": 3213
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_f_artist_angry.png",
+          "file": "public/images/cast/char_f_artist_angry.png",
+          "w": 197,
+          "h": 700,
+          "crownY": 9,
+          "bodyPx": 691,
+          "extractedBodyPx": 691,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 68.36,
+            "opaquePct": 30.57,
+            "partialAlphaPixels": 2889
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_f_artist_in_love.png",
+          "file": "public/images/cast/char_f_artist_in_love.png",
+          "w": 177,
+          "h": 700,
+          "crownY": 9,
+          "bodyPx": 691,
+          "extractedBodyPx": 691,
+          "strippedPixels": 20,
+          "sourceAlpha": {
+            "transparentPct": 70,
+            "opaquePct": 28.92,
+            "partialAlphaPixels": 2912
+          }
+        }
+      }
+    },
+    "char_f_tsundere": {
+      "name": "Rin",
+      "heightCm": 171,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_f_tsundere_figure.png",
+        "file": "public/images/cast/char_f_tsundere_figure.png",
+        "w": 533,
+        "h": 1708,
+        "crownY": 16,
+        "bodyPx": 1692
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_f_tsundere_neutral.png",
+          "file": "public/images/cast/char_f_tsundere_neutral.png",
+          "w": 199,
+          "h": 705,
+          "crownY": 6,
+          "bodyPx": 699,
+          "extractedBodyPx": 698,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 69.06,
+            "opaquePct": 30.03,
+            "partialAlphaPixels": 2458
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_f_tsundere_happy.png",
+          "file": "public/images/cast/char_f_tsundere_happy.png",
+          "w": 220,
+          "h": 704,
+          "crownY": 5,
+          "bodyPx": 699,
+          "extractedBodyPx": 699,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.94,
+            "opaquePct": 30.98,
+            "partialAlphaPixels": 2908
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_f_tsundere_sad.png",
+          "file": "public/images/cast/char_f_tsundere_sad.png",
+          "w": 193,
+          "h": 704,
+          "crownY": 5,
+          "bodyPx": 699,
+          "extractedBodyPx": 699,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 70.05,
+            "opaquePct": 28.99,
+            "partialAlphaPixels": 2573
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_f_tsundere_surprised.png",
+          "file": "public/images/cast/char_f_tsundere_surprised.png",
+          "w": 208,
+          "h": 705,
+          "crownY": 6,
+          "bodyPx": 699,
+          "extractedBodyPx": 699,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 68.13,
+            "opaquePct": 30.7,
+            "partialAlphaPixels": 3171
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_f_tsundere_angry.png",
+          "file": "public/images/cast/char_f_tsundere_angry.png",
+          "w": 196,
+          "h": 704,
+          "crownY": 5,
+          "bodyPx": 699,
+          "extractedBodyPx": 699,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 68.67,
+            "opaquePct": 30.38,
+            "partialAlphaPixels": 2589
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_f_tsundere_in_love.png",
+          "file": "public/images/cast/char_f_tsundere_in_love.png",
+          "w": 189,
+          "h": 704,
+          "crownY": 5,
+          "bodyPx": 699,
+          "extractedBodyPx": 698,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 70.04,
+            "opaquePct": 29.02,
+            "partialAlphaPixels": 2532
+          }
+        }
+      }
+    },
+    "char_m_senpai": {
+      "name": "Haruto",
+      "heightCm": 184,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_m_senpai_figure.png",
+        "file": "public/images/cast/char_m_senpai_figure.png",
+        "w": 422,
+        "h": 1369,
+        "crownY": 19,
+        "bodyPx": 1350
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_m_senpai_neutral.png",
+          "file": "public/images/cast/char_m_senpai_neutral.png",
+          "w": 217,
+          "h": 761,
+          "crownY": 9,
+          "bodyPx": 752,
+          "extractedBodyPx": 752,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.49,
+            "opaquePct": 31.56,
+            "partialAlphaPixels": 2578
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_m_senpai_happy.png",
+          "file": "public/images/cast/char_m_senpai_happy.png",
+          "w": 238,
+          "h": 760,
+          "crownY": 8,
+          "bodyPx": 752,
+          "extractedBodyPx": 752,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 66.41,
+            "opaquePct": 32.47,
+            "partialAlphaPixels": 3034
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_m_senpai_sad.png",
+          "file": "public/images/cast/char_m_senpai_sad.png",
+          "w": 177,
+          "h": 759,
+          "crownY": 7,
+          "bodyPx": 752,
+          "extractedBodyPx": 752,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 69.43,
+            "opaquePct": 29.63,
+            "partialAlphaPixels": 2532
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_m_senpai_surprised.png",
+          "file": "public/images/cast/char_m_senpai_surprised.png",
+          "w": 262,
+          "h": 761,
+          "crownY": 9,
+          "bodyPx": 752,
+          "extractedBodyPx": 752,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 66.34,
+            "opaquePct": 32.47,
+            "partialAlphaPixels": 3195
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_m_senpai_angry.png",
+          "file": "public/images/cast/char_m_senpai_angry.png",
+          "w": 243,
+          "h": 760,
+          "crownY": 8,
+          "bodyPx": 752,
+          "extractedBodyPx": 751,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.77,
+            "opaquePct": 33.19,
+            "partialAlphaPixels": 2812
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_m_senpai_in_love.png",
+          "file": "public/images/cast/char_m_senpai_in_love.png",
+          "w": 194,
+          "h": 760,
+          "crownY": 8,
+          "bodyPx": 752,
+          "extractedBodyPx": 752,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.87,
+            "opaquePct": 31.16,
+            "partialAlphaPixels": 2610
+          }
+        }
+      }
+    },
+    "char_m_athlete": {
+      "name": "Sora",
+      "heightCm": 179,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_m_athlete_figure.png",
+        "file": "public/images/cast/char_m_athlete_figure.png",
+        "w": 331,
+        "h": 853,
+        "crownY": 18,
+        "bodyPx": 835
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_m_athlete_neutral.png",
+          "file": "public/images/cast/char_m_athlete_neutral.png",
+          "w": 212,
+          "h": 742,
+          "crownY": 11,
+          "bodyPx": 731,
+          "extractedBodyPx": 729,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.65,
+            "opaquePct": 33.07,
+            "partialAlphaPixels": 3459
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_m_athlete_happy.png",
+          "file": "public/images/cast/char_m_athlete_happy.png",
+          "w": 271,
+          "h": 745,
+          "crownY": 14,
+          "bodyPx": 731,
+          "extractedBodyPx": 728,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 62.66,
+            "opaquePct": 35.8,
+            "partialAlphaPixels": 4158
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_m_athlete_sad.png",
+          "file": "public/images/cast/char_m_athlete_sad.png",
+          "w": 214,
+          "h": 743,
+          "crownY": 12,
+          "bodyPx": 731,
+          "extractedBodyPx": 729,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 66.73,
+            "opaquePct": 32.06,
+            "partialAlphaPixels": 3259
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_m_athlete_surprised.png",
+          "file": "public/images/cast/char_m_athlete_surprised.png",
+          "w": 246,
+          "h": 743,
+          "crownY": 12,
+          "bodyPx": 731,
+          "extractedBodyPx": 730,
+          "strippedPixels": 7,
+          "sourceAlpha": {
+            "transparentPct": 63.63,
+            "opaquePct": 34.73,
+            "partialAlphaPixels": 4431
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_m_athlete_angry.png",
+          "file": "public/images/cast/char_m_athlete_angry.png",
+          "w": 237,
+          "h": 744,
+          "crownY": 13,
+          "bodyPx": 731,
+          "extractedBodyPx": 730,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 63.91,
+            "opaquePct": 34.69,
+            "partialAlphaPixels": 3769
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_m_athlete_in_love.png",
+          "file": "public/images/cast/char_m_athlete_in_love.png",
+          "w": 214,
+          "h": 745,
+          "crownY": 14,
+          "bodyPx": 731,
+          "extractedBodyPx": 731,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.9,
+            "opaquePct": 32.82,
+            "partialAlphaPixels": 3450
+          }
+        }
+      }
+    },
+    "char_f_siren": {
+      "name": "Reina",
+      "heightCm": 174,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_f_siren_figure.png",
+        "file": "public/images/cast/char_f_siren_figure.png",
+        "w": 448,
+        "h": 1456,
+        "crownY": 12,
+        "bodyPx": 1444
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_f_siren_neutral.png",
+          "file": "public/images/cast/char_f_siren_neutral.png",
+          "w": 171,
+          "h": 715,
+          "crownY": 4,
+          "bodyPx": 711,
+          "extractedBodyPx": 711,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 72.88,
+            "opaquePct": 26.22,
+            "partialAlphaPixels": 2424
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_f_siren_happy.png",
+          "file": "public/images/cast/char_f_siren_happy.png",
+          "w": 218,
+          "h": 715,
+          "crownY": 4,
+          "bodyPx": 711,
+          "extractedBodyPx": 711,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 72.12,
+            "opaquePct": 26.8,
+            "partialAlphaPixels": 2919
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_f_siren_sad.png",
+          "file": "public/images/cast/char_f_siren_sad.png",
+          "w": 160,
+          "h": 714,
+          "crownY": 3,
+          "bodyPx": 711,
+          "extractedBodyPx": 711,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 74.8,
+            "opaquePct": 24.35,
+            "partialAlphaPixels": 2318
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_f_siren_surprised.png",
+          "file": "public/images/cast/char_f_siren_surprised.png",
+          "w": 216,
+          "h": 715,
+          "crownY": 4,
+          "bodyPx": 711,
+          "extractedBodyPx": 710,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 73.03,
+            "opaquePct": 25.87,
+            "partialAlphaPixels": 2965
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_f_siren_angry.png",
+          "file": "public/images/cast/char_f_siren_angry.png",
+          "w": 198,
+          "h": 716,
+          "crownY": 5,
+          "bodyPx": 711,
+          "extractedBodyPx": 711,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 72.44,
+            "opaquePct": 26.52,
+            "partialAlphaPixels": 2812
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_f_siren_in_love.png",
+          "file": "public/images/cast/char_f_siren_in_love.png",
+          "w": 168,
+          "h": 715,
+          "crownY": 4,
+          "bodyPx": 711,
+          "extractedBodyPx": 711,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 74.56,
+            "opaquePct": 24.58,
+            "partialAlphaPixels": 2338
+          }
+        }
+      }
+    },
+    "char_m_charmer": {
+      "name": "Kaito",
+      "heightCm": 186,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_m_charmer_figure.png",
+        "file": "public/images/cast/char_m_charmer_figure.png",
+        "w": 410,
+        "h": 1365,
+        "crownY": 11,
+        "bodyPx": 1354
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_m_charmer_neutral.png",
+          "file": "public/images/cast/char_m_charmer_neutral.png",
+          "w": 229,
+          "h": 765,
+          "crownY": 5,
+          "bodyPx": 760,
+          "extractedBodyPx": 760,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.61,
+            "opaquePct": 33.31,
+            "partialAlphaPixels": 2919
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_m_charmer_happy.png",
+          "file": "public/images/cast/char_m_charmer_happy.png",
+          "w": 242,
+          "h": 766,
+          "crownY": 6,
+          "bodyPx": 760,
+          "extractedBodyPx": 760,
+          "strippedPixels": 1,
+          "sourceAlpha": {
+            "transparentPct": 64.51,
+            "opaquePct": 34.2,
+            "partialAlphaPixels": 3487
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_m_charmer_sad.png",
+          "file": "public/images/cast/char_m_charmer_sad.png",
+          "w": 199,
+          "h": 764,
+          "crownY": 4,
+          "bodyPx": 760,
+          "extractedBodyPx": 759,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.64,
+            "opaquePct": 31.38,
+            "partialAlphaPixels": 2644
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_m_charmer_surprised.png",
+          "file": "public/images/cast/char_m_charmer_surprised.png",
+          "w": 251,
+          "h": 763,
+          "crownY": 3,
+          "bodyPx": 760,
+          "extractedBodyPx": 760,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.54,
+            "opaquePct": 33.17,
+            "partialAlphaPixels": 3464
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_m_charmer_angry.png",
+          "file": "public/images/cast/char_m_charmer_angry.png",
+          "w": 246,
+          "h": 766,
+          "crownY": 6,
+          "bodyPx": 760,
+          "extractedBodyPx": 760,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 63.75,
+            "opaquePct": 35.1,
+            "partialAlphaPixels": 3090
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_m_charmer_in_love.png",
+          "file": "public/images/cast/char_m_charmer_in_love.png",
+          "w": 207,
+          "h": 764,
+          "crownY": 4,
+          "bodyPx": 760,
+          "extractedBodyPx": 760,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.57,
+            "opaquePct": 31.49,
+            "partialAlphaPixels": 2539
+          }
+        }
+      }
+    },
+    "char_f_runner": {
+      "name": "Kaede",
+      "heightCm": 172,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_f_runner_figure.png",
+        "file": "public/images/cast/char_f_runner_figure.png",
+        "w": 633,
+        "h": 1703,
+        "crownY": 25,
+        "bodyPx": 1678
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_f_runner_neutral.png",
+          "file": "public/images/cast/char_f_runner_neutral.png",
+          "w": 206,
+          "h": 714,
+          "crownY": 11,
+          "bodyPx": 703,
+          "extractedBodyPx": 702,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 71.37,
+            "opaquePct": 27.45,
+            "partialAlphaPixels": 3198
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_f_runner_happy.png",
+          "file": "public/images/cast/char_f_runner_happy.png",
+          "w": 232,
+          "h": 711,
+          "crownY": 8,
+          "bodyPx": 703,
+          "extractedBodyPx": 702,
+          "strippedPixels": 2,
+          "sourceAlpha": {
+            "transparentPct": 70.71,
+            "opaquePct": 27.93,
+            "partialAlphaPixels": 3680
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_f_runner_sad.png",
+          "file": "public/images/cast/char_f_runner_sad.png",
+          "w": 181,
+          "h": 710,
+          "crownY": 7,
+          "bodyPx": 703,
+          "extractedBodyPx": 702,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 73.73,
+            "opaquePct": 25.19,
+            "partialAlphaPixels": 2896
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_f_runner_surprised.png",
+          "file": "public/images/cast/char_f_runner_surprised.png",
+          "w": 234,
+          "h": 710,
+          "crownY": 7,
+          "bodyPx": 703,
+          "extractedBodyPx": 703,
+          "strippedPixels": 2,
+          "sourceAlpha": {
+            "transparentPct": 71.45,
+            "opaquePct": 27.23,
+            "partialAlphaPixels": 3553
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_f_runner_angry.png",
+          "file": "public/images/cast/char_f_runner_angry.png",
+          "w": 199,
+          "h": 712,
+          "crownY": 9,
+          "bodyPx": 703,
+          "extractedBodyPx": 704,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 70.61,
+            "opaquePct": 28.13,
+            "partialAlphaPixels": 3415
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_f_runner_in_love.png",
+          "file": "public/images/cast/char_f_runner_in_love.png",
+          "w": 188,
+          "h": 710,
+          "crownY": 7,
+          "bodyPx": 703,
+          "extractedBodyPx": 702,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 73.16,
+            "opaquePct": 25.75,
+            "partialAlphaPixels": 2937
+          }
+        }
+      }
+    },
+    "char_m_climber": {
+      "name": "Ren",
+      "heightCm": 181,
+      "totalCharacterImages": 7,
+      "original": {
+        "src": "images/cast/char_m_climber_figure.png",
+        "file": "public/images/cast/char_m_climber_figure.png",
+        "w": 374,
+        "h": 1182,
+        "crownY": 11,
+        "bodyPx": 1171
+      },
+      "poses": {
+        "neutral": {
+          "src": "images/cast/char_m_climber_neutral.png",
+          "file": "public/images/cast/char_m_climber_neutral.png",
+          "w": 218,
+          "h": 748,
+          "crownY": 8,
+          "bodyPx": 740,
+          "extractedBodyPx": 739,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.29,
+            "opaquePct": 33.57,
+            "partialAlphaPixels": 3065
+          }
+        },
+        "happy": {
+          "src": "images/cast/char_m_climber_happy.png",
+          "file": "public/images/cast/char_m_climber_happy.png",
+          "w": 242,
+          "h": 749,
+          "crownY": 9,
+          "bodyPx": 740,
+          "extractedBodyPx": 739,
+          "strippedPixels": 1,
+          "sourceAlpha": {
+            "transparentPct": 64.69,
+            "opaquePct": 33.95,
+            "partialAlphaPixels": 3660
+          }
+        },
+        "sad": {
+          "src": "images/cast/char_m_climber_sad.png",
+          "file": "public/images/cast/char_m_climber_sad.png",
+          "w": 198,
+          "h": 752,
+          "crownY": 12,
+          "bodyPx": 740,
+          "extractedBodyPx": 739,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.59,
+            "opaquePct": 31.29,
+            "partialAlphaPixels": 3037
+          }
+        },
+        "surprised": {
+          "src": "images/cast/char_m_climber_surprised.png",
+          "file": "public/images/cast/char_m_climber_surprised.png",
+          "w": 253,
+          "h": 747,
+          "crownY": 7,
+          "bodyPx": 740,
+          "extractedBodyPx": 740,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 65.22,
+            "opaquePct": 33.4,
+            "partialAlphaPixels": 3744
+          }
+        },
+        "angry": {
+          "src": "images/cast/char_m_climber_angry.png",
+          "file": "public/images/cast/char_m_climber_angry.png",
+          "w": 271,
+          "h": 751,
+          "crownY": 11,
+          "bodyPx": 740,
+          "extractedBodyPx": 739,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 62.49,
+            "opaquePct": 36.17,
+            "partialAlphaPixels": 3624
+          }
+        },
+        "in_love": {
+          "src": "images/cast/char_m_climber_in_love.png",
+          "file": "public/images/cast/char_m_climber_in_love.png",
+          "w": 195,
+          "h": 753,
+          "crownY": 13,
+          "bodyPx": 740,
+          "extractedBodyPx": 739,
+          "strippedPixels": 0,
+          "sourceAlpha": {
+            "transparentPct": 67.25,
+            "opaquePct": 31.65,
+            "partialAlphaPixels": 2983
+          }
+        }
+      }
+    }
+  }
+}

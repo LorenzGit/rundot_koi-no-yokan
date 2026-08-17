@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Koi no Yokan Story Studio Asset Gallery</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #1b101c; color: #fff8ee; }
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 32px; background: radial-gradient(circle at top, #563447 0, #221422 42%, #130c15 100%); }
+      h1 { margin: 0 0 6px; font-size: 34px; }
+      h2 { margin: 32px 0 14px; color: #ffb5c8; }
+      p { margin: 0; color: #d8c9d0; }
+      .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+      .card { min-width: 0; overflow: hidden; border: 1px solid #765167; border-radius: 18px; background: rgba(41, 25, 38, .88); box-shadow: 0 14px 34px #0007; }
+      .figure { width: 100%; height: 255px; object-fit: contain; object-position: center bottom; padding: 10px 10px 0; background: linear-gradient(#5e4058, #30222f); }
+      .location { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+      .postcard { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+      .reference { width: 100%; height: 260px; object-fit: contain; display: block; padding: 12px; background: #2a1a28; }
+      .label { padding: 10px 12px 12px; font-weight: 750; }
+      .emotions { padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; border-top: 1px solid #765167; }
+      .emotions img { width: 100%; height: 76px; object-fit: contain; object-position: center bottom; background: #2a1a28; border-radius: 7px; }
+      .locations { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .props { display: flex; flex-wrap: wrap; gap: 10px; }
+      .prop { width: 92px; height: 92px; object-fit: contain; padding: 9px; border: 1px solid #765167; border-radius: 14px; background: #2a1a28; }
+      @media (max-width: 900px) { body { padding: 18px; } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .locations { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <h1>Koi no Yokan: Three Evenings</h1>
+    <p>Story Studio upload reference. Expression order: normal, happy, sad, angry, shocked, in-love.</p>
+
+    <h2>Cast</h2>
+    <main class="grid">
+      <article class="card"><img class="figure" src="assets/characters/mizuki/portrait.png" alt="Mizuki" /><div class="label">Mizuki</div><div class="emotions"><img src="assets/characters/mizuki/normal.png" alt="normal" /><img src="assets/characters/mizuki/happy.png" alt="happy" /><img src="assets/characters/mizuki/sad.png" alt="sad" /><img src="assets/characters/mizuki/angry.png" alt="angry" /><img src="assets/characters/mizuki/shocked.png" alt="shocked" /><img src="assets/characters/mizuki/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/rin/portrait.png" alt="Rin" /><div class="label">Rin</div><div class="emotions"><img src="assets/characters/rin/normal.png" alt="normal" /><img src="assets/characters/rin/happy.png" alt="happy" /><img src="assets/characters/rin/sad.png" alt="sad" /><img src="assets/characters/rin/angry.png" alt="angry" /><img src="assets/characters/rin/shocked.png" alt="shocked" /><img src="assets/characters/rin/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/haruto/portrait.png" alt="Haruto" /><div class="label">Haruto</div><div class="emotions"><img src="assets/characters/haruto/normal.png" alt="normal" /><img src="assets/characters/haruto/happy.png" alt="happy" /><img src="assets/characters/haruto/sad.png" alt="sad" /><img src="assets/characters/haruto/angry.png" alt="angry" /><img src="assets/characters/haruto/shocked.png" alt="shocked" /><img src="assets/characters/haruto/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/sora/portrait.png" alt="Sora" /><div class="label">Sora</div><div class="emotions"><img src="assets/characters/sora/normal.png" alt="normal" /><img src="assets/characters/sora/happy.png" alt="happy" /><img src="assets/characters/sora/sad.png" alt="sad" /><img src="assets/characters/sora/angry.png" alt="angry" /><img src="assets/characters/sora/shocked.png" alt="shocked" /><img src="assets/characters/sora/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/reina/portrait.png" alt="Reina" /><div class="label">Reina</div><div class="emotions"><img src="assets/characters/reina/normal.png" alt="normal" /><img src="assets/characters/reina/happy.png" alt="happy" /><img src="assets/characters/reina/sad.png" alt="sad" /><img src="assets/characters/reina/angry.png" alt="angry" /><img src="assets/characters/reina/shocked.png" alt="shocked" /><img src="assets/characters/reina/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/kaito/portrait.png" alt="Kaito" /><div class="label">Kaito</div><div class="emotions"><img src="assets/characters/kaito/normal.png" alt="normal" /><img src="assets/characters/kaito/happy.png" alt="happy" /><img src="assets/characters/kaito/sad.png" alt="sad" /><img src="assets/characters/kaito/angry.png" alt="angry" /><img src="assets/characters/kaito/shocked.png" alt="shocked" /><img src="assets/characters/kaito/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/kaede/portrait.png" alt="Kaede" /><div class="label">Kaede</div><div class="emotions"><img src="assets/characters/kaede/normal.png" alt="normal" /><img src="assets/characters/kaede/happy.png" alt="happy" /><img src="assets/characters/kaede/sad.png" alt="sad" /><img src="assets/characters/kaede/angry.png" alt="angry" /><img src="assets/characters/kaede/shocked.png" alt="shocked" /><img src="assets/characters/kaede/in-love.png" alt="in love" /></div></article>
+      <article class="card"><img class="figure" src="assets/characters/ren/portrait.png" alt="Ren" /><div class="label">Ren</div><div class="emotions"><img src="assets/characters/ren/normal.png" alt="normal" /><img src="assets/characters/ren/happy.png" alt="happy" /><img src="assets/characters/ren/sad.png" alt="sad" /><img src="assets/characters/ren/angry.png" alt="angry" /><img src="assets/characters/ren/shocked.png" alt="shocked" /><img src="assets/characters/ren/in-love.png" alt="in love" /></div></article>
+    </main>
+
+    <h2>Locations</h2>
+    <section class="grid locations">
+      <article class="card"><img class="location" src="assets/backgrounds/sakura-plaza.png" alt="Sakura Plaza" /><div class="label">Sakura Plaza</div></article>
+      <article class="card"><img class="location" src="assets/backgrounds/beach-terrace.png" alt="Beach Terrace" /><div class="label">Beach Terrace</div></article>
+      <article class="card"><img class="location" src="assets/backgrounds/la-dolce-vita.png" alt="La Dolce Vita" /><div class="label">La Dolce Vita</div></article>
+    </section>
+
+    <h2>Props</h2>
+    <section class="props">
+      <img class="prop" src="assets/props/bouquet.png" alt="bouquet" /><img class="prop" src="assets/props/bubbletea.png" alt="bubble tea" /><img class="prop" src="assets/props/cake.png" alt="cake" /><img class="prop" src="assets/props/coffee.png" alt="coffee" /><img class="prop" src="assets/props/filmreel.png" alt="film reel" /><img class="prop" src="assets/props/letter.png" alt="letter" /><img class="prop" src="assets/props/mixtape.png" alt="mixtape" /><img class="prop" src="assets/props/plushie.png" alt="plushie" /><img class="prop" src="assets/props/ringbox.png" alt="ring box" /><img class="prop" src="assets/props/sketchbook.png" alt="sketchbook" /><img class="prop" src="assets/props/sportsbottle.png" alt="sports bottle" /><img class="prop" src="assets/props/telescope.png" alt="telescope" /><img class="prop" src="assets/props/tickets.png" alt="tickets" /><img class="prop" src="assets/props/umbrella.png" alt="umbrella" />
+    </section>
+
+    <h2>Route postcards</h2>
+    <section class="grid">
+      <article class="card"><img class="postcard" src="assets/postcards/mizuki.png" alt="Mizuki postcard" /><div class="label">Mizuki</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/rin.png" alt="Rin postcard" /><div class="label">Rin</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/haruto.png" alt="Haruto postcard" /><div class="label">Haruto</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/sora.png" alt="Sora postcard" /><div class="label">Sora</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/reina.png" alt="Reina postcard" /><div class="label">Reina</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/kaito.png" alt="Kaito postcard" /><div class="label">Kaito</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/kaede.png" alt="Kaede postcard" /><div class="label">Kaede</div></article>
+      <article class="card"><img class="postcard" src="assets/postcards/ren.png" alt="Ren postcard" /><div class="label">Ren</div></article>
+    </section>
+
+    <h2>Covers and thumbnails</h2>
+    <section class="grid">
+      <article class="card"><img class="reference" src="assets/covers/series-cover.jpg" alt="Series cover" /><div class="label">Series cover</div></article>
+      <article class="card"><img class="reference" src="assets/covers/menu-sakura-reference.png" alt="Menu art style reference" /><div class="label">Menu style reference</div></article>
+      <article class="card"><img class="reference" src="assets/location-thumbnails/sakura.png" alt="Sakura thumbnail" /><div class="label">Sakura thumbnail</div></article>
+      <article class="card"><img class="reference" src="assets/location-thumbnails/beach.png" alt="Beach thumbnail" /><div class="label">Beach thumbnail</div></article>
+      <article class="card"><img class="reference" src="assets/location-thumbnails/trattoria.png" alt="Trattoria thumbnail" /><div class="label">Trattoria thumbnail</div></article>
+    </section>
+  </body>
+</html>

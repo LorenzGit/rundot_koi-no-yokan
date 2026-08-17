@@ -1,0 +1,42 @@
+{
+  "package": "koi-no-yokan-three-evenings",
+  "sourceVersion": "1.16.3",
+  "createdAt": "2026-08-14",
+  "cover": "assets/covers/series-cover.jpg",
+  "styleReference": "assets/covers/menu-sakura-reference.png",
+  "music": {
+    "Cherry Promenade": "assets/audio/cherry-promenade.mp3"
+  },
+  "locations": {
+    "Sakura Plaza": "assets/backgrounds/sakura-plaza.png",
+    "Beach Terrace": "assets/backgrounds/beach-terrace.png",
+    "La Dolce Vita": "assets/backgrounds/la-dolce-vita.png"
+  },
+  "characters": {
+    "Mizuki": "assets/characters/mizuki",
+    "Rin": "assets/characters/rin",
+    "Haruto": "assets/characters/haruto",
+    "Sora": "assets/characters/sora",
+    "Reina": "assets/characters/reina",
+    "Kaito": "assets/characters/kaito",
+    "Kaede": "assets/characters/kaede",
+    "Ren": "assets/characters/ren"
+  },
+  "characterFileConvention": {
+    "portrait": "portrait.png",
+    "normal": "normal.png",
+    "happy": "happy.png",
+    "sad": "sad.png",
+    "angry": "angry.png",
+    "shocked": "shocked.png",
+    "optionalRomanceAlternate": "in-love.png"
+  },
+  "propsDirectory": "assets/props",
+  "postcardsDirectory": "assets/postcards",
+  "locationThumbnailsDirectory": "assets/location-thumbnails",
+  "episodes": [
+    "episodes/01-the-page-left-blank.ink",
+    "episodes/02-what-the-tide-kept.ink",
+    "episodes/03-say-it-before-five.ink"
+  ]
+}
