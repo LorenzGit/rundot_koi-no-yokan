@@ -87,12 +87,19 @@ export default function GiftShop() {
                     onConfirm={() => {
                         const bought = buyGift(pending.id, pending.price);
                         if (bought) {
-                            analytics.event("currency_spend", {
+                            analytics.event("currency_spent", {
                                 currency: "hearts",
                                 amount: pending.price,
                                 sink: "gift",
                                 item_id: pending.id,
                                 balance_after: profile.coins - pending.price,
+                            });
+                            // Bought with in-game currency, so it is a
+                            // shop_purchase — distinct from an IAP.
+                            analytics.event("shop_purchase", {
+                                item_id: pending.id,
+                                cost: pending.price,
+                                currency: "hearts",
                             });
                         }
                         setPending(null);

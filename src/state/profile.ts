@@ -7,6 +7,7 @@
  * coins in the same frame.
  */
 import { getRunCapabilities, readAppStorage, writeAppStorage } from "../sdk/runSdk.ts";
+import { analytics } from "../systems/analytics/analyticsConfig.ts";
 
 /**
  * The character the player is. Any cast member can be picked, so this is an id
@@ -320,10 +321,20 @@ export function bankExtraAffection(id: string, amount: number): void {
     });
 }
 
-export function grantHearts(hearts: number): void {
+export function grantHearts(hearts: number, source = "grant"): void {
     mutate((p) => {
         p.coins += hearts;
     });
+    // Income side of currency_spent. Without it economy_events_30d only ever
+    // shows hearts draining, never where they come from.
+    if (hearts > 0) {
+        analytics.event("currency_earned", {
+            currency: "hearts",
+            amount: hearts,
+            source,
+            balance_after: getProfile().coins,
+        });
+    }
 }
 
 export function grantGift(giftId: string): void {

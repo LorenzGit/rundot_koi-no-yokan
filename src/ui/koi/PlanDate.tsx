@@ -2,7 +2,15 @@
 import { useState } from "react";
 import { analytics, FIRST_PLAY_FUNNEL } from "../../systems/analytics/analyticsConfig.ts";
 import { store } from "../../state/store.ts";
-import { CAST, CAST_BY_ID, LOCATIONS, TOPIC_GLYPH, affectionTier, traitsFor } from "../../game/data/world.ts";
+import {
+    CAST,
+    CAST_BY_ID,
+    LOCATIONS,
+    TOPIC_GLYPH,
+    affectionTier,
+    figureHeightRatio,
+    traitsFor,
+} from "../../game/data/world.ts";
 import type { TopicId } from "../../game/data/types.ts";
 import { getProfile, personFor, totalAffection } from "../../state/profile.ts";
 import { warmDateAssets } from "../../game/dateScene.ts";
@@ -23,6 +31,7 @@ export default function PlanDate() {
     const playerId = profile.avatar;
     const chosen = who ? CAST_BY_ID[who] : undefined;
     const chosenPerson = personFor(who ?? "");
+    const chosenLocation = LOCATIONS.find((loc) => loc.id === where);
     // You do not date yourself.
     const candidates = CAST.filter((c) => c.id !== playerId);
 
@@ -37,7 +46,7 @@ export default function PlanDate() {
 
             <div className="koi-plan-scroll">
                 {profile.totalDates === 0 && (
-                    <p className="koi-first-date-callout">Your first evening is ready. Change anything, or meet now.</p>
+                    <p className="koi-first-date-callout">Everything's picked. Change anything, or meet now.</p>
                 )}
                 <h2 className="koi-section">Who</h2>
                 <div className="koi-pick-row">
@@ -48,15 +57,29 @@ export default function PlanDate() {
                                 type="button"
                                 key={c.id}
                                 className={`koi-pick ${who === c.id ? "is-selected" : ""}`}
-                                style={{ "--koi-char": c.color } as React.CSSProperties}
+                                // Everyone is drawn at one px-per-cm, so the
+                                // 169cm painter really is shorter than the
+                                // 186cm charmer standing beside her.
+                                style={
+                                    {
+                                        "--koi-char": c.color,
+                                        "--koi-fig": figureHeightRatio(c.id),
+                                    } as React.CSSProperties
+                                }
                                 onClick={() => setWho(c.id)}
                             >
                                 <img src={`images/cast/${c.id}_figure.png`} alt="" />
-                                <span className="koi-pick-name">{c.name}</span>
-                                <span className="koi-pick-meta">
-                                    {person.dates > 0
-                                        ? `${affectionTier(person.affection)} · ${person.affection}♥`
-                                        : "New"}
+                                {/* Over the figure, not stacked under it: a
+                                name and a tier below the art cost 32px of every
+                                card, which on a short phone came straight out
+                                of the only thing worth looking at. */}
+                                <span className="koi-pick-plate">
+                                    <span className="koi-pick-name">{c.name}</span>
+                                    <span className="koi-pick-meta">
+                                        {person.dates > 0
+                                            ? `${affectionTier(person.affection)} · ${person.affection}♥`
+                                            : "New"}
+                                    </span>
                                 </span>
                             </button>
                         );
@@ -78,43 +101,64 @@ export default function PlanDate() {
                                 </li>
                             ))}
                         </ul>
-                        <p className="koi-brief-topics">
-                            {chosenPerson.learned.length > 0 ? (
-                                <>
-                                    <span className="koi-brief-label">You have seen them think about</span>
-                                    {chosenPerson.learned.map((topic) => (
-                                        <span key={topic} className="koi-brief-glyph">
-                                            {TOPIC_GLYPH[topic as TopicId] ?? "?"}
-                                        </span>
-                                    ))}
-                                </>
-                            ) : (
-                                <span className="koi-brief-label">You have not met them yet.</span>
-                            )}
-                        </p>
+                        {/* Only once there is something to show. The "not met
+                        yet" version of this line repeated the New badge on the
+                        card two inches above it, and it cost a whole line of
+                        the screen on exactly the first-run layout where space
+                        is tightest. */}
+                        {chosenPerson.learned.length > 0 && (
+                            <p className="koi-brief-topics">
+                                <span className="koi-brief-label">You have seen them think about</span>
+                                {chosenPerson.learned.map((topic) => (
+                                    <span key={topic} className="koi-brief-glyph">
+                                        {TOPIC_GLYPH[topic as TopicId] ?? "?"}
+                                    </span>
+                                ))}
+                            </p>
+                        )}
                     </section>
                 )}
 
+                {/* Three tiles, not three full-width rows. The rows read fine
+                on their own but cost ~250px of a 667px phone, which is what
+                pushed Where off the bottom and put a scrollbar down the middle
+                of the screen. The mood line every tile used to carry is shown
+                once, below, for whichever place is actually selected. */}
                 <h2 className="koi-section">Where</h2>
-                <div className="koi-loc-list">
-                    {LOCATIONS.map((loc) => {
-                        const locked = unlockedBy < loc.unlockAt;
-                        return (
-                            <button
-                                type="button"
-                                key={loc.id}
-                                className={`koi-loc ${where === loc.id ? "is-selected" : ""} ${locked ? "is-locked" : ""}`}
-                                disabled={locked}
-                                onClick={() => setWhere(loc.id)}
-                            >
-                                <img src={loc.thumbnail} alt="" />
-                                <span className="koi-loc-body">
-                                    <strong>{loc.name}</strong>
-                                    <em>{locked ? `Unlocks at ${loc.unlockAt} total ♥` : loc.mood}</em>
-                                </span>
-                            </button>
-                        );
-                    })}
+                {/* Tiles and their caption travel together — rotated, they are
+                one grid item, or the caption ends up stranded at the bottom of
+                a column the tiles only fill the top of. */}
+                <div className="koi-where">
+                    <div className="koi-loc-grid">
+                        {LOCATIONS.map((loc) => {
+                            const locked = unlockedBy < loc.unlockAt;
+                            return (
+                                <button
+                                    type="button"
+                                    key={loc.id}
+                                    className={`koi-loc ${where === loc.id ? "is-selected" : ""} ${locked ? "is-locked" : ""}`}
+                                    disabled={locked}
+                                    aria-label={
+                                        locked ? `${loc.name}, unlocks at ${loc.unlockAt} total hearts` : loc.name
+                                    }
+                                    onClick={() => setWhere(loc.id)}
+                                >
+                                    <span className="koi-loc-thumb">
+                                        <img src={loc.thumbnail} alt="" />
+                                        {locked && (
+                                            <span className="koi-loc-lock" aria-hidden="true">
+                                                {loc.unlockAt}♥
+                                            </span>
+                                        )}
+                                    </span>
+                                    <span className="koi-loc-name">{loc.name}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <p className="koi-loc-caption">
+                        {chosenLocation ? chosenLocation.mood : "Choose where the evening happens."}
+                    </p>
                 </div>
             </div>
 

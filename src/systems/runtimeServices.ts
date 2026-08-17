@@ -6,6 +6,7 @@ import {
     getRunCapabilities,
     purchaseVerifiedShopItem,
     cancelLocalNotification,
+    readNotificationPermission,
     recordAnalytics,
     recordFunnelStep,
     showVerifiedRewardedAd,
@@ -101,8 +102,22 @@ async function refreshTime(): Promise<void> {
  * notification permission the first three depend on.
  */
 async function rearmNotifications(): Promise<void> {
+    // The RUN app owns notification permission and shares it across every game,
+    // so a player who allowed it anywhere has allowed it here. Read that state
+    // (silently — only the setter prompts) instead of requiring a visit to a
+    // Settings screen almost nobody opens.
+    const granted = await readNotificationPermission();
     const state = store.get();
-    if (!state.notificationsEnabled || state.notificationsConsent !== "granted") return;
+    store.patch({
+        notificationsEnabled: granted && !state.notificationsOptOut,
+        // A refused ask stays "denied" so Settings can offer OFF rather than
+        // ASK; anything else the host reports as off is simply not-yet-asked.
+        notificationsConsent: granted ? "granted" : state.notificationsConsent === "denied" ? "denied" : "unknown",
+    });
+    // Only the player's own opt-out stops the cadence. Scheduling without the
+    // host permission is a no-op, so gating on it would buy nothing and would
+    // silence every player whose grant lands after this read.
+    if (state.notificationsOptOut) return;
     // The pre-cadence reminder used its own id; leave it scheduled and the
     // player gets the old generic ping alongside the new specific ones.
     for (const legacy of [RETURN_REMINDER_ID, LEGACY_RETURN_REMINDER_ID]) {
@@ -129,6 +144,9 @@ export const runtimeServices = {
     bootstrap(): void {
         startRefreshCycle();
         this.track("game_boot", { version: packageJson.version, host: getRunCapabilities().host });
+        // Canonical core-loop name RUN's query filters on. The `game_loaded`
+        // funnel step keeps its shipped name; this is the queryable event.
+        this.track("game_opened", { version: packageJson.version });
     },
     resume(): void {
         startRefreshCycle();
@@ -191,7 +209,7 @@ const FIRST_SESSION_DATE_GRACE = 2;
 /**
  * Show a rewarded ad and record the offer→complete pair.
  *
- * Both halves matter: `rewarded_ad_offered` without `rewarded_ad_complete` is a
+ * Both halves matter: `rewarded_ad_offered` without `rewarded_ad_watched` is a
  * placement players see and decline, which is a copy/reward problem, not an
  * inventory one. Only a resolved `granied` counts as complete — the wrapper
  * reports `cancelled` for a closed-early ad and `unavailable` for no inventory,
@@ -205,7 +223,16 @@ async function trackRewarded(
     runtimeServices.track("rewarded_ad_offered", { ad_display_id: placementId, placement });
     const result = await showVerifiedRewardedAd(placementId, displayName);
     if (result === "verified") {
-        runtimeServices.track("rewarded_ad_complete", { ad_display_id: placementId, placement });
+        runtimeServices.track("rewarded_ad_watched", { ad_display_id: placementId, placement });
+    } else {
+        // Offered-minus-watched is not the same as dismissed: a cancel is the
+        // player declining, while unavailable/failed is missing inventory.
+        // Without this the acceptance rate has no denominator.
+        runtimeServices.track("rewarded_ad_dismissed", {
+            ad_display_id: placementId,
+            placement,
+            reason: result,
+        });
     }
     return result;
 }

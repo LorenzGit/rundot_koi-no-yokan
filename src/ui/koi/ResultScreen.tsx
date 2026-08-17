@@ -85,7 +85,7 @@ export default function ResultScreen() {
             return;
         }
         bankExtraAffection(result.personId, result.gained);
-        analytics.event("reward_granted", {
+        analytics.event("reward_claimed", {
             reward_type: "double_date_affection",
             amount: result.gained,
             placement_id: AD_PLACEMENTS.doubleHearts,

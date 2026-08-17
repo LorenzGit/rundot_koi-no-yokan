@@ -1603,11 +1603,20 @@ html[data-reduced-motion="true"] *::after {
 
 /* The plan screen scrolls its middle, not its chrome: Back and Meet up are how
    you leave, and selecting someone adds the brief, which pushed both of them
-   below the fold. */
-.koi-plan {
+   below the fold.
+   Written `.koi-screen.koi-plan` because .koi-screen carries `display: flex`,
+   `overflow-y: auto` and its own gap and padding LATER in this sheet at equal
+   specificity — so every one of these declarations lost, this screen was never
+   actually a grid, and the row that was supposed to absorb the leftover height
+   sized itself to its content instead, stranding ~90px under the button. */
+.koi-screen.koi-plan {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     overflow: hidden;
+    /* Every pixel the frame gives back goes to the cast strip, which is the
+       one thing here that is worth looking at large. */
+    gap: 12px;
+    padding-bottom: calc(14px + var(--koi-safe-bottom));
 }
 
 .koi-plan .koi-header {
@@ -1620,25 +1629,32 @@ html[data-reduced-motion="true"] *::after {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding-bottom: 4px;
+    gap: 9px;
+    /* On a tall phone the cast strip stops growing before the screen runs out
+       — past its cap the widest figure would be limited by card width instead
+       of height and fall out of scale with the rest — so there is height left
+       over. Spread across the sections it reads as an airy layout; pooled under
+       the last one it reads as a page that ran out. Nothing to spread on a
+       short phone, where the sections fill the column exactly. */
+    justify-content: space-between;
 }
 
 .koi-plan .koi-cta-sticky {
     grid-row: 3;
     position: static;
-    margin-top: 8px;
+    margin-top: 4px;
 }
 
 .koi-first-date-callout {
+    flex: 0 0 auto;
     margin: 0;
-    padding: 9px 12px;
+    padding: 6px 10px;
     border: 1px solid color-mix(in srgb, var(--koi-gold) 55%, transparent);
     border-radius: 12px;
     background: rgba(24, 17, 29, 0.72);
     color: rgba(253, 246, 236, 0.86);
-    font-size: 12px;
-    line-height: 1.35;
+    font-size: 11.5px;
+    line-height: 1.3;
     text-align: center;
 }
 
@@ -1748,7 +1764,7 @@ html[data-reduced-motion="true"] *::after {
 }
 
 .koi-section {
-    margin: 6px 0 -4px;
+    margin: 4px 0 -4px;
     font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -2710,17 +2726,23 @@ button.koi-stage-plate:active {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 7px;
-    padding: 10px 12px;
+    gap: 6px;
+    padding: 9px 11px;
     border-radius: 16px;
     background: rgba(27, 20, 32, 0.55);
     border: 1px solid color-mix(in srgb, var(--koi-char, var(--koi-accent)) 40%, transparent);
 }
 
+/* Two lines of flavour, never three: the third line comes straight off the
+   height of the face cards above it. */
 .koi-brief-blurb {
     margin: 0;
-    font-size: 12px;
-    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 11.5px;
+    line-height: 1.35;
     color: rgba(253, 246, 236, 0.78);
 }
 
@@ -2734,11 +2756,13 @@ button.koi-stage-plate:active {
 }
 
 .koi-brief-traits li {
-    padding: 4px 9px;
+    padding: 3px 7px;
     border-radius: 99px;
     background: rgba(253, 246, 236, 0.1);
     border: 1px solid rgba(253, 246, 236, 0.14);
-    font-size: 10px;
+    font-size: 9px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
 .koi-brief-topics {
@@ -3315,100 +3339,213 @@ button.koi-stage-plate:active {
 
 /* --- pickers ------------------------------------------------ */
 
-/* A horizontal strip inside a vertical flex column will shrink VERTICALLY when
-   the column runs short, squashing its cards to nothing. Selecting a person
-   adds the brief below, which is exactly the moment space runs out: the cards
-   collapsed from 188px to 24px on a 740px screen. These strips keep their
-   height and the screen scrolls instead. */
+/* The cast strip is the one elastic element on the plan screen: it takes
+   whatever height is left over, so a tall phone gets full-length figures and a
+   667px one still shows complete cards instead of collapsing them to a sliver.
+   The `min-height` is the floor that a plain `flex: 1 1 auto` inside a short
+   column would otherwise blow straight through — the cards were shrinking from
+   188px to 24px, which is the bug this floor exists to stop.
+
+   Seven candidates never fit across a phone, so the strip scrolls sideways by
+   design. It is styled as a carousel — snap points, no scrollbar chrome, a fade
+   off the trailing edge — rather than a box with a system scrollbar bolted to
+   the bottom of it. */
 .koi-pick-row {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    min-height: 104px;
+    /* Not a scale guard — the card's own aspect ratio handles that. This is
+       just how many faces stay on screen at once: past ~250px the cards grow
+       wide enough that the third one falls off a portrait phone. Landscape
+       lifts it, because that column only ever holds two or three anyway. */
+    max-height: 250px;
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    /* The strip runs to the screen edge under the page padding so the next card
+       is visibly cut rather than sitting in a dead margin — the standard "there
+       is more this way" cue. */
+    margin: 0 -18px;
+    padding: 0 18px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
 }
 
+.koi-pick-row::-webkit-scrollbar,
+.koi-plan-scroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.koi-pick-row,
+.koi-plan-scroll {
+    scrollbar-width: none;
+}
+
+/* The card is as wide as its own height demands, so the figure inside it is
+   ALWAYS limited by height and never by width.
+   Without this a tall strip — a desktop landscape column, where the height cap
+   is lifted — made every card taller than it was wide, `object-fit: contain`
+   started limiting the widest character by width instead, and Sora alone came
+   out a head shorter than a woman 5cm below him. A fixed card width cannot fix
+   that: it is the RATIO that has to hold.
+   0.43 with 14px of chrome on both axes leaves the card's interior no narrower
+   than 0.394 of its height at any size — the tightest point is where min-width
+   takes over, at a 242px card — against a widest figure of 0.378. Both numbers
+   are asserted in scripts/test-figure.mjs. */
 .koi-pick {
-    flex: 0 0 108px;
-    align-self: flex-start;
+    position: relative;
+    flex: 0 0 auto;
+    height: 100%;
+    aspect-ratio: 0.43;
+    min-width: 104px;
+    scroll-snap-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 10px 6px;
-    border-radius: 14px;
+    padding: 5px;
+    border-radius: 16px;
+    overflow: hidden;
     background: var(--koi-panel-soft);
     border: 2px solid transparent;
     color: inherit;
     cursor: pointer;
     font-family: inherit;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease;
 }
 
+/* Scales with the strip rather than carrying a fixed height, so the figures
+   grow on a tall phone instead of leaving a gap under their feet — but only to
+   `--koi-fig` of the frame, which is this character's height as a fraction of
+   the tallest one's. Told to simply fill, every card drew a different person at
+   exactly the same height. Soles on the bottom edge (`margin-top: auto` plus a
+   bottom object-position), so the whole cast stands on one floor. */
 .koi-pick img {
-    height: 120px;
+    display: block;
+    margin-top: auto;
+    width: 100%;
+    height: calc(var(--koi-fig, 1) * 100%);
     object-fit: contain;
     object-position: bottom;
 }
+
+/* The scrim is what makes a name legible over whatever colour the character
+   happens to be wearing at their ankles. */
+.koi-pick-plate {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 20px 4px 7px;
+    background: linear-gradient(180deg, transparent 0%, rgba(18, 11, 22, 0.8) 55%, rgba(18, 11, 22, 0.93) 100%);
+}
+
 .koi-pick.is-selected {
     border-color: var(--koi-char, var(--koi-accent));
     background: color-mix(in srgb, var(--koi-char, var(--koi-accent)) 18%, transparent);
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--koi-char, var(--koi-accent)) 80%, transparent);
 }
 .koi-pick-name {
     font-weight: 700;
     font-size: 14px;
+    line-height: 1.15;
+    text-shadow: 0 1px 3px rgba(14, 8, 18, 0.9);
 }
 .koi-pick-meta {
     font-size: 10px;
-    opacity: 0.62;
+    line-height: 1.15;
+    color: rgba(253, 246, 236, 0.66);
 }
 
-.koi-loc-list {
+.koi-where {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 7px;
+}
+
+/* Three places, three tiles, one row. As full-width rows these cost a quarter
+   of a short phone's height and the third one was never on screen. */
+.koi-loc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
 }
 
 .koi-loc {
     display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 8px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 6px 7px;
     border-radius: 14px;
     background: var(--koi-panel-soft);
     border: 2px solid transparent;
     color: inherit;
     cursor: pointer;
-    text-align: left;
+    text-align: center;
     font-family: inherit;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+.koi-loc-thumb {
+    position: relative;
+    display: block;
+    border-radius: 9px;
+    overflow: hidden;
 }
 
 .koi-loc img {
-    width: 84px;
-    height: 62px;
+    display: block;
+    width: 100%;
+    height: 48px;
     object-fit: cover;
-    border-radius: 10px;
 }
+
+/* The requirement, on the thing that is locked, instead of a sentence in a
+   column too narrow to hold one. */
+.koi-loc-lock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 10, 20, 0.62);
+    color: var(--koi-cream);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
 .koi-loc.is-selected {
     border-color: var(--koi-accent);
     background: color-mix(in srgb, var(--koi-accent) 16%, transparent);
+    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--koi-accent) 70%, transparent);
 }
 .koi-loc.is-locked {
-    opacity: 0.4;
+    opacity: 0.45;
 }
-.koi-loc-body {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+.koi-loc-name {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.15;
 }
-.koi-loc-body strong {
-    font-size: 15px;
-}
-.koi-loc-body em {
+
+/* One mood line for the selected place, where three of them used to be. */
+.koi-loc-caption {
+    margin: 0;
     font-size: 11px;
-    opacity: 0.65;
-    font-style: normal;
-    line-height: 1.35;
+    line-height: 1.3;
+    opacity: 0.6;
+    text-align: center;
 }
 
 /* --- book --------------------------------------------------- */
@@ -3435,9 +3572,14 @@ button.koi-stage-plate:active {
     border: 1px solid rgba(253, 246, 236, 0.1);
 }
 
+/* The frame height is a variable and the drawn height is `--koi-fig` of it, so
+   a 174cm siren is visibly shorter than a 184cm senpai in the row below her —
+   the same one px-per-cm the date scene draws them at. Overrides below set the
+   frame, never the height, or they would drop the ratio on the floor. */
 .koi-book-row img {
+    --koi-book-frame: 150px;
     width: 74px;
-    height: 150px;
+    height: calc(var(--koi-fig, 1) * var(--koi-book-frame));
     object-fit: contain;
     object-position: bottom;
 }
@@ -5295,10 +5437,31 @@ button.koi-stage-plate:active {
        stopped working once they moved inside the scroller, and `display:
        contents` is not an option here — WebKit declines to paint block children
        inside such a subtree. */
+    /* Rotated, the frame is the expensive part: header, gap, CTA and page
+       padding took 141px of a 375px-tall phone, leaving less for the whole plan
+       than the cast strip alone needs. Trimmed here rather than on .koi-screen
+       so no other screen inherits a tighter frame than it was designed for. */
+    /* Vertical only — the shorthand would also reset the left/right island
+       gutters this media query sets above, putting Back under the curve. And
+       .koi-screen again, or .koi-screen's own padding wins on specificity. */
+    .koi-screen.koi-plan {
+        padding-top: calc(12px + var(--koi-safe-top));
+        padding-bottom: calc(12px + var(--koi-safe-bottom));
+        gap: 10px;
+    }
+
+    .koi-plan .koi-cta-sticky {
+        padding: 11px 18px;
+        margin-top: 6px;
+    }
+
+    /* The cast row gets a floor, not just a share: as a bare 1fr it was the row
+       that gave way whenever the brief grew a line, and a grid item that no
+       longer fits its row does not scroll — it overlaps the row below. */
     .koi-plan-scroll {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        grid-template-rows: auto auto minmax(76px, 1fr) auto;
         column-gap: 18px;
         row-gap: 6px;
         align-content: stretch;
@@ -5316,24 +5479,35 @@ button.koi-stage-plate:active {
         grid-row: 2;
     }
 
+    /* Still one scrolling row, not a wrapping block: wrapping seven faces into
+       a column this short left a 6px sliver of the first row and nothing else. */
     .koi-plan-scroll .koi-pick-row {
         grid-column: 1;
         grid-row: 3;
-        flex-wrap: wrap;
-        overflow-y: auto;
-        align-content: flex-start;
+        min-height: 76px;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 14px), transparent 100%);
+        mask-image: linear-gradient(90deg, #000 calc(100% - 14px), transparent 100%);
     }
 
     .koi-plan .koi-pick {
-        flex: 0 0 88px;
+        min-width: 80px;
+        padding: 4px;
+        border-radius: 13px;
     }
 
-    .koi-plan .koi-pick img {
-        height: 58px;
+    .koi-plan .koi-pick-plate {
+        padding: 9px 3px 4px;
     }
 
     .koi-plan .koi-pick-name {
         font-size: 12px;
+    }
+
+    .koi-plan .koi-pick-meta {
+        font-size: 9px;
     }
 
     .koi-plan-scroll .koi-section:nth-of-type(2) {
@@ -5341,11 +5515,28 @@ button.koi-stage-plate:active {
         grid-row: 2;
     }
 
-    /* Spans both content rows so all three locations are visible at once. */
-    .koi-plan-scroll .koi-loc-list {
+    /* All three places, on one row, at the top of their column. */
+    .koi-plan-scroll .koi-where {
         grid-column: 2;
         grid-row: 3 / span 2;
-        overflow-y: auto;
+        align-self: start;
+        gap: 6px;
+    }
+
+    /* Sized so a two-line name — which is what "Sakura Plaza" becomes in a
+       264px column on a short phone — still fits the row the tiles share with
+       the cast strip opposite them. */
+    .koi-plan .koi-loc img {
+        height: 32px;
+    }
+
+    .koi-plan .koi-loc {
+        padding: 4px 4px 5px;
+        gap: 4px;
+    }
+
+    .koi-plan .koi-loc-name {
+        font-size: 10.5px;
     }
 
     /* Under the faces, in the same column as the person it describes. */
@@ -5353,21 +5544,32 @@ button.koi-stage-plate:active {
         grid-column: 1;
         grid-row: 4;
         gap: 4px;
-        padding: 6px 10px;
+        padding: 5px 9px;
     }
 
-    /* Two lines at most: every line here is a line taken off the face cards. */
+    /* One line rotated. The second line of flavour text and the cast strip are
+       competing for the same 40px, and the faces are what you came to look at. */
     .koi-plan .koi-brief-blurb {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        -webkit-line-clamp: 1;
         font-size: 11px;
     }
 
     .koi-plan .koi-brief-traits li {
         font-size: 9px;
         padding: 3px 7px;
+    }
+
+    /* Same trade the HUD makes rotated: the sentence is 186px of a 264px
+       column, so it wraps the glyphs onto a second line and the brief grows
+       into the cast strip. The thought bubble says the same thing. */
+    .koi-plan .koi-brief-label {
+        font-size: 0;
+        letter-spacing: 0;
+    }
+
+    .koi-plan .koi-brief-label::before {
+        content: "💭";
+        font-size: 12px;
     }
 
     /* The book rows are already wide; two per row uses the space. */
@@ -5378,7 +5580,7 @@ button.koi-stage-plate:active {
     }
 
     .koi-book .koi-book-row img {
-        height: 132px;
+        --koi-book-frame: 132px;
     }
 
     /* Postcards use the wide axis instead of scaling one 3:2 card across the
@@ -5422,7 +5624,7 @@ button.koi-stage-plate:active {
     }
 
     .koi-postcard .koi-book-row img {
-        height: min(132px, calc(220px / var(--ui-scale, 1)));
+        --koi-book-frame: min(132px, calc(220px / var(--ui-scale, 1)));
     }
 
     /* More gifts per row rather than a tall scroll. */
@@ -5795,4 +5997,28 @@ summary,
 [role="button"]:not([aria-disabled="true"]),
 label[for] {
     cursor: pointer;
+}
+
+/* A rotated tablet or desktop has height to spare in the Where column once the
+   cast strip opposite it has taken what it needs, so the location art gets to
+   be art rather than a 32px stamp sized for a 375px-tall phone. */
+@media (orientation: landscape) and (min-width: 760px) {
+    /* Full 3:2 frames instead of a fixed strip height: the tiles are ~110px
+       wide here, and a 32px crop of a painting is a colour swatch. */
+    .koi-plan .koi-loc-thumb {
+        aspect-ratio: 256 / 170;
+    }
+
+    .koi-plan .koi-loc img {
+        height: 100%;
+    }
+
+    .koi-plan .koi-loc {
+        padding: 6px 6px 7px;
+        gap: 6px;
+    }
+
+    .koi-plan .koi-loc-name {
+        font-size: 12px;
+    }
 }

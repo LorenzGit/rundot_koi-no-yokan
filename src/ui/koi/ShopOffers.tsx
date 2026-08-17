@@ -34,12 +34,20 @@ export default function ShopOffers() {
     // it the later steps have no denominator and conversion is unreadable.
     useEffect(() => {
         analytics.funnelStep("purchase", 1, { offers: offers.length });
-    }, [offers.length]);
+        // Funnel steps feed funnel_steps_30d; these canonical events are what
+        // monetization_events_30d filters on. Both are needed.
+        analytics.event("store_opened", { placement: "shop_offers", offers: offers.length });
+        for (const offer of offers) {
+            analytics.event("offer_shown", { offer_id: offer.id, product_id: offer.itemId, cost: offer.priceRb });
+        }
+    }, [offers]);
 
-    const buy = async (id: string, itemId: string, rewardHearts: number, grant: () => void) => {
+    const buy = async (id: string, itemId: string, rewardHearts: number, priceRb: number, grant: () => void) => {
         setBusy(id);
         analytics.funnelStep("purchase", 2, { item_id: itemId, offer_id: id });
+        analytics.event("offer_clicked", { offer_id: id, product_id: itemId, cost: priceRb });
         analytics.funnelStep("purchase", 3, { item_id: itemId });
+        analytics.event("iap_purchase_started", { product_id: itemId, offer_id: id, cost: priceRb });
         // One logical tap, one order. Reusing a date/day-derived key caused
         // repeatable packs to replay an old fulfilled order and grant again.
         const result = await runtimeServices.purchaseShopItem(itemId, crypto.randomUUID());
@@ -47,7 +55,10 @@ export default function ShopOffers() {
         if (result === "verified") {
             grant();
             analytics.funnelStep("purchase", 4, { item_id: itemId, offer_id: id });
-            analytics.event("reward_granted", {
+            // `cost` is what monetization_events_30d sums into total_value —
+            // omit it and every purchase reports as worth nothing.
+            analytics.event("iap_purchase_complete", { product_id: itemId, offer_id: id, cost: priceRb });
+            analytics.event("reward_claimed", {
                 reward_type: "iap_hearts",
                 amount: rewardHearts,
                 offer_id: id,
@@ -64,6 +75,7 @@ export default function ShopOffers() {
             offer_id: id,
             reason: result,
         });
+        analytics.event("iap_purchase_failed", { product_id: itemId, offer_id: id, cost: priceRb, reason: result });
         store.patch({
             toast: result === "cancelled" ? "No charge made." : "That did not go through. Nothing was charged.",
         });
@@ -83,7 +95,7 @@ export default function ShopOffers() {
         if (!pick) return;
         grantGift(pick.id);
         claimFreeGiftDay();
-        analytics.event("reward_granted", { amount: 1, currency: "gift", source: "rewarded_free_gift" });
+        analytics.event("reward_claimed", { amount: 1, currency: "gift", source: "rewarded_free_gift" });
         // Kill switch: the 24h reminder promises this gift. Leaving it scheduled
         // pings the player about something they just took, which is precisely
         // how a useful notification becomes a muted one.
@@ -121,7 +133,7 @@ export default function ShopOffers() {
                                 className="koi-offer"
                                 disabled={busy !== null}
                                 onClick={() =>
-                                    void buy(offer.id, offer.itemId, offer.hearts, () =>
+                                    void buy(offer.id, offer.itemId, offer.hearts, offer.priceRb, () =>
                                         grantOffer(offer.id, offer.hearts, offer.gifts, offer.entitlement),
                                     )
                                 }
@@ -148,7 +160,9 @@ export default function ShopOffers() {
                                 className={`koi-pack ${pack.featured ? "is-featured" : ""}`}
                                 disabled={busy !== null}
                                 onClick={() =>
-                                    void buy(pack.id, pack.itemId, pack.hearts, () => grantHearts(pack.hearts))
+                                    void buy(pack.id, pack.itemId, pack.hearts, pack.priceRb, () =>
+                                        grantHearts(pack.hearts),
+                                    )
                                 }
                             >
                                 <strong>♡ {pack.hearts.toLocaleString()}</strong>

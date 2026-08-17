@@ -237,7 +237,7 @@ export default function HomeScreen() {
                         className="koi-return-reward"
                         onClick={() => {
                             const claimed = claimReturnReward(dayKey);
-                            analytics.event("reward_granted", {
+                            analytics.event("reward_claimed", {
                                 reward_type: "daily_return",
                                 amount: claimed.amount,
                                 streak: claimed.nextStreak,

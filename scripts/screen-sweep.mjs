@@ -350,7 +350,10 @@ async function audit(page) {
             // beyond smaller circular art. Pseudo-elements contribute to
             // scrollHeight even though no visible content is clipped.
             const expandedHitTarget = el.matches(".koi-fab, .koi-pager-dot");
-            if (!replaced && !expandedHitTarget && clipped && (interactive || !canScroll)) {
+            // A line clamp IS the design: the overflow is deliberate and the
+            // truncation is visible as such. Only unintended clipping counts.
+            const clamped = style.webkitLineClamp && style.webkitLineClamp !== "none";
+            if (!replaced && !expandedHitTarget && !clamped && clipped && (interactive || !canScroll)) {
                 problems.push({
                     tag,
                     interactive,

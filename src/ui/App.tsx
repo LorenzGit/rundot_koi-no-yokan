@@ -8,6 +8,7 @@
  * safe areas and input never leak into decorative side art.
  */
 import { store, useStore } from "../state/store.ts";
+import { analytics } from "../systems/analytics/analyticsConfig.ts";
 import { lazy, Suspense, useEffect } from "react";
 import LoadingScreen from "./LoadingScreen.tsx";
 import AvatarSelect from "./koi/AvatarSelect.tsx";
@@ -124,6 +125,11 @@ function useOrientationSafeArea(): void {
  */
 function KoiRoute() {
     const screen = useStore((state) => state.koiScreen);
+    // One place every meta screen passes through, so screen_viewed cannot drift
+    // out of sync with the router the way per-screen calls do.
+    useEffect(() => {
+        analytics.event("screen_viewed", { screen });
+    }, [screen]);
     if (screen === "avatar") return <AvatarSelect />;
     if (screen === "plan") return <PlanDate />;
     if (screen === "book") return <BookScreen />;

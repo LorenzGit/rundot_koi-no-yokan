@@ -6,6 +6,7 @@
  * what they have worked out so far.
  */
 import type { ArchetypeDef, ArchetypeId, CastMemberDef, GiftDef, LocationDef, TopicId } from "./types.ts";
+import castAtlas from "./cast-atlas.json";
 
 export const TOPIC_GLYPH: Record<TopicId, string> = {
     food: "🍜",
@@ -448,4 +449,46 @@ export function traitsFor(archetypeId: ArchetypeId): Trait[] {
     const spare = [...approach.slice(1), ...reaction.slice(1), ...likes.slice(1)];
     while (picked.length < TRAIT_COUNT && spare.length > 0) picked.push(spare.shift() as Trait);
     return picked.slice(0, TRAIT_COUNT);
+}
+
+/* --- figure scale ------------------------------------------------------- */
+
+/**
+ * Per-character metrics for the standing figure PNGs, as measured by
+ * scripts/slice-expression-poses.mjs. `bodyPx` is crown-to-sole; `figure.h`
+ * includes whatever the pose puts above the crown — Sora's raised hand is 18
+ * rows of it — which is why the two are not interchangeable.
+ */
+interface FigureEntry {
+    heightCm: number;
+    figure: { w: number; h: number };
+    crownY: number;
+    bodyPx: number;
+}
+
+const FIGURES = castAtlas as unknown as Record<string, FigureEntry>;
+
+/**
+ * How tall a figure PNG must be drawn, as a fraction of the tallest character's
+ * PNG, for everyone to share one px-per-cm.
+ *
+ * A UI that just tells every figure to fill its frame draws a 169cm painter and
+ * a 186cm charmer at the same height, and — because the fraction of the PNG
+ * spent above the crown differs per pose — puts their heads on the same line
+ * while their real heights differ by a head. The date scene has always scaled
+ * by `heightCm * pxPerCm / bodyPx`; this is that same rule expressed as a
+ * ratio the DOM can multiply a frame height by.
+ *
+ * Derived from the atlas rather than written down, so re-cutting the art moves
+ * these numbers with it instead of silently invalidating them.
+ */
+const FIGURE_SPAN: Record<string, number> = Object.fromEntries(
+    Object.entries(FIGURES).map(([id, entry]) => [id, (entry.heightCm * entry.figure.h) / entry.bodyPx]),
+);
+
+const TALLEST_SPAN = Math.max(...Object.values(FIGURE_SPAN));
+
+export function figureHeightRatio(id: string): number {
+    const span = FIGURE_SPAN[id];
+    return span ? span / TALLEST_SPAN : 1;
 }

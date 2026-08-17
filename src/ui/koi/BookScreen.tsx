@@ -4,7 +4,7 @@
  * only lists topics you personally watched them think about.
  */
 import { store } from "../../state/store.ts";
-import { CAST_BY_ID, TOPIC_GLYPH, affectionTier } from "../../game/data/world.ts";
+import { CAST_BY_ID, TOPIC_GLYPH, affectionTier, figureHeightRatio } from "../../game/data/world.ts";
 import { setPartner } from "../../state/profile.ts";
 import { useProfile } from "./useProfile.ts";
 import type { TopicId } from "../../game/data/types.ts";
@@ -47,7 +47,12 @@ export default function BookScreen() {
                         <li
                             key={person.id}
                             className="koi-book-row"
-                            style={{ "--koi-char": def?.color } as React.CSSProperties}
+                            style={
+                                {
+                                    "--koi-char": def?.color,
+                                    "--koi-fig": figureHeightRatio(person.id),
+                                } as React.CSSProperties
+                            }
                         >
                             <img src={`images/cast/${person.id}_figure.png`} alt="" />
                             <div className="koi-book-body">

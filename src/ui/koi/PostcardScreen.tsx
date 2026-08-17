@@ -9,7 +9,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { store } from "../../state/store.ts";
-import { CAST_BY_ID, affectionTier } from "../../game/data/world.ts";
+import { CAST_BY_ID, affectionTier, figureHeightRatio } from "../../game/data/world.ts";
 import { POSTCARD } from "../../game/data/monetization.ts";
 import { bankExtraAffection, getProfile, spendHearts, type MetPerson } from "../../state/profile.ts";
 import { runtimeServices } from "../../systems/runtimeServices.ts";
@@ -59,7 +59,7 @@ export default function PostcardScreen() {
         bankExtraAffection(person.id, POSTCARD.affection);
         // A soft-currency sink, not a purchase: one schema across every spend
         // so the economy reads off a single event.
-        analytics.event("currency_spend", {
+        analytics.event("currency_spent", {
             currency: "hearts",
             amount: POSTCARD.priceHearts,
             sink: "postcard",
@@ -133,7 +133,12 @@ export default function PostcardScreen() {
                         <li
                             key={person.id}
                             className="koi-book-row"
-                            style={{ "--koi-char": def?.color } as React.CSSProperties}
+                            style={
+                                {
+                                    "--koi-char": def?.color,
+                                    "--koi-fig": figureHeightRatio(person.id),
+                                } as React.CSSProperties
+                            }
                         >
                             <img src={`images/cast/${person.id}_figure.png`} alt="" />
                             <div className="koi-book-body">
